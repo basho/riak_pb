@@ -20,7 +20,7 @@ interface.
 
 The Riak PBC protocol encodes requests and responses as Protocol
 Buffers messages.  Each request message results in one or more
-response messages.  As message type and length are not encoded by PB
+response messages.  As message type and length are not encoded by PB,
 they are sent on the wire as:
 
     <length:32> <msg_code:8> <pbmsg>
@@ -98,7 +98,7 @@ are adding new client-facing features to Riak or fixing a
 bug. Nevertheless, we encourage contributions to `riak_pb` from the
 community.
 
-1. Fork the [`riak_api`](https://github.com/basho/riak_pb) repository
+1. Fork the [`riak_pb`](https://github.com/basho/riak_pb) repository
    on Github.
 2. Clone your fork or add the remote if you already have a clone of
    the repository.
