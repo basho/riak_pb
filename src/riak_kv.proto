@@ -152,6 +152,26 @@ message RpbMapRedResp {
     optional bool done = 3;
 }
 
+// Secondary Index query request
+message RpbIndexReq {
+    enum IndexQueryType {
+        eq = 0;
+        range = 1;
+    }
+
+    required bytes bucket = 1;
+    required bytes index = 2;
+    required IndexQueryType query = 3;
+    optional bytes key = 4;
+    optional bytes range_min = 5;
+    optional bytes range_max = 6;
+}
+
+// Secondary Index query response
+message RpbIndexResp {
+    repeated bytes keys = 1;
+}
+
 // Content message included in get/put responses
 // Holds the value and associated metadata
 message RpbContent {
