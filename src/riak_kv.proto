@@ -161,7 +161,7 @@ message RpbIndexReq {
 
     required bytes bucket = 1;
     required bytes index = 2;
-    required IndexQueryType query = 3;
+    required IndexQueryType qtype = 3;
     optional bytes key = 4;
     optional bytes range_min = 5;
     optional bytes range_max = 6;
