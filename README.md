@@ -62,6 +62,7 @@ single request. The response message will typically include a boolean
     RpbListKeysReq -> RpbErrorResp | RpbListKeysResp{1,}
     RpbGetBucketReq -> RpbErrorResp | RpbGetBucketResp
     RpbMapRedReq -> RpbMapRedResp{1,}
+    RpbIndexReq -> RpbIndexResp
 
 ### Registered Message Codes
 
@@ -90,6 +91,8 @@ single request. The response message will typically include a boolean
     22 - RpbSetBucketResp
     23 - RpbMapRedReq
     24 - RpbMapRedResp{1,}
+    25 - RpbIndexReq
+    26 - RpbIndexResp
 
 ## Contributing
 
