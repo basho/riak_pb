@@ -207,6 +207,7 @@ encode_quorum(one) -> ?RIAKPB_RW_ONE;
 encode_quorum(quorum) -> ?RIAKPB_RW_QUORUM;
 encode_quorum(all) -> ?RIAKPB_RW_ALL;
 encode_quorum(default) -> ?RIAKPB_RW_DEFAULT;
+encode_quorum(undefined) -> undefined;
 encode_quorum(I) when is_integer(I), I >= 0 -> I.
 
 %% @doc Decodes a Protocol Buffers value into a symbolic or numeric
@@ -216,4 +217,5 @@ decode_quorum(?RIAKPB_RW_ONE) -> one;
 decode_quorum(?RIAKPB_RW_QUORUM) -> quorum;
 decode_quorum(?RIAKPB_RW_ALL) -> all;
 decode_quorum(?RIAKPB_RW_DEFAULT) -> default;
+decode_quorum(undefined) -> undefined;
 decode_quorum(I) when is_integer(I), I >= 0 -> I.
