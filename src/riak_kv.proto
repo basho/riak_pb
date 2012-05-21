@@ -25,6 +25,7 @@
 ** Revision: 1.2
 */
 
+import "riak.proto"; // for RpbPair
 
 // Get ClientId Request - no message defined, just send RpbGetClientIdReq message code
 message RpbGetClientIdResp {
@@ -185,12 +186,6 @@ message RpbContent {
     optional uint32 last_mod_usecs = 8;
     repeated RpbPair usermeta = 9;       // user metadata stored with the object
     repeated RpbPair indexes = 10;       // user metadata stored with the object
-}
-
-// Key/value pair - used for user metadata
-message RpbPair {
-    required bytes key = 1;
-    optional bytes value = 2;
 }
 
 // Link metadata

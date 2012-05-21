@@ -25,12 +25,16 @@
 %% not normally need to be used in application code.
 -module(riak_pb_codec).
 
+-include("riak_pb.hrl").
+
 -export([encode/1,      %% riakc_pb:encode
          decode/2,      %% riakc_pb:decode
          msg_type/1,    %% riakc_pb:msg_type
          msg_code/1,    %% riakc_pb:msg_code
          decoder_for/1,
          encoder_for/1,
+         encode_pair/1, %% riakc_pb:pbify_rpbpair
+         decode_pair/1, %% riakc_pb:erlify_rpbpair
          encode_bool/1, %% riakc_pb:pbify_bool
          decode_bool/1, %% riakc_pb:erlify_bool
          to_binary/1,   %% riakc_pb:binary
@@ -85,6 +89,8 @@ msg_type(23) -> rpbmapredreq;
 msg_type(24) -> rpbmapredresp;
 msg_type(25) -> rpbindexreq;
 msg_type(26) -> rpbindexresp;
+msg_type(27) -> rpbsearchqueryreq;
+msg_type(28) -> rpbsearchqueryresp;
 msg_type(_) -> undefined.
 
 %% @doc Converts a symbolic message name into a message code. Replaces
@@ -116,7 +122,9 @@ msg_code(rpbsetbucketresp)       -> 22;
 msg_code(rpbmapredreq)           -> 23;
 msg_code(rpbmapredresp)          -> 24;
 msg_code(rpbindexreq)            -> 25;
-msg_code(rpbindexresp)           -> 26.
+msg_code(rpbindexresp)           -> 26;
+msg_code(rpbsearchqueryreq)      -> 27;
+msg_code(rpbsearchqueryresp)     -> 28.
 
 %% @doc Selects the appropriate PB decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
@@ -125,7 +133,9 @@ decoder_for(N) when N >= 0, N < 3;
     riak_pb;
 decoder_for(N) when N >= 3, N < 7;
                     N >= 9, N =< 26->
-    riak_kv_pb.
+    riak_kv_pb;
+decoder_for(N) when N >= 27, N =< 28 ->
+    riak_search_pb.
 
 %% @doc Selects the appropriate PB encoder for a given message name.
 -spec encoder_for(atom()) -> module().
@@ -171,3 +181,13 @@ to_list(V) when is_binary(V) ->
     binary_to_list(V);
 to_list(V) when is_integer(V) ->
     integer_to_list(V).
+
+%% @doc Convert {K,V} tuple to protocol buffers
+-spec encode_pair({Key::binary(), Value::any()}) -> #rpbpair{}.
+encode_pair({K,V}) ->
+    #rpbpair{key = K, value = to_list(V)}.
+
+%% @doc Convert RpbPair PB message to erlang {K,V} tuple
+-spec decode_pair(#rpbpair{}) -> {string(), string()}.
+decode_pair(#rpbpair{key = K, value = V}) ->
+    {binary_to_list(K), binary_to_list(V)}.

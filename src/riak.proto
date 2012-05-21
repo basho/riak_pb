@@ -37,3 +37,8 @@ message RpbGetServerInfoResp {
     optional bytes server_version = 2;
 }
 
+// Key/value pair - used for user metadata, indexes, search doc fields
+message RpbPair {
+    required bytes key = 1;
+    optional bytes value = 2;
+}
