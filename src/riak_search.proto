@@ -32,7 +32,7 @@ message RpbSearchDoc {
 }
 
 message RpbSearchQueryReq {
-  required bytes  query  =  1;  // Query string
+  required bytes  q      =  1;  // Query string
   required bytes  index  =  2;  // Index
   optional uint32 rows   =  3;  // Limit rows
   optional uint32 start  =  4;  // Starting offset
