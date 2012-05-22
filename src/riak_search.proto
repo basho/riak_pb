@@ -45,5 +45,7 @@ message RpbSearchQueryReq {
 }
 
 message RpbSearchQueryResp {
-  repeated RpbSearchDoc docs = 1;
+  repeated RpbSearchDoc docs      = 1; // Result documents
+  optional float        max_score = 2; // Maximum score
+  optional uint32       num_found = 3; // Number of results
 }
