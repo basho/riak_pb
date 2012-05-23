@@ -1,6 +1,7 @@
 %% -------------------------------------------------------------------
 %%
-%% riak_pb_codec: Protocol Buffers encoding/decoding helpers
+%% riak_pb_search_codec: Protocol Buffers encoding/decoding helpers for
+%% Riak Search
 %%
 %% Copyright (c) 2012 Basho Technologies, Inc.  All Rights Reserved.
 %%
