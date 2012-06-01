@@ -44,7 +44,7 @@ encode(Msg) when is_atom(Msg) ->
 encode(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
-    [msg_code(MsgType) | Encoder:iolist(MsgType, Msg)].
+    [msg_code(MsgType) | Encoder:encode(Msg)].
 
 %% @doc Decode a protocol buffer message given its type - if no bytes
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
