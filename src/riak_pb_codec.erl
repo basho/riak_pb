@@ -83,6 +83,8 @@ msg_type(21) -> rpbsetbucketreq;
 msg_type(22) -> rpbsetbucketresp;
 msg_type(23) -> rpbmapredreq;
 msg_type(24) -> rpbmapredresp;
+msg_type(25) -> rpbindexreq;
+msg_type(26) -> rpbindexresp;
 msg_type(_) -> undefined.
 
 %% @doc Converts a symbolic message name into a message code. Replaces
@@ -112,7 +114,9 @@ msg_code(rpbgetbucketresp)       -> 20;
 msg_code(rpbsetbucketreq)        -> 21;
 msg_code(rpbsetbucketresp)       -> 22;
 msg_code(rpbmapredreq)           -> 23;
-msg_code(rpbmapredresp)          -> 24.
+msg_code(rpbmapredresp)          -> 24;
+msg_code(rpbindexreq)            -> 25;
+msg_code(rpbindexresp)           -> 26.
 
 %% @doc Selects the appropriate PB decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
@@ -120,7 +124,7 @@ decoder_for(N) when N >= 0, N < 3;
                     N == 7, N == 8 ->
     riak_pb;
 decoder_for(N) when N >= 3, N < 7;
-                    N >= 9, N =< 24->
+                    N >= 9, N =< 26->
     riak_kv_pb.
 
 %% @doc Selects the appropriate PB encoder for a given message name.
