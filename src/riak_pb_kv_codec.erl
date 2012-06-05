@@ -202,18 +202,18 @@ encode_bucket_props([_Ignore|Rest], Pb) ->
 
 %% @doc Encode a symbolic or numeric quorum value into a Protocol
 %% Buffers value
--spec encode_quorum(symbolic_quorum() | non_neg_integer()) -> non_neg_integer().
+-spec encode_quorum(symbolic_quorum() | non_neg_integer()) -> non_neg_integer() | any().
 encode_quorum(one) -> ?RIAKPB_RW_ONE;
 encode_quorum(quorum) -> ?RIAKPB_RW_QUORUM;
 encode_quorum(all) -> ?RIAKPB_RW_ALL;
 encode_quorum(default) -> ?RIAKPB_RW_DEFAULT;
-encode_quorum(I) when is_integer(I), I >= 0 -> I.
+encode_quorum(I) -> I.
 
 %% @doc Decodes a Protocol Buffers value into a symbolic or numeric
 %% quorum.
--spec decode_quorum(non_neg_integer()) -> symbolic_quorum() | non_neg_integer().
+-spec decode_quorum(non_neg_integer()) -> symbolic_quorum() | non_neg_integer() | any().
 decode_quorum(?RIAKPB_RW_ONE) -> one;
 decode_quorum(?RIAKPB_RW_QUORUM) -> quorum;
 decode_quorum(?RIAKPB_RW_ALL) -> all;
 decode_quorum(?RIAKPB_RW_DEFAULT) -> default;
-decode_quorum(I) when is_integer(I), I >= 0 -> I.
+decode_quorum(I) -> I.
