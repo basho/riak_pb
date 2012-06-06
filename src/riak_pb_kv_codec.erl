@@ -153,14 +153,16 @@ decode_content(PbC) ->
     {dict:from_list(MD), PbC#rpbcontent.value}.
 
 %% @doc Convert {K,V} tuple to protocol buffers
+%% @equiv riak_pb_codec:encode_pair/1
 -spec encode_pair({Key::binary(), Value::any()}) -> #rpbpair{}.
-encode_pair({K,V}) ->
-    #rpbpair{key = K, value = to_list(V)}.
+encode_pair(Pair) ->
+    riak_pb_codec:encode_pair(Pair).
 
 %% @doc Convert RpbPair PB message to erlang {K,V} tuple
+%% @equiv riak_pb_codec:decode_pair/1
 -spec decode_pair(#rpbpair{}) -> {string(), string()}.
-decode_pair(#rpbpair{key = K, value = V}) ->
-    {binary_to_list(K), binary_to_list(V)}.
+decode_pair(PB) ->
+    riak_pb_codec:decode_pair(PB).
 
 %% @doc Convert erlang link tuple to RpbLink PB message
 -spec encode_link({{binary(), binary()}, binary() | string()}) -> #rpblink{}.

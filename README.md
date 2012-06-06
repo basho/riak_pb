@@ -28,7 +28,7 @@ they are sent on the wire as:
 * `length` is the length of `msg_code` (1 byte) plus the message length
   in bytes encoded in network order (big endian).
 
-* `msg_code` indicates what is encoded as pbmsg
+* `msg_code` indicates what is encoded as `pbmsg`
 
 * `pbmsg` is the encoded protocol buffer message
 
@@ -64,6 +64,10 @@ single request. The response message will typically include a boolean
     RpbMapRedReq -> RpbMapRedResp{1,}
     RpbIndexReq -> RpbIndexResp
 
+### Riak Search Request/Response messages
+
+    RpbSearchQueryReq -> RpbSearchQueryResp
+
 ### Registered Message Codes
 
      0 - RpbErrorResp
@@ -93,6 +97,8 @@ single request. The response message will typically include a boolean
     24 - RpbMapRedResp{1,}
     25 - RpbIndexReq
     26 - RpbIndexResp
+    27 - RpbSearchQueryReq
+    28 - RbpSearchQueryResp
 
 ## Contributing
 
