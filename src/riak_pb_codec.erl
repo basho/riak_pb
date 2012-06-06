@@ -129,7 +129,7 @@ msg_code(rpbsearchqueryresp)     -> 28.
 %% @doc Selects the appropriate PB decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
 decoder_for(N) when N >= 0, N < 3;
-                    N == 7, N == 8 ->
+                    N == 7; N == 8 ->
     riak_pb;
 decoder_for(N) when N >= 3, N < 7;
                     N >= 9, N =< 26->
