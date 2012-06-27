@@ -25,6 +25,10 @@
 ** Revision: 1.2
 */
 
+// Java package specifiers
+option java_package = "com.basho.riak.protobuf";
+option java_outer_classname = "RiakKvPB";
+
 import "riak.proto"; // for RpbPair
 
 // Get ClientId Request - no message defined, just send RpbGetClientIdReq message code

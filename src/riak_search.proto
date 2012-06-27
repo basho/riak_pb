@@ -27,6 +27,10 @@
 
 import "riak.proto";
 
+// java package specifiers
+option java_package = "com.basho.riak.protobuf";
+option java_outer_classname = "RiakSearchPB";
+
 message RpbSearchDoc {
   repeated RpbPair fields = 1;
 }
