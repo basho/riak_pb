@@ -1,5 +1,7 @@
 # Riak Protocol Buffers Messages
 
+[![Build Status](https://secure.travis-ci.org/basho/riak_pb.png?branch=master)](http://travis-ci.org/basho/riak_pb)
+
 This repository contains the message definitions for the Protocol
 Buffers-based interface to [Riak](https://github.com/basho/riak) and
 various Erlang-specific utility modules for the message types.
