@@ -3,19 +3,51 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.basho.riak.protobuf</groupId>
-    <artifactId>riak_pb</artifactId>
+    <artifactId>riak-pb</artifactId>
     <version>1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>riak_pbj</name>
-    <url>http://maven.apache.org</url>
-
+    <name>Riak Protocol Buffers</name>
+    <description>Protocol buffers used to communicate with Riak</description>
+    <url>https://github.com/basho/riak_pb</url>
+    
+    <scm>
+        <connection>scm:git:ssh://git@github.com/basho/riak_pb.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/basho/riak_pb.git</developerConnection>
+        <url>http://github.com/basho/riak_pb</url>
+    </scm>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>sonatype-nexus-staging</id>
+            <name>Nexus Release Repository</name>
+            <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+    </distributionManagement>
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.7</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.8</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -36,10 +68,6 @@
                         <LanguageSpecification>
                             <language>JAVA</language>
                             <outputDirectory>${project.basedir}/target/generated-sources/java</outputDirectory>
-                        </LanguageSpecification>
-                        <LanguageSpecification>
-                            <language>CPP</language>
-                            <outputDirectory>${project.basedir}/target/generated-sources/cpp</outputDirectory>
                         </LanguageSpecification>
                     </languageSpecifications>						
                 </configuration>
@@ -64,8 +92,45 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.1</version>
+                <configuration>
+                    <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.4</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+					<!-- NOTE: source and javadoc jars automatically generated on release (http://maven.apache.org/pom.html#The_Super_POM) -->
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
