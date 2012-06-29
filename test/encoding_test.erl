@@ -17,7 +17,8 @@ pb_test_() ->
                                {?MD_LASTMOD, {1, 2, 3}},
                                {?MD_USERMETA, [{"X-Riak-Meta-MyMetaData1","here it is"},
                                                {"X-Riak-Meta-MoreMd", "have some more"}
-                                              ]}
+                                              ]},
+                               {?MD_INDEX, []}
                               ]),
                  Value = <<"test value">>,
                  {MetaData2, Value2} = riak_pb_kv_codec:decode_content(
@@ -32,14 +33,17 @@ pb_test_() ->
      {"empty content encode decode",
       ?_test(begin
                  MetaData = dict:new(),
+                 MetaDataExpect = [
+                    {?MD_LINKS, []},
+                    {?MD_USERMETA, []},
+                    {?MD_INDEX, []}
+                 ],
                  Value = <<"test value">>,
                  {MetaData2, Value2} = riak_pb_kv_codec:decode_content(
                                          riak_kv_pb:decode_rpbcontent(
                                            riak_kv_pb:encode_rpbcontent(
                                              riak_pb_kv_codec:encode_content({MetaData, Value})))),
-                 MdSame = (lists:sort(dict:to_list(MetaData)) =:=
-                               lists:sort(dict:to_list(MetaData2))),
-                 ?assertEqual(true, MdSame),
+                 ?assertEqual(lists:sort(MetaDataExpect), lists:sort(dict:to_list(MetaData2))),
                  Value = Value2
              end)},
      {"msg code encode decode",
