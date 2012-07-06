@@ -96,11 +96,25 @@ encode_content_meta(?MD_USERMETA, UserMeta, PbContent) when is_list(UserMeta) ->
     PbContent#rpbcontent{usermeta = [encode_pair(E) || E <- UserMeta]};
 encode_content_meta(?MD_INDEX, Indexes, PbContent) when is_list(Indexes) ->
     PbContent#rpbcontent{indexes = [encode_pair(E) || E <- Indexes]};
+encode_content_meta(?MD_DELETED, DeletedVal, PbContent) ->
+    PbContent#rpbcontent{deleted=header_val_to_bool(DeletedVal)};
 encode_content_meta(_Key, _Value, PbContent) ->
     %% Ignore unknown metadata - need to add to RpbContent if it needs to make it
     %% to/from the client
     PbContent.
 
+%% @doc Return a boolean based on a header value.
+%% Representations of `true' return `true'; anything
+%% else returns `false'.
+-spec header_val_to_bool(term()) -> boolean().
+header_val_to_bool(<<"true">>) ->
+    true;
+header_val_to_bool("true") ->
+    true;
+header_val_to_bool(true) ->
+    true;
+header_val_to_bool(_) ->
+    false.
 
 %% @doc Convert a list of rpbcontent pb messages to a list of [{MetaData,Value}] tuples
 -spec decode_contents(PBContents::[tuple()]) -> contents().
@@ -136,7 +150,10 @@ decode_content_meta(usermeta, PbUserMeta, _Pb) ->
     [{?MD_USERMETA, UserMeta}];
 decode_content_meta(indexes, PbIndexes, _Pb) ->
     Indexes = [decode_pair(E) || E <- PbIndexes],
-    [{?MD_INDEX, Indexes}].
+    [{?MD_INDEX, Indexes}];
+decode_content_meta(deleted, DeletedVal, _Pb) ->
+    [{?MD_DELETED, DeletedVal}].
+
 
 %% @doc Convert an rpccontent pb message to an erlang {MetaData,Value} tuple
 -spec decode_content(PBContent::tuple()) -> {riakc_obj:metadata(), riakc_obj:value()}.
@@ -148,7 +165,8 @@ decode_content(PbC) ->
           decode_content_meta(links, PbC#rpbcontent.links, PbC) ++
           decode_content_meta(last_mod, PbC#rpbcontent.last_mod, PbC) ++
           decode_content_meta(usermeta, PbC#rpbcontent.usermeta, PbC) ++
-          decode_content_meta(indexes, PbC#rpbcontent.indexes, PbC),
+          decode_content_meta(indexes, PbC#rpbcontent.indexes, PbC) ++
+          decode_content_meta(deleted, PbC#rpbcontent.deleted, PbC),
 
     {dict:from_list(MD), PbC#rpbcontent.value}.
 
