@@ -124,6 +124,13 @@ decode_contents(RpbContents) ->
 -spec decode_content_meta(atom(), any(), #rpbcontent{}) -> [ {binary(), any()} ].
 decode_content_meta(_, undefined, _Pb) ->
     [];
+decode_content_meta(_, [], _Pb) ->
+    %% Repeated metadata fields that are empty lists need not be added
+    %% to the decoded metadata. This previously resulted in
+    %% type-conversion errors when using the JSON form of a
+    %% riak_object. All of the other metadata types are primitive
+    %% types.
+    [];
 decode_content_meta(content_type, CType, _Pb) ->
     [{?MD_CTYPE, binary_to_list(CType)}];
 decode_content_meta(charset, Charset, _Pb) ->
@@ -132,9 +139,6 @@ decode_content_meta(encoding, Encoding, _Pb) ->
     [{?MD_ENCODING, binary_to_list(Encoding)}];
 decode_content_meta(vtag, VTag, _Pb) ->
     [{?MD_VTAG, binary_to_list(VTag)}];
-decode_content_meta(links, Links1, _Pb) ->
-    Links = [ decode_link(L) || L <- Links1 ],
-    [{?MD_LINKS, Links}];
 decode_content_meta(last_mod, LastMod, Pb) ->
     case Pb#rpbcontent.last_mod_usecs of
         undefined ->
@@ -145,6 +149,9 @@ decode_content_meta(last_mod, LastMod, Pb) ->
     Msec = LastMod div 1000000,
     Sec = LastMod rem 1000000,
     [{?MD_LASTMOD, {Msec,Sec,Usec}}];
+decode_content_meta(links, Links1, _Pb) ->
+    Links = [ decode_link(L) || L <- Links1 ],
+    [{?MD_LINKS, Links}];
 decode_content_meta(usermeta, PbUserMeta, _Pb) ->
     UserMeta = [decode_pair(E) || E <- PbUserMeta],
     [{?MD_USERMETA, UserMeta}];
