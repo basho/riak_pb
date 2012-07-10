@@ -50,18 +50,12 @@ pb_test_() ->
      {"empty content encode decode",
       ?_test(begin
                  MetaData = dict:new(),
-                 MetaDataExpect = [
-                                   %% Note that empty repeated fields are no longer decoded.
-                                   %% {?MD_LINKS, []},
-                                   %% {?MD_USERMETA, []},
-                                   %% {?MD_INDEX, []}
-                                  ],
                  Value = <<"test value">>,
                  {MetaData2, Value2} = riak_pb_kv_codec:decode_content(
                                          riak_kv_pb:decode_rpbcontent(
                                            riak_kv_pb:encode_rpbcontent(
                                              riak_pb_kv_codec:encode_content({MetaData, Value})))),
-                 ?assertEqual(lists:sort(MetaDataExpect), lists:sort(dict:to_list(MetaData2))),
+                 ?assertEqual([], dict:to_list(MetaData2)),
                  ?assertEqual(Value, Value2)
              end)},
      {"empty repeated metas are removed/ignored",
