@@ -185,9 +185,9 @@ to_list(V) when is_integer(V) ->
 %% @doc Convert {K,V} tuple to protocol buffers
 -spec encode_pair({Key::binary(), Value::any()}) -> #rpbpair{}.
 encode_pair({K,V}) ->
-    #rpbpair{key = K, value = to_list(V)}.
+    #rpbpair{key = to_binary(K), value = to_binary(V)}.
 
 %% @doc Convert RpbPair PB message to erlang {K,V} tuple
 -spec decode_pair(#rpbpair{}) -> {string(), string()}.
 decode_pair(#rpbpair{key = K, value = V}) ->
-    {binary_to_list(K), binary_to_list(V)}.
+    {K, V}.

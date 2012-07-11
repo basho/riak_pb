@@ -15,10 +15,11 @@ pb_test_() ->
                                             {{<<"b2">>, <<"k2">>}, <<"v2">>}
                                            ]},
                                {?MD_LASTMOD, {1, 2, 3}},
-                               {?MD_USERMETA, [{"X-Riak-Meta-MyMetaData1","here it is"},
-                                               {"X-Riak-Meta-MoreMd", "have some more"}
+                               {?MD_USERMETA, [{<<"X-Riak-Meta-MyMetaData1">>, <<"here it is">>},
+                                               {<<"X-Riak-Meta-MoreMd">>, <<"have some more">>},
+                                               {<<"X-Riak-Meta-EvenMoreMd">>, term_to_binary({a,b,c,d,e,f})}
                                               ]},
-                               {?MD_INDEX, [{"index_bin", "foo"}]},
+                               {?MD_INDEX, [{<<"index_bin">>, <<"foo">>}]},
                                {?MD_DELETED, true}
                               ]),
                  Value = <<"test value">>,
