@@ -95,7 +95,7 @@ encode_content_meta(?MD_LASTMOD, {MS,S,US}, PbContent) ->
 encode_content_meta(?MD_USERMETA, UserMeta, PbContent) when is_list(UserMeta) ->
     PbContent#rpbcontent{usermeta = [encode_pair(E) || E <- UserMeta]};
 encode_content_meta(?MD_INDEX, Indexes, PbContent) when is_list(Indexes) ->
-    PbContent#rpbcontent{indexes = [encode_pair(E) || E <- Indexes]};
+    PbContent#rpbcontent{indexes = [encode_index_pair(E) || E <- Indexes]};
 encode_content_meta(?MD_DELETED, DeletedVal, PbContent) ->
     PbContent#rpbcontent{deleted=header_val_to_bool(DeletedVal)};
 encode_content_meta(_Key, _Value, PbContent) ->
@@ -176,6 +176,13 @@ decode_content(PbC) ->
           decode_content_meta(deleted, PbC#rpbcontent.deleted, PbC),
 
     {dict:from_list(MD), PbC#rpbcontent.value}.
+
+%% @doc Convert {K,V} index entries into protocol buffers
+-spec encode_index_pair({binary(), integer() | binary()}) -> #rpbpair{}.
+encode_index_pair({K,V}) when is_integer(V) ->
+    encode_pair({K, integer_to_list(V)});
+encode_index_pair(E) ->
+    encode_pair(E).
 
 %% @doc Convert {K,V} tuple to protocol buffers
 %% @equiv riak_pb_codec:encode_pair/1
