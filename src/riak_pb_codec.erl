@@ -160,7 +160,7 @@ decode_bool(false) -> false;
 decode_bool(0) -> false;
 decode_bool(1) -> true.
 
-%% @doc Make sure an atom/string/binary is definitely a
+%% @doc Make sure an atom/string/binary/integer is definitely a
 %% binary. Replaces `riakc_pb:to_binary/1'.
 -spec to_binary(atom() | string() | binary()) -> binary().
 to_binary(A) when is_atom(A) ->
@@ -168,7 +168,9 @@ to_binary(A) when is_atom(A) ->
 to_binary(L) when is_list(L) ->
     list_to_binary(L);
 to_binary(B) when is_binary(B) ->
-    B.
+    B;
+to_binary(I) when is_integer(I) ->
+    list_to_binary(integer_to_list(I)).
 
 %% @doc Converts an arbitrary type to a list for sending in a
 %% PB. Replaces `riakc_pb:any_to_list/1'.
