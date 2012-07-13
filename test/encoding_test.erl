@@ -2,6 +2,7 @@
 -compile([export_all]).
 -include_lib("eunit/include/eunit.hrl").
 -include("riak_pb_kv_codec.hrl").
+-include("riak_pb.hrl").
 
 pb_test_() ->
     [{"content encode decode",
@@ -97,6 +98,13 @@ pb_test_() ->
                  MdSame = (lists:sort(Props) =:=
                                lists:sort(Props2)),
                  ?assertEqual(true, MdSame)
+             end)},
+     {"Int index rpbpair",
+      ?_test(begin
+                 Index = #rpbpair{key="index_int", value=100},
+                 ErlangyFy = riak_pb_codec:decode_pair(Index),
+                 PBify = riak_pb_codec:encode_pair(ErlangyFy),
+                 ?assertEqual({rpbpair, <<"index_int">>, <<"100">>}, PBify)
              end)}
     ]
         .
