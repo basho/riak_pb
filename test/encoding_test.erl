@@ -48,6 +48,19 @@ pb_test_() ->
                  ?assertEqual(true, MdSame1),
                  ?assertEqual(true, MdSame2)
              end)},
+     {"indexes encode decode",
+      ?_test(begin
+                 InputMD = dict:from_list([{?MD_INDEX, [{"index_bin", "foo"},
+                                                        {"index_int", 10}]}]),
+                 ExpectedMD = [{?MD_INDEX, [{<<"index_bin">>, <<"foo">>},
+                                            {<<"index_int">>, <<"10">>}]}],
+                 Value = <<"test value">>,
+                 {OutputMD, _} = riak_pb_kv_codec:decode_content(
+                                         riak_kv_pb:decode_rpbcontent(
+                                           riak_kv_pb:encode_rpbcontent(
+                                             riak_pb_kv_codec:encode_content({InputMD, Value})))),
+                 ?assertEqual(ExpectedMD, dict:to_list(OutputMD))
+             end)},
      {"empty content encode decode",
       ?_test(begin
                  MetaData = dict:new(),
