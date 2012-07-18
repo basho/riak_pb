@@ -1,3 +1,4 @@
+# Erlang
 .eunit/*
 deps/*
 priv/*
@@ -6,3 +7,10 @@ ebin/*.beam
 ebin/riak_pb.app
 include/*_pb.hrl
 doc/*
+
+# Python
+riak_pb.egg-info
+riak_pb/*_pb2.py
+build
+*.pyc
+dist/*.egg
