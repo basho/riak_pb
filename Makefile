@@ -4,9 +4,9 @@ all: compile
 
 deps: erl_deps
 
-compile: erl_compile python_compile
+compile: erl_compile python_compile java_compile
 
-clean: erl_clean python_clean
+clean: erl_clean python_clean java_clean
 
 distclean: clean
 	rm -rf dist
@@ -40,3 +40,15 @@ python_clean:
 python_release: python_compile
 	@python2.6 setup.py bdist_egg upload
 	@python2.7 setup.py bdist_egg upload
+
+# Java specific build steps
+java_compile:
+	@echo "==> Java"
+	@mvn install
+
+java_clean:
+	@echo "==> Java"
+	@mvn clean
+
+java_release: java_compile
+
