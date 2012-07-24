@@ -95,12 +95,26 @@ encode_content_meta(?MD_LASTMOD, {MS,S,US}, PbContent) ->
 encode_content_meta(?MD_USERMETA, UserMeta, PbContent) when is_list(UserMeta) ->
     PbContent#rpbcontent{usermeta = [encode_pair(E) || E <- UserMeta]};
 encode_content_meta(?MD_INDEX, Indexes, PbContent) when is_list(Indexes) ->
-    PbContent#rpbcontent{indexes = [encode_pair(E) || E <- Indexes]};
+    PbContent#rpbcontent{indexes = [encode_index_pair(E) || E <- Indexes]};
+encode_content_meta(?MD_DELETED, DeletedVal, PbContent) ->
+    PbContent#rpbcontent{deleted=header_val_to_bool(DeletedVal)};
 encode_content_meta(_Key, _Value, PbContent) ->
     %% Ignore unknown metadata - need to add to RpbContent if it needs to make it
     %% to/from the client
     PbContent.
 
+%% @doc Return a boolean based on a header value.
+%% Representations of `true' return `true'; anything
+%% else returns `false'.
+-spec header_val_to_bool(term()) -> boolean().
+header_val_to_bool(<<"true">>) ->
+    true;
+header_val_to_bool("true") ->
+    true;
+header_val_to_bool(true) ->
+    true;
+header_val_to_bool(_) ->
+    false.
 
 %% @doc Convert a list of rpbcontent pb messages to a list of [{MetaData,Value}] tuples
 -spec decode_contents(PBContents::[tuple()]) -> contents().
@@ -110,6 +124,13 @@ decode_contents(RpbContents) ->
 -spec decode_content_meta(atom(), any(), #rpbcontent{}) -> [ {binary(), any()} ].
 decode_content_meta(_, undefined, _Pb) ->
     [];
+decode_content_meta(_, [], _Pb) ->
+    %% Repeated metadata fields that are empty lists need not be added
+    %% to the decoded metadata. This previously resulted in
+    %% type-conversion errors when using the JSON form of a
+    %% riak_object. All of the other metadata types are primitive
+    %% types.
+    [];
 decode_content_meta(content_type, CType, _Pb) ->
     [{?MD_CTYPE, binary_to_list(CType)}];
 decode_content_meta(charset, Charset, _Pb) ->
@@ -118,9 +139,6 @@ decode_content_meta(encoding, Encoding, _Pb) ->
     [{?MD_ENCODING, binary_to_list(Encoding)}];
 decode_content_meta(vtag, VTag, _Pb) ->
     [{?MD_VTAG, binary_to_list(VTag)}];
-decode_content_meta(links, Links1, _Pb) ->
-    Links = [ decode_link(L) || L <- Links1 ],
-    [{?MD_LINKS, Links}];
 decode_content_meta(last_mod, LastMod, Pb) ->
     case Pb#rpbcontent.last_mod_usecs of
         undefined ->
@@ -131,12 +149,18 @@ decode_content_meta(last_mod, LastMod, Pb) ->
     Msec = LastMod div 1000000,
     Sec = LastMod rem 1000000,
     [{?MD_LASTMOD, {Msec,Sec,Usec}}];
+decode_content_meta(links, Links1, _Pb) ->
+    Links = [ decode_link(L) || L <- Links1 ],
+    [{?MD_LINKS, Links}];
 decode_content_meta(usermeta, PbUserMeta, _Pb) ->
     UserMeta = [decode_pair(E) || E <- PbUserMeta],
     [{?MD_USERMETA, UserMeta}];
 decode_content_meta(indexes, PbIndexes, _Pb) ->
     Indexes = [decode_pair(E) || E <- PbIndexes],
-    [{?MD_INDEX, Indexes}].
+    [{?MD_INDEX, Indexes}];
+decode_content_meta(deleted, DeletedVal, _Pb) ->
+    [{?MD_DELETED, DeletedVal}].
+
 
 %% @doc Convert an rpccontent pb message to an erlang {MetaData,Value} tuple
 -spec decode_content(PBContent::tuple()) -> {riakc_obj:metadata(), riakc_obj:value()}.
@@ -148,9 +172,17 @@ decode_content(PbC) ->
           decode_content_meta(links, PbC#rpbcontent.links, PbC) ++
           decode_content_meta(last_mod, PbC#rpbcontent.last_mod, PbC) ++
           decode_content_meta(usermeta, PbC#rpbcontent.usermeta, PbC) ++
-          decode_content_meta(indexes, PbC#rpbcontent.indexes, PbC),
+          decode_content_meta(indexes, PbC#rpbcontent.indexes, PbC) ++
+          decode_content_meta(deleted, PbC#rpbcontent.deleted, PbC),
 
     {dict:from_list(MD), PbC#rpbcontent.value}.
+
+%% @doc Convert {K,V} index entries into protocol buffers
+-spec encode_index_pair({binary(), integer() | binary()}) -> #rpbpair{}.
+encode_index_pair({K,V}) when is_integer(V) ->
+    encode_pair({K, integer_to_list(V)});
+encode_index_pair(E) ->
+    encode_pair(E).
 
 %% @doc Convert {K,V} tuple to protocol buffers
 %% @equiv riak_pb_codec:encode_pair/1
