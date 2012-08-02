@@ -21,7 +21,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-
+    <pluginRepositories>
+        <pluginRepository>
+            <id>davidtrott</id>
+            <url>http://maven.davidtrott.com/repository</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <distributionManagement>
         <snapshotRepository>
@@ -60,7 +65,7 @@
             <plugin>
                 <groupId>com.google.protobuf.tools</groupId>
                 <artifactId>maven-protoc-plugin</artifactId>
-                <version>0.1.12-SNAPSHOT</version>
+                <version>0.1.10</version>
                 <configuration>
                     <protocExecutable>protoc</protocExecutable>
                     <protoSourceRoot>${project.basedir}/src</protoSourceRoot>
