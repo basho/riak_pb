@@ -10,13 +10,7 @@
     <name>Riak Protocol Buffers</name>
     <description>Protocol buffers used to communicate with Riak</description>
     <url>https://github.com/basho/riak_pb</url>
-    
-    <scm>
-        <connection>scm:git:ssh://git@github.com/basho/riak_pb.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/basho/riak_pb.git</developerConnection>
-        <url>http://github.com/basho/riak_pb</url>
-    </scm>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -28,26 +22,8 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Nexus Release Repository</name>
-            <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-    </distributionManagement>
-
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.7</version>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -74,7 +50,7 @@
                             <language>JAVA</language>
                             <outputDirectory>${project.basedir}/target/generated-sources/java</outputDirectory>
                         </LanguageSpecification>
-                    </languageSpecifications>						
+                    </languageSpecifications>
                 </configuration>
                 <executions>
                     <execution>
@@ -96,13 +72,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.1</version>
-                <configuration>
-                    <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
-                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -132,6 +101,37 @@
                         </executions>
                     </plugin>
 					<!-- NOTE: source and javadoc jars automatically generated on release (http://maven.apache.org/pom.html#The_Super_POM) -->
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>githubUpload</id>
+            <activation>
+                <property>
+                    <name>github.downloads</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.github</groupId>
+                        <artifactId>downloads-maven-plugin</artifactId>
+                        <version>0.4</version>
+                        <configuration>
+                            <description>${project.version} release of ${project.name}</description>
+                            <override>false</override>
+                            <includeAttached>true</includeAttached>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>upload</goal>
+                                </goals>
+                                <phase>install</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>

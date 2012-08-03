@@ -11,7 +11,7 @@ clean: erl_clean python_clean java_clean
 distclean: clean
 	rm -rf dist
 
-release: python_release
+release: python_release java_release
 
 test: erl_test
 
@@ -30,25 +30,27 @@ erl_test: erl_compile
 
 # Python specific build steps
 python_compile:
-	@echo "==> Python"
+	@echo "==> Python (compile)"
 	@./setup.py build
 
 python_clean:
-	@echo "==> Python"
+	@echo "==> Python (clean)"
 	@./setup.py clean
 
 python_release: python_compile
+	@echo "==> Python (release)"
 	@python2.6 setup.py bdist_egg upload
 	@python2.7 setup.py bdist_egg upload
 
 # Java specific build steps
 java_compile:
-	@echo "==> Java"
+	@echo "==> Java (compile)"
 	@mvn install
 
 java_clean:
-	@echo "==> Java"
+	@echo "==> Java (clean)"
 	@mvn clean
 
-java_release: java_compile
-
+java_release:
+	@echo "==> Java (release)"
+	@mvn install -Dgithub.downloads=true
