@@ -11,7 +11,7 @@ clean: erl_clean python_clean java_clean
 distclean: clean
 	rm -rf dist
 
-release: python_release
+release: python_release java_release
 
 test: erl_test
 
@@ -50,5 +50,13 @@ java_clean:
 	@echo "==> Java"
 	@mvn clean
 
-java_release: java_compile
+java_release: 
+	@echo "==> Java"
+ifeq ($(RELEASE_GPG_KEYNAME),)
+	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
+else
+	@mvn clean
+	@mvn deploy	
+endif
+	
 
