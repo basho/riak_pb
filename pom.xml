@@ -4,13 +4,13 @@
 
     <groupId>com.basho.riak.protobuf</groupId>
     <artifactId>riak-pb</artifactId>
-    <version>1.2</version>
-    <packaging>jar</packaging>
+    <version>1.3-SNAPSHOT</version>
+    <packaging>bundle</packaging>
 
     <name>Riak Protocol Buffers</name>
     <description>Protocol buffers used to communicate with Riak</description>
     <url>https://github.com/basho/riak_pb</url>
-    
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -24,23 +24,16 @@
             <email>roach@basho.com</email>
         </developer>
     </developers>
-    
+
     <scm>
         <connection>scm:git:ssh://git@github.com/basho/riak_pb.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/basho/riak_pb.git</developerConnection>
         <url>http://github.com/basho/riak_pb</url>
     </scm>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>davidtrott</id>
-            <url>http://maven.davidtrott.com/repository</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <build>
         <plugins>
@@ -67,26 +60,27 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.google.protobuf.tools</groupId>
-                <artifactId>maven-protoc-plugin</artifactId>
-                <version>0.1.10</version>
+                <groupId>com.github.igor-petruk.protobuf</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>0.5.2</version>
                 <configuration>
-                    <protocExecutable>protoc</protocExecutable>
-                    <protoSourceRoot>${project.basedir}/src</protoSourceRoot>
-                    <languageSpecifications>
-                        <LanguageSpecification>
-                            <language>JAVA</language>
-                            <outputDirectory>${project.basedir}/target/generated-sources/java</outputDirectory>
-                        </LanguageSpecification>
-                    </languageSpecifications>
+                    <inputDirectories>
+                        <directory>${project.basedir}/src</directory>
+                    </inputDirectories>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>compile</goal>
+                            <goal>run</goal>
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <groupId>org.apache.felix</groupId>
+                <version>2.3.7</version>
+                <extensions>true</extensions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -141,7 +135,7 @@
                         <configuration>
                             <skip>true</skip>
                         </configuration>
-                    </plugin> 
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -228,29 +222,6 @@
         </profile>
     </profiles>
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.8.5</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <version>1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>net.avh4.util</groupId>
-            <artifactId>imagecomparison</artifactId>
-            <version>0.0.1</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
