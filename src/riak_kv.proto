@@ -204,4 +204,18 @@ message RpbLink {
 message RpbBucketProps {
     optional uint32 n_val = 1;
     optional bool allow_mult = 2;
+    optional bool last_write_wins = 3;
+    optional bytes backend = 4;
+    optional uint32 r_val = 5;
+    optional uint32 w_val = 6;
+    optional uint32 dw_val = 7;
+    optional uint32 rw_val = 8;
+    repeated RpbPrePostCommitHook precommit = 9;
+    repeated RpbPrePostCommitHook postcommit = 10;
+}
+
+message RpbPrePostCommitHook {
+    optional bytes mod = 1;  // erlang hook module name
+    optional bytes func = 2;  // erlang hook function
+    optional bytes name = 3; // javascript function
 }
