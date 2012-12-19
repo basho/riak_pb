@@ -156,7 +156,7 @@ decode_content_meta(usermeta, PbUserMeta, _Pb) ->
     UserMeta = [decode_pair(E) || E <- PbUserMeta],
     [{?MD_USERMETA, UserMeta}];
 decode_content_meta(indexes, PbIndexes, _Pb) ->
-    Indexes = [decode_pair(E) || E <- PbIndexes],
+    Indexes = [decode_index_pair(E) || E <- PbIndexes],
     [{?MD_INDEX, Indexes}];
 decode_content_meta(deleted, DeletedVal, _Pb) ->
     [{?MD_DELETED, DeletedVal}].
@@ -183,6 +183,17 @@ encode_index_pair({K,V}) when is_integer(V) ->
     encode_pair({K, integer_to_list(V)});
 encode_index_pair(E) ->
     encode_pair(E).
+
+%% @doc Convert RpbPair PB message to erlang tuple when index entry
+-spec decode_index_pair(#rpbpair{}) -> {string(), integer() | binary()}.
+decode_index_pair(#rpbpair{key = K, value = V} = RB) ->
+    case lists:suffix("_int", binary_to_list(K)) of
+        true ->
+            RB1 = RB#rpbpair{value = list_to_integer(binary_to_list(V))},
+            decode_pair(RB1);
+        false -> % Should be suffix _bin, not tested explicitly.
+            decode_pair(RB)
+    end.
 
 %% @doc Convert {K,V} tuple to protocol buffers
 %% @equiv riak_pb_codec:encode_pair/1

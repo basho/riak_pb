@@ -53,7 +53,7 @@ pb_test_() ->
                  InputMD = dict:from_list([{?MD_INDEX, [{"index_bin", "foo"},
                                                         {"index_int", 10}]}]),
                  ExpectedMD = [{?MD_INDEX, [{<<"index_bin">>, <<"foo">>},
-                                            {<<"index_int">>, <<"10">>}]}],
+                                            {<<"index_int">>, 10}]}],
                  Value = <<"test value">>,
                  {OutputMD, _} = riak_pb_kv_codec:decode_content(
                                          riak_kv_pb:decode_rpbcontent(
