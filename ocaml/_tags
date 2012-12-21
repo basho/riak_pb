@@ -1,0 +1,20 @@
+# OASIS_START
+# DO NOT EDIT (digest: 37d5e9ba55072ea5c5d4358a59aa05c5)
+# Ignore VCS directories, you can use the same kind of rule outside 
+# OASIS_START/STOP if you want to exclude directories that contains 
+# useless stuff for the build process
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library riak-pb
+"riak-pb.cmxs": use_riak-pb
+<*.ml{,i}>: pkg_piqi
+<*.ml{,i}>: pkg_piqi.runtime
+# OASIS_STOP

@@ -1,0 +1,13 @@
+
+.record [
+    .name RpbGetServerInfoReq
+]
+
+.record [
+    .name RpbPingReq
+]
+
+.record [
+    .name RpbPingResp
+]
+
