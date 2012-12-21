@@ -1,0 +1,5 @@
+(* OASIS_START *)
+(* DO NOT EDIT (digest: 808d1163cd6fefc00fffe6b8fbbb25c7) *)
+Authors of Riak OCaml Protobuffs
+Dave Parfitt
+(* OASIS_STOP *)

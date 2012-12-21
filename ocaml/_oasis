@@ -1,0 +1,21 @@
+OASISFormat: 0.3
+Name:        Riak OCaml Protobuffs
+Version:     0.99
+Synopsis:    Protocol Buffers libraries for Riak
+Authors:     Dave Parfitt (dparfitt@basho.com)
+Maintainers:     Dave Parfitt (dparfitt@basho.com)
+Copyrights:  (C) 2012 Dave Parfitt
+             (C) 2012 Basho Technologies
+License:     Apache-2.0
+PreBuildCommand: make -f Makefile.piqi
+
+Plugins:     META (0.3), StdFiles (0.3), DevFiles (0.3)
+Library "riak-pb"
+  Path:       ./
+  FindlibName: riak-pb
+  Modules:     Riak_piqi, Riak_kv_piqi, Riak_search_piqi
+  BuildDepends: piqi, piqi.runtime
+  BuildTools: ocamlbuild
+
+XDevFilesEnableMakefile: true
+XDevFilesEnableConfigure: true

@@ -51,12 +51,24 @@ java_clean:
 	@echo "==> Java (clean)"
 	@mvn clean
 
-java_release: 
+java_release:
 	@echo "==> Java"
 ifeq ($(RELEASE_GPG_KEYNAME),)
 	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
 else
 	@mvn clean
-	@mvn deploy -Dgithub.downloads=true	
+	@mvn deploy -Dgithub.downloads=true
 endif
 
+ocaml_compile:
+	@echo "==> OCaml (compile)"
+	@cd ocaml && ./configure
+	@make -C ocaml
+
+ocaml_clean:
+	@echo "==> OCaml (compile)"
+	@make -C clean
+
+ocaml_release: ocaml_compile
+	@echo "==> OCaml (release)"
+	@make -C ocaml install

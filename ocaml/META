@@ -1,0 +1,12 @@
+# OASIS_START
+# DO NOT EDIT (digest: c4fdd382da1af367322968d009568a7e)
+version = "0.99"
+description = "Protocol Buffers libraries for Riak"
+requires = "piqi piqi.runtime"
+archive(byte) = "riak-pb.cma"
+archive(byte, plugin) = "riak-pb.cma"
+archive(native) = "riak-pb.cmxa"
+archive(native, plugin) = "riak-pb.cmxs"
+exists_if = "riak-pb.cma"
+# OASIS_STOP
+

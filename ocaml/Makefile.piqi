@@ -1,0 +1,8 @@
+piqi:
+	piqi of-proto -I ../src/ ../src/riak.proto -o ./riak.proto.piqi
+	piqi of-proto -I ../src/ ../src/riak_kv.proto -o ./riak_kv.proto.piqi
+	piqi of-proto -I ../src/ ../src/riak_search.proto -o ./riak_search.proto.piqi
+	cat riak.piqi.additions >> riak.proto.piqi
+	piqic ocaml --pp riak.proto.piqi
+	piqic ocaml --pp riak_kv.proto.piqi
+	piqic ocaml --pp riak_search.proto.piqi
