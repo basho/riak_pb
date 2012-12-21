@@ -25,8 +25,8 @@ pb_test_() ->
                  Value = <<"test value">>,
                  {MetaData2, Value2} = riak_pb_kv_codec:decode_content(
                                          riak_kv_pb:decode_rpbcontent(
-                                           riak_kv_pb:encode_rpbcontent(
-                                             riak_pb_kv_codec:encode_content({MetaData, Value})))),
+                                           iolist_to_binary(riak_kv_pb:encode_rpbcontent(
+                                             riak_pb_kv_codec:encode_content({MetaData, Value}))))),
                  ?assertEqual(lists:sort(dict:to_list(MetaData)), lists:sort(dict:to_list(MetaData2))),
                  ?assertEqual(Value, Value2)
              end)},
@@ -38,8 +38,8 @@ pb_test_() ->
                  {OutputMD, _} = lists:unzip(
                                    [riak_pb_kv_codec:decode_content(
                                       riak_kv_pb:decode_rpbcontent(
-                                        riak_kv_pb:encode_rpbcontent(
-                                          riak_pb_kv_codec:encode_content({MD, Value})))) ||
+                                        iolist_to_binary(riak_kv_pb:encode_rpbcontent(
+                                          riak_pb_kv_codec:encode_content({MD, Value}))))) ||
                                        MD <- InputMD]),
                  MdSame1 = (lists:sort(dict:to_list(lists:nth(1, OutputMD))) =:=
                                 lists:sort(dict:to_list(lists:nth(2, OutputMD)))),
@@ -57,8 +57,8 @@ pb_test_() ->
                  Value = <<"test value">>,
                  {OutputMD, _} = riak_pb_kv_codec:decode_content(
                                          riak_kv_pb:decode_rpbcontent(
-                                           riak_kv_pb:encode_rpbcontent(
-                                             riak_pb_kv_codec:encode_content({InputMD, Value})))),
+                                           iolist_to_binary(riak_kv_pb:encode_rpbcontent(
+                                             riak_pb_kv_codec:encode_content({InputMD, Value}))))),
                  ?assertEqual(ExpectedMD, dict:to_list(OutputMD))
              end)},
      {"empty content encode decode",
@@ -67,8 +67,8 @@ pb_test_() ->
                  Value = <<"test value">>,
                  {MetaData2, Value2} = riak_pb_kv_codec:decode_content(
                                          riak_kv_pb:decode_rpbcontent(
-                                           riak_kv_pb:encode_rpbcontent(
-                                             riak_pb_kv_codec:encode_content({MetaData, Value})))),
+                                           iolist_to_binary(riak_kv_pb:encode_rpbcontent(
+                                             riak_pb_kv_codec:encode_content({MetaData, Value}))))),
                  ?assertEqual([], dict:to_list(MetaData2)),
                  ?assertEqual(Value, Value2)
              end)},
@@ -78,8 +78,8 @@ pb_test_() ->
                  Value = <<"test value">>,
                  {MetaData2, Value2} = riak_pb_kv_codec:decode_content(
                                          riak_kv_pb:decode_rpbcontent(
-                                           riak_kv_pb:encode_rpbcontent(
-                                             riak_pb_kv_codec:encode_content({MetaData, Value})))),
+                                           iolist_to_binary(riak_kv_pb:encode_rpbcontent(
+                                             riak_pb_kv_codec:encode_content({MetaData, Value}))))),
                  ?assertEqual([], dict:to_list(MetaData2)),
                  ?assertEqual(Value, Value2)
              end)},
@@ -93,8 +93,8 @@ pb_test_() ->
                           {allow_mult, true}],
                  Props2 = riak_pb_kv_codec:decode_bucket_props(
                             riak_kv_pb:decode_rpbbucketprops(
-                              riak_kv_pb:encode_rpbbucketprops(
-                                riak_pb_kv_codec:encode_bucket_props(Props)))),
+                              iolist_to_binary(riak_kv_pb:encode_rpbbucketprops(
+                                riak_pb_kv_codec:encode_bucket_props(Props))))),
                  MdSame = (lists:sort(Props) =:=
                                lists:sort(Props2)),
                  ?assertEqual(true, MdSame)
@@ -105,14 +105,13 @@ pb_test_() ->
                           {allow_mult, false}],
                  Props2 = riak_pb_kv_codec:decode_bucket_props(
                             riak_kv_pb:decode_rpbbucketprops(
-                              riak_kv_pb:encode_rpbbucketprops(
-                                riak_pb_kv_codec:encode_bucket_props(Props)))),
+                              iolist_to_binary(riak_kv_pb:encode_rpbbucketprops(
+                                riak_pb_kv_codec:encode_bucket_props(Props))))),
                  MdSame = (lists:sort(Props) =:=
                                lists:sort(Props2)),
                  ?assertEqual(true, MdSame)
              end)}
-    ]
-        .
+    ].
 
 
 msg_code_encode_decode(N) ->

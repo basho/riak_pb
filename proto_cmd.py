@@ -48,7 +48,7 @@ class build_proto(Command):
     if self.protoc is None:
       self.protoc = find_executable('protoc')
     if self.protoc is None:
-      raise RuntimeError, "No protoc compiler was found!"
+      raise RuntimeError("No protoc compiler was found!")
 
   def run(self):
     for protofile in self.get_proto_files():
@@ -84,7 +84,7 @@ class build_proto(Command):
                        source ]
     result = self.spawn(protoc_command, 0)
     if result is not None and result[1] is not 0:
-      raise SystemError, "protoc command failed: '%s'" % protoc_command.join(' ')
+      raise SystemError("protoc command failed: '%s'" % protoc_command.join(' '))
 
 # Inject our .proto compiler into the front of the build commands
 build.sub_commands.insert(0, ('build_proto', None))
