@@ -41,6 +41,7 @@ python_release: python_compile
 	@echo "==> Python (release)"
 	@python2.6 setup.py bdist_egg upload
 	@python2.7 setup.py bdist_egg upload
+	@python2.6 setup.py sdist upload
 
 # Java specific build steps
 java_compile:
