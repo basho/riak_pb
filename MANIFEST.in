@@ -1,3 +1,2 @@
 include proto_cmd.py
-include src/riak_pb.app.src
 include src/*.proto
