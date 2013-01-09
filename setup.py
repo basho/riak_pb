@@ -2,14 +2,9 @@
 
 from setuptools import setup
 from proto_cmd import build_proto, clean_proto
-import re
-
-# Get the riak_pb app version
-appfile = open('src/riak_pb.app.src').read()
-version = re.search(r"vsn.*\"([^\"]+)\"", appfile).group(1)
 
 setup(name='riak_pb',
-      version=version,
+      version='1.2.1',
       description='Riak Protocol Buffers Messages',
       packages=['riak_pb'],
       requires=['protobuf(==2.4.1)'],
