@@ -1,6 +1,6 @@
 .PHONY: deps
 
-all: compile
+all: deps compile
 
 deps: erl_deps
 
@@ -52,12 +52,11 @@ java_clean:
 	@echo "==> Java (clean)"
 	@mvn clean
 
-java_release: 
+java_release:
 	@echo "==> Java"
 ifeq ($(RELEASE_GPG_KEYNAME),)
 	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
 else
 	@mvn clean
-	@mvn deploy -Dgithub.downloads=true	
+	@mvn deploy -Dgithub.downloads=true
 endif
-
