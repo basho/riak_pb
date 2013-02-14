@@ -122,25 +122,6 @@ message RpbListKeysResp {
     optional bool done = 2;
 }
 
-// Get bucket properties request
-message RpbGetBucketReq {
-    required bytes bucket = 1;
-}
-
-// Get bucket properties response
-message RpbGetBucketResp {
-    required RpbBucketProps props = 1;
-}
-
-// Set bucket properties request
-message RpbSetBucketReq {
-    required bytes bucket = 1;
-    required RpbBucketProps props = 2;
-}
-
-
-// Set bucket properties response - no message defined, just send RpbSetBucketResp
-
 
 // Map/Reduce request
 message RpbMapRedReq {
@@ -198,10 +179,4 @@ message RpbLink {
     optional bytes bucket = 1;
     optional bytes key = 2;
     optional bytes tag = 3;
-}
-
-// Bucket properties
-message RpbBucketProps {
-    optional uint32 n_val = 1;
-    optional bool allow_mult = 2;
 }

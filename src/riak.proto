@@ -22,7 +22,7 @@
 */
 
 /*
-** Revision: 1.2
+** Revision: 1.4
 */
 
 // Java package specifiers
@@ -46,4 +46,29 @@ message RpbGetServerInfoResp {
 message RpbPair {
     required bytes key = 1;
     optional bytes value = 2;
+}
+
+
+// Get bucket properties request
+message RpbGetBucketReq {
+    required bytes bucket = 1;
+}
+
+// Get bucket properties response
+message RpbGetBucketResp {
+    required RpbBucketProps props = 1;
+}
+
+// Set bucket properties request
+message RpbSetBucketReq {
+    required bytes bucket = 1;
+    required RpbBucketProps props = 2;
+}
+
+// Set bucket properties response - no message defined, just send RpbSetBucketResp
+
+// Bucket properties
+message RpbBucketProps {
+    optional uint32 n_val = 1;
+    optional bool allow_mult = 2;
 }
