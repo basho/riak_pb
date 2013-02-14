@@ -44,6 +44,8 @@
          decode_link/1,         %% riakc_pb:erlify_rpblink
          encode_bucket_props/1, %% riakc_pb:pbify_rpbbucketprops
          decode_bucket_props/1, %% riakc_pb:erlify_rpbbucketprops
+	 encode_commit_hook/1,
+	 decode_commit_hook/1,
          encode_quorum/1,
          decode_quorum/1        %% riak_kv_pb_socket:normalize_rw_value
         ]).
@@ -206,14 +208,33 @@ encode_link({{B,K},T}) ->
 decode_link(#rpblink{bucket = B, key = K, tag = T}) ->
     {{B,K},T}.
 
-
 %% @doc Convert an RpbBucketProps message to a property list
 -spec decode_bucket_props(PBProps::#rpbbucketprops{} | undefined) -> [proplists:property()].
 decode_bucket_props(undefined) ->
     [];
-decode_bucket_props(#rpbbucketprops{n_val=N, allow_mult=AM}) ->
+decode_bucket_props(#rpbbucketprops{n_val=N, allow_mult=AM, last_write_wins=LWW, 
+				    r_val=R, w_val=W, dw_val=DW, rw_val=RW, 
+				    backend=Backend, precommit=Precommit, postcommit=Postcommit}) ->
     [ {n_val, N} || N /= undefined ] ++
-    [ {allow_mult, decode_bool(AM)} || AM /= undefined ].
+    [ {allow_mult, decode_bool(AM)} || AM /= undefined ] ++
+    [ {last_write_wins, decode_bool(LWW)} || LWW /= undefined ] ++
+    [ {r_val, R} || R /= undefined ] ++
+    [ {w_val, W} || W /= undefined ] ++
+    [ {dw_val, DW} || DW /= undefined ] ++
+    [ {rw_val, RW} || RW /= undefined ] ++
+    [ {backend, Backend} || Backend /= undefined ] ++
+    [ {precommit, [decode_commit_hook(P) || P <- Precommit]} || Precommit /= undefined ] ++
+    [ {postcommit, [decode_commit_hook(P) || P <- Postcommit]} || Postcommit /= undefined ].
+
+%% @doc Convert an RpbPrePostCommitHook message to a proplist
+-spec decode_commit_hook(PBProps::#rpbprepostcommithook{} | undefined) -> [proplists:property()].
+decode_commit_hook(undefined) ->
+    [];
+decode_commit_hook(#rpbprepostcommithook{mod=Mod, func=Fun, name=Name}) ->
+    H = [ {<<"mod">>, Mod} || Mod /= undefined] ++
+	[ {<<"fun">>, Fun} || Fun /= undefined] ++
+	[ {<<"name">>, Name} || Name /= undefined],
+    {struct, H}.
 
 %% @doc Convert a property list to an RpbBucketProps message
 -spec encode_bucket_props([proplists:property()]) -> PBProps::#rpbbucketprops{}.
@@ -229,10 +250,45 @@ encode_bucket_props([{n_val, Nval} | Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{n_val = Nval});
 encode_bucket_props([{allow_mult, Flag} | Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{allow_mult = encode_bool(Flag)});
+encode_bucket_props([{last_write_wins, Flag} | Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{last_write_wins = encode_bool(Flag)});
+encode_bucket_props([{r_val, Rval} | Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{r_val = Rval});
+encode_bucket_props([{w_val, Wval} | Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{w_val = Wval});
+encode_bucket_props([{dw_val, DWval} | Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{dw_val = DWval});
+encode_bucket_props([{rw_val, RWval} | Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{rw_val = RWval});
+encode_bucket_props([{backend, Backend} | Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{backend = Backend});
+encode_bucket_props([{precommit, Precommit} | Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{precommit = [encode_commit_hook(P) || P <- Precommit]});
+encode_bucket_props([{postcommit, Postcommit} | Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{postcommit = [encode_commit_hook(P) || P <- Postcommit]}); 
 encode_bucket_props([_Ignore|Rest], Pb) ->
     %% Ignore any properties not explicitly part of the PB message
     encode_bucket_props(Rest, Pb).
 
+%% @doc Convert a property list to an RpbBucketProps message
+-spec encode_commit_hook([proplists:property()]) -> PBProps::#rpbprepostcommithook{}.
+encode_commit_hook({struct, Hook}) ->
+    encode_commit_hook(Hook, #rpbprepostcommithook{}).
+
+%% @doc Convert a property list to an RpbPrePostCommitHook message
+%% @private
+-spec encode_commit_hook([proplists:property()], PBPropsIn::#rpbprepostcommithook{}) -> PBPropsOut::#rpbprepostcommithook{}.
+encode_commit_hook([], Pb) ->
+    Pb;
+encode_commit_hook([{<<"mod">>, Mod} | Rest], Pb) ->
+    encode_commit_hook(Rest, Pb#rpbprepostcommithook{mod = Mod});
+encode_commit_hook([{<<"fun">>, Fun} | Rest], Pb) ->
+    encode_commit_hook(Rest, Pb#rpbprepostcommithook{func = Fun});
+encode_commit_hook([{<<"name">>, Fun} | Rest], Pb) ->
+    encode_commit_hook(Rest, Pb#rpbprepostcommithook{name = Fun});
+encode_commit_hook([_Ignore|Rest], Pb) ->
+    %% Ignore any properties not explicitly part of the PB message
+    encode_commit_hook(Rest, Pb).
 
 %% @doc Encode a symbolic or numeric quorum value into a Protocol
 %% Buffers value

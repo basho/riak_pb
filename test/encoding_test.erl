@@ -90,7 +90,15 @@ pb_test_() ->
      {"bucket props encode decode",
       ?_test(begin
                  Props = [{n_val, 99},
-                          {allow_mult, true}],
+                          {allow_mult, true},
+			  {last_write_wins, false},
+			  {backend, <<"leveldb">>},
+			  {r_val, 20},
+			  {w_val, 19},
+			  {dw_val, 18},
+			  {rw_val, 17},
+			  {precommit, []},
+			  {postcommit, [{struct, [{<<"mod">>, <<"testmod">>}, {<<"fun">>, <<"testfun">>}]}]}],
                  Props2 = riak_pb_kv_codec:decode_bucket_props(
                             riak_kv_pb:decode_rpbbucketprops(
                               iolist_to_binary(riak_kv_pb:encode_rpbbucketprops(
@@ -102,7 +110,15 @@ pb_test_() ->
      {"bucket props encode decode 2",
       ?_test(begin
                  Props = [{n_val, 33},
-                          {allow_mult, false}],
+                          {allow_mult, false},
+			  {last_write_wins, true},
+			  {backend, <<"memory">>},
+			  {r_val, 13},
+			  {w_val, 14},
+			  {dw_val, 15},
+			  {rw_val, 16},
+			  {precommit, [{struct, [{<<"name">>, <<"testJSFunc">>}]}]},
+			  {postcommit, []}],
                  Props2 = riak_pb_kv_codec:decode_bucket_props(
                             riak_kv_pb:decode_rpbbucketprops(
                               iolist_to_binary(riak_kv_pb:encode_rpbbucketprops(
