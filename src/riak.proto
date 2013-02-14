@@ -65,10 +65,60 @@ message RpbSetBucketReq {
     required RpbBucketProps props = 2;
 }
 
-// Set bucket properties response - no message defined, just send RpbSetBucketResp
+// Set bucket properties response - no message defined, just send
+// RpbSetBucketResp
+
+// Module-Function pairs for commit hooks and other bucket properties
+// that take functions
+message RpbModFun {
+    required bytes module = 1;
+    required bytes function = 1;
+}
+
+// A commit hook, which may either be a modfun or a JavaScript named
+// function
+message RpbCommitHook {
+    optional RpbModFun modfun = 1;
+    optional bytes name = 2;
+}
 
 // Bucket properties
 message RpbBucketProps {
+    // Declared in riak_core_app
     optional uint32 n_val = 1;
     optional bool allow_mult = 2;
+    optional bool last_write_wins = 3;
+    repeated RpbCommitHook precommit = 4;
+    repeated RpbCommitHook postcommit = 5;
+    optional RpbModFun chash_keyfun = 6;
+
+    // Declared in riak_kv_app
+    optional RpbModFun linkfun = 7;
+    optional uint32 old_vclock = 8;
+    optional uint32 young_vclock = 9;
+    optional uint32 big_vclock = 10;
+    optional uint32 small_vclock = 11;
+    optional uint32 pr = 12;
+    optional uint32 r = 13;
+    optional uint32 w = 14;
+    optional uint32 pw = 15;
+    optional uint32 dw = 16;
+    optional uint32 rw = 17;
+    optional bool basic_quorum = 18;
+    optional bool notfound_ok = 19;
+
+    // Used by riak_kv_multibackend
+    optional bytes backend = 20;
+
+    // Used by riak_search bucket fixup
+    optional bool search = 21;
+
+    // Used by riak_repl bucket fixup
+    enum RpbReplMode {
+        OFF = 0;
+        REALTIME = 1;
+        FULLSYNC = 2;
+        BOTH = 3;
+    }
+    optional RpbReplMode repl = 22;
 }
