@@ -214,6 +214,7 @@ message RpbCounterUpdateReq {
     optional uint32 w = 4;
     optional uint32 dw = 5;
     optional uint32 pw = 6;
+    repeated RpbPair indexes = 7;       // indexes for the key
 }
 
 // Counter update response? No message | error response
