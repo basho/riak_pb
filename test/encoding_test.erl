@@ -86,30 +86,6 @@ pb_test_() ->
      {"msg code encode decode",
       ?_test(begin
                  msg_code_encode_decode(0)
-             end)},
-     {"bucket props encode decode",
-      ?_test(begin
-                 Props = [{n_val, 99},
-                          {allow_mult, true}],
-                 Props2 = riak_pb_codec:decode_bucket_props(
-                            riak_pb:decode_rpbbucketprops(
-                              iolist_to_binary(riak_pb:encode_rpbbucketprops(
-                                riak_pb_codec:encode_bucket_props(Props))))),
-                 MdSame = (lists:sort(Props) =:=
-                               lists:sort(Props2)),
-                 ?assertEqual(true, MdSame)
-             end)},
-     {"bucket props encode decode 2",
-      ?_test(begin
-                 Props = [{n_val, 33},
-                          {allow_mult, false}],
-                 Props2 = riak_pb_codec:decode_bucket_props(
-                            riak_pb:decode_rpbbucketprops(
-                              iolist_to_binary(riak_pb:encode_rpbbucketprops(
-                                riak_pb_codec:encode_bucket_props(Props))))),
-                 MdSame = (lists:sort(Props) =:=
-                               lists:sort(Props2)),
-                 ?assertEqual(true, MdSame)
              end)}
     ].
 
