@@ -107,7 +107,7 @@ message RpbBucketProps {
     optional bool basic_quorum = 18;
     optional bool notfound_ok = 19;
 
-    // Used by riak_kv_multibackend
+    // Used by riak_kv_multi_backend
     optional bytes backend = 20;
 
     // Used by riak_search bucket fixup
