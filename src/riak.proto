@@ -72,7 +72,7 @@ message RpbSetBucketReq {
 // that take functions
 message RpbModFun {
     required bytes module = 1;
-    required bytes function = 1;
+    required bytes function = 2;
 }
 
 // A commit hook, which may either be a modfun or a JavaScript named
