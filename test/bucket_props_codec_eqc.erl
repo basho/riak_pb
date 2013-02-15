@@ -18,7 +18,7 @@
 %%
 %% -------------------------------------------------------------------
 -module(bucket_props_codec_eqc).
-
+-ifdef(EQC).
 -include_lib("eqc/include/eqc.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
@@ -31,7 +31,7 @@
 bucket_codec_test_() ->
     [{"bucket properties encode decode", 
       ?_test(begin
-                 quickcheck(?QC_OUT(numtests(1000, prop_codec())))
+                 quickcheck(?QC_OUT(numtests(2000, prop_codec())))
              end)}].
 
 prop_codec() ->
@@ -110,3 +110,5 @@ atom() ->
 
 linkfun() ->
     ?LET({M,F}, {atom(), atom()}, {linkfun, {modfun, M, F}}).
+
+-endif.
