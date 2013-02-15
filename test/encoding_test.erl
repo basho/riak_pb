@@ -91,10 +91,10 @@ pb_test_() ->
       ?_test(begin
                  Props = [{n_val, 99},
                           {allow_mult, true}],
-                 Props2 = riak_pb_kv_codec:decode_bucket_props(
-                            riak_kv_pb:decode_rpbbucketprops(
-                              iolist_to_binary(riak_kv_pb:encode_rpbbucketprops(
-                                riak_pb_kv_codec:encode_bucket_props(Props))))),
+                 Props2 = riak_pb_codec:decode_bucket_props(
+                            riak_pb:decode_rpbbucketprops(
+                              iolist_to_binary(riak_pb:encode_rpbbucketprops(
+                                riak_pb_codec:encode_bucket_props(Props))))),
                  MdSame = (lists:sort(Props) =:=
                                lists:sort(Props2)),
                  ?assertEqual(true, MdSame)
@@ -103,10 +103,10 @@ pb_test_() ->
       ?_test(begin
                  Props = [{n_val, 33},
                           {allow_mult, false}],
-                 Props2 = riak_pb_kv_codec:decode_bucket_props(
-                            riak_kv_pb:decode_rpbbucketprops(
-                              iolist_to_binary(riak_kv_pb:encode_rpbbucketprops(
-                                riak_pb_kv_codec:encode_bucket_props(Props))))),
+                 Props2 = riak_pb_codec:decode_bucket_props(
+                            riak_pb:decode_rpbbucketprops(
+                              iolist_to_binary(riak_pb:encode_rpbbucketprops(
+                                riak_pb_codec:encode_bucket_props(Props))))),
                  MdSame = (lists:sort(Props) =:=
                                lists:sort(Props2)),
                  ?assertEqual(true, MdSame)

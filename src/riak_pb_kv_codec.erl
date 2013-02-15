@@ -42,8 +42,6 @@
          decode_pair/1,         %% riakc_pb:erlify_rpbpair
          encode_link/1,         %% riakc_pb:pbify_rpblink
          decode_link/1,         %% riakc_pb:erlify_rpblink
-         encode_bucket_props/1, %% riakc_pb:pbify_rpbbucketprops
-         decode_bucket_props/1, %% riakc_pb:erlify_rpbbucketprops
          encode_quorum/1,
          decode_quorum/1        %% riak_kv_pb_socket:normalize_rw_value
         ]).
@@ -205,34 +203,6 @@ encode_link({{B,K},T}) ->
 -spec decode_link(PBLink::#rpblink{}) -> {{binary(), binary()}, binary()}.
 decode_link(#rpblink{bucket = B, key = K, tag = T}) ->
     {{B,K},T}.
-
-
-%% @doc Convert an RpbBucketProps message to a property list
--spec decode_bucket_props(PBProps::#rpbbucketprops{} | undefined) -> [proplists:property()].
-decode_bucket_props(undefined) ->
-    [];
-decode_bucket_props(#rpbbucketprops{n_val=N, allow_mult=AM}) ->
-    [ {n_val, N} || N /= undefined ] ++
-    [ {allow_mult, decode_bool(AM)} || AM /= undefined ].
-
-%% @doc Convert a property list to an RpbBucketProps message
--spec encode_bucket_props([proplists:property()]) -> PBProps::#rpbbucketprops{}.
-encode_bucket_props(Props) ->
-    encode_bucket_props(Props, #rpbbucketprops{}).
-
-%% @doc Convert a property list to an RpbBucketProps message
-%% @private
--spec encode_bucket_props([proplists:property()], PBPropsIn::#rpbbucketprops{}) -> PBPropsOut::#rpbbucketprops{}.
-encode_bucket_props([], Pb) ->
-    Pb;
-encode_bucket_props([{n_val, Nval} | Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{n_val = Nval});
-encode_bucket_props([{allow_mult, Flag} | Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{allow_mult = encode_bool(Flag)});
-encode_bucket_props([_Ignore|Rest], Pb) ->
-    %% Ignore any properties not explicitly part of the PB message
-    encode_bucket_props(Rest, Pb).
-
 
 %% @doc Encode a symbolic or numeric quorum value into a Protocol
 %% Buffers value
