@@ -357,7 +357,7 @@ decode_modfun(#rpbmodfun{module=Mod, function=Fun}=MF, _Prop) ->
     try
         {binary_to_existing_atom(Mod, latin1), binary_to_existing_atom(Fun, latin1)}
     catch
-        exit:{badarg,_} ->
+        error:badarg ->
             error_logger:warning_msg("Creating new atoms from protobuffs message! ~p", [MF]),
             {binary_to_atom(Mod, latin1), binary_to_atom(Fun, latin1)}
     end.
