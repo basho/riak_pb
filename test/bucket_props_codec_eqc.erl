@@ -28,12 +28,18 @@
                                          io:format(user, F, TL)
                                  end, P)).
 
+%%====================================================================
+%% Eunit integration
+%%====================================================================
 bucket_codec_test_() ->
-    [{"bucket properties encode decode", 
+    [{"bucket properties encode decode",
       ?_test(begin
-                 quickcheck(?QC_OUT(numtests(2000, prop_codec())))
+                 eqc:quickcheck(?QC_OUT(eqc:numtests(2000, prop_codec())))
              end)}].
 
+%%====================================================================
+%% Properties
+%%====================================================================
 prop_codec() ->
     ?FORALL(Props, sortuniq(list(bucket_prop())),
             ?WHENFAIL(begin
@@ -47,6 +53,21 @@ prop_codec() ->
                           Props =:= lists:sort(Props2)
                       end)).
 
+%%====================================================================
+%% Shell helpers
+%%====================================================================
+qc() ->
+    qc(2000).
+
+qc(NumTests) ->
+    quickcheck(numtests(NumTests, prop_codec())).
+
+check() ->
+    eqc:check(prop_codec(), eqc:current_counterexample()).
+
+%%====================================================================
+%% Generators
+%%====================================================================
 bucket_prop() ->
     oneof([num(n_val),
            flag(allow_mult),
