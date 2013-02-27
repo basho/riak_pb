@@ -7,6 +7,9 @@ ebin/*.beam
 ebin/riak_pb.app
 include/*_pb.hrl
 doc/*
+.qc
+.eqc-info
+current_counterexample.eqc
 
 # Python
 riak_pb.egg-info

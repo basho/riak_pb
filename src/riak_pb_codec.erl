@@ -38,7 +38,33 @@
          encode_bool/1, %% riakc_pb:pbify_bool
          decode_bool/1, %% riakc_pb:erlify_bool
          to_binary/1,   %% riakc_pb:binary
-         to_list/1]).   %% riakc_pb:any_to_list
+         to_list/1,     %% riakc_pb:any_to_list
+         encode_bucket_props/1, %% riakc_pb:pbify_rpbbucketprops
+         decode_bucket_props/1, %% riakc_pb:erlify_rpbbucketprops
+         encode_modfun/1,
+         decode_modfun/2,
+         encode_commit_hooks/1,
+         decode_commit_hooks/1
+        ]).
+
+%% @doc Bucket properties that store module/function pairs, e.g.
+%% commit hooks, hash functions, link functions, will be in one of
+%% these forms. More specifically:
+%%
+%% chash_keyfun :: {module(), function()}
+%% linkfun :: {modfun, module(), function()}
+%% precommit, postcommit :: [ {struct, [{binary(), binary()}]} ]
+%% @end
+-type modfun_property() :: {module(), function()} | {modfun, module(), function()} | {struct, [{binary(), binary()}]}.
+
+%% @doc Fields that can be specified in a commit hook must be
+%% binaries. The valid values are <<"mod">>, <<"fun">>, <<"name">>.
+%% Note that "mod" and "fun" must be used together, and "name" cannot
+%% be used if the other two are present.
+-type commit_hook_field() :: binary().
+
+%% @doc Bucket properties that are commit hooks have this format.
+-type commit_hook_property() :: [ {struct, [{commit_hook_field(), binary()}]} ].
 
 %% @doc Create an iolist of msg code and protocol buffer
 %% message. Replaces `riakc_pb:encode/1'.
@@ -191,3 +217,177 @@ encode_pair({K,V}) ->
 -spec decode_pair(#rpbpair{}) -> {string(), string()}.
 decode_pair(#rpbpair{key = K, value = V}) ->
     {K, V}.
+
+
+%% @doc Convert an RpbBucketProps message to a property list
+-spec decode_bucket_props(PBProps::#rpbbucketprops{} | undefined) -> [proplists:property()].
+decode_bucket_props(undefined) ->
+    [];
+decode_bucket_props(#rpbbucketprops{n_val=N,
+                                    allow_mult=AM,
+                                    last_write_wins=LWW,
+                                    precommit=Pre,
+                                    postcommit=Post,
+                                    chash_keyfun=Chash,
+                                    linkfun=Link,
+                                    old_vclock=Old,
+                                    young_vclock=Young,
+                                    big_vclock=Big,
+                                    small_vclock=Small,
+                                    pr=PR, r=R, w=W, pw=PW,
+                                    dw=DW, rw=RW,
+                                    basic_quorum=BQ,
+                                    notfound_ok=NFOK,
+                                    backend=Backend,
+                                    search=Search,
+                                    repl=Repl
+
+                                   }) ->
+    %% Extract numerical properties
+    [ {P,V} || {P,V} <- [ {n_val, N}, {old_vclock, Old}, {young_vclock, Young},
+                          {big_vclock, Big}, {small_vclock, Small} ],
+               V /= undefined ] ++
+    %% Extract booleans
+    [ {BProp, decode_bool(Bool)} ||
+       {BProp, Bool} <- [{allow_mult, AM}, {last_write_wins, LWW},
+                         {basic_quorum, BQ}, {notfound_ok, NFOK},
+                         {search, Search}],
+        Bool /= undefined ] ++
+
+    %% Extract commit hooks
+    [ {PrePostProp, decode_commit_hooks(CList)} ||
+        {PrePostProp, CList} <- [{precommit, Pre}, {postcommit, Post}],
+        CList /= [] ] ++
+
+    %% Extract modfuns
+    [ {MFProp, decode_modfun(MF, MFProp)} || {MFProp, MF} <- [{chash_keyfun, Chash},
+                                                              {linkfun, Link}],
+                                             MF /= undefined ] ++
+
+    %% Extract backend
+    [ {backend, Backend} || is_binary(Backend) ] ++
+
+    %% Extract quora
+    [ {QProp, riak_pb_kv_codec:decode_quorum(Q)} ||
+        {QProp, Q} <- [{pr, PR}, {r, R}, {w, W}, {pw, PW}, {dw, DW}, {rw, RW}],
+        Q /= undefined ] ++
+
+    %% Extract repl prop
+    [ {repl, Repl} || Repl /= undefined ].
+
+
+%% @doc Convert a property list to an RpbBucketProps message
+-spec encode_bucket_props([proplists:property()]) -> PBProps::#rpbbucketprops{}.
+encode_bucket_props(Props) ->
+    encode_bucket_props(Props, #rpbbucketprops{}).
+
+%% @doc Convert a property list to an RpbBucketProps message
+%% @private
+-spec encode_bucket_props([proplists:property()], PBPropsIn::#rpbbucketprops{}) -> PBPropsOut::#rpbbucketprops{}.
+encode_bucket_props([], Pb) ->
+    Pb;
+encode_bucket_props([{n_val, Nval} | Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{n_val = Nval});
+encode_bucket_props([{allow_mult, Flag} | Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{allow_mult = encode_bool(Flag)});
+encode_bucket_props([{last_write_wins, LWW}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{last_write_wins = encode_bool(LWW)});
+encode_bucket_props([{precommit, Precommit}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{precommit = encode_commit_hooks(Precommit)});
+encode_bucket_props([{postcommit, Postcommit}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{postcommit = encode_commit_hooks(Postcommit)});
+encode_bucket_props([{chash_keyfun, ModFun}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{chash_keyfun = encode_modfun(ModFun)});
+encode_bucket_props([{linkfun, ModFun}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{linkfun = encode_modfun(ModFun)});
+encode_bucket_props([{old_vclock, Num}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{old_vclock = Num});
+encode_bucket_props([{young_vclock, Num}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{young_vclock = Num});
+encode_bucket_props([{big_vclock, Num}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{big_vclock = Num});
+encode_bucket_props([{small_vclock, Num}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{small_vclock = Num});
+encode_bucket_props([{pr, Q}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{pr = riak_pb_kv_codec:encode_quorum(Q)});
+encode_bucket_props([{r, Q}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{r = riak_pb_kv_codec:encode_quorum(Q)});
+encode_bucket_props([{w, Q}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{w = riak_pb_kv_codec:encode_quorum(Q)});
+encode_bucket_props([{pw, Q}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{pw = riak_pb_kv_codec:encode_quorum(Q)});
+encode_bucket_props([{dw, Q}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{dw = riak_pb_kv_codec:encode_quorum(Q)});
+encode_bucket_props([{rw, Q}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{rw = riak_pb_kv_codec:encode_quorum(Q)});
+encode_bucket_props([{basic_quorum, BQ}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{basic_quorum = encode_bool(BQ)});
+encode_bucket_props([{notfound_ok, NFOK}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{notfound_ok = encode_bool(NFOK)});
+encode_bucket_props([{backend, B}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{backend = to_binary(B)});
+encode_bucket_props([{search, S}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{search = encode_bool(S)});
+encode_bucket_props([{repl, Atom}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{repl = Atom});
+encode_bucket_props([_Ignore|Rest], Pb) ->
+    %% Ignore any properties not explicitly part of the PB message
+    encode_bucket_props(Rest, Pb).
+
+%% @doc Converts a module-function specification into a RpbModFun message.
+-spec encode_modfun(modfun_property()) -> #rpbmodfun{}.
+encode_modfun({struct, Props}) ->
+    {<<"mod">>, Mod} = lists:keyfind(<<"mod">>, 1, Props),
+    {<<"fun">>, Fun} = lists:keyfind(<<"fun">>, 1, Props),
+    encode_modfun({Mod, Fun});
+encode_modfun({modfun, M, F}) ->
+    encode_modfun({M, F});
+encode_modfun({M, F}) ->
+    #rpbmodfun{module=to_binary(M), function=to_binary(F)}.
+
+%% @doc Converts an RpbModFun message into the appropriate format for
+%% the given property.
+-spec decode_modfun(#rpbmodfun{}, atom()) -> modfun_property().
+decode_modfun(MF, linkfun) ->
+    {M,F} = decode_modfun(MF, undefined),
+    {modfun, M, F};
+decode_modfun(#rpbmodfun{module=Mod, function=Fun}, commit_hook) ->
+    {struct, [{<<"mod">>, Mod}, {<<"fun">>, Fun}]};
+decode_modfun(#rpbmodfun{module=Mod, function=Fun}=MF, _Prop) ->
+    try
+        {binary_to_existing_atom(Mod, latin1), binary_to_existing_atom(Fun, latin1)}
+    catch
+        error:badarg ->
+            error_logger:warning_msg("Creating new atoms from protobuffs message! ~p", [MF]),
+            {binary_to_atom(Mod, latin1), binary_to_atom(Fun, latin1)}
+    end.
+
+%% @doc Converts a list of commit hooks into a list of RpbCommitHook
+%% messages.
+-spec encode_commit_hooks([commit_hook_property()]) -> [ #rpbcommithook{} ].
+encode_commit_hooks(Hooks) ->
+    [ encode_commit_hook(Hook) || Hook <- Hooks ].
+
+encode_commit_hook({struct, Props}=Hook) ->
+    FoundProps = [ lists:keymember(Field, 1, Props) ||
+                     Field <- [<<"mod">>, <<"fun">>, <<"name">>]],
+    case FoundProps of
+        [true, true, _] ->
+            #rpbcommithook{modfun=encode_modfun(Hook)};
+        [false, false, true] ->
+            {<<"name">>, Name} = lists:keyfind(<<"name">>, 1, Props),
+            #rpbcommithook{name=to_binary(Name)};
+        _ ->
+            erlang:error(badarg, [Hook])
+    end.
+
+%% @doc Converts a list of RpbCommitHook messages into commit hooks.
+-spec decode_commit_hooks([ #rpbcommithook{} ]) -> [ commit_hook_property() ].
+decode_commit_hooks(Hooks) ->
+    [ decode_commit_hook(Hook) || Hook <- Hooks,
+                                  Hook =/= #rpbcommithook{modfun=undefined, name=undefined} ].
+
+decode_commit_hook(#rpbcommithook{modfun = Modfun}) when Modfun =/= undefined ->
+    decode_modfun(Modfun, commit_hook);
+decode_commit_hook(#rpbcommithook{name = Name}) when Name =/= undefined ->
+    {struct, [{<<"name">>, Name}]}.
