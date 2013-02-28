@@ -51,7 +51,8 @@ single request. The response message will typically include a boolean
 
     RpbGetServerInfoReq -> RpbGetServerInfoResp
     RpbPingReq -> RpbPingResp
-
+    RpbGetBucketReq -> RpbErrorResp | RpbGetBucketResp
+    RpbPutBucketReq -> RpbErrorResp | RpbPutBucketResp
 
 ### Riak KV Request/Response messages
 
@@ -62,7 +63,6 @@ single request. The response message will typically include a boolean
     RpbDelReq -> RpbErrorResp | RpbDelResp
     RpbListBucketsReq -> RpbErrorResp | RpbListBucketsResp
     RpbListKeysReq -> RpbErrorResp | RpbListKeysResp{1,}
-    RpbGetBucketReq -> RpbErrorResp | RpbGetBucketResp
     RpbMapRedReq -> RpbMapRedResp{1,}
     RpbIndexReq -> RpbIndexResp
 
