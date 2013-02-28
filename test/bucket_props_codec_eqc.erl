@@ -108,7 +108,7 @@ backend() ->
     ?LET(B, non_empty(binary()), {backend, B}).
 
 repl() ->
-    ?LET(R, oneof([off, realtime, fullsync, both]), {repl, R}).
+    ?LET(R, oneof([false, realtime, fullsync, true]), {repl, R}).
 
 commit(Prop) ->
     ?LET(C, non_empty(list(commit_hook())), {Prop, C}).
