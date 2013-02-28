@@ -115,10 +115,10 @@ message RpbBucketProps {
 
     // Used by riak_repl bucket fixup
     enum RpbReplMode {
-        off = 0;
+        false = 0;
         realtime = 1;
         fullsync = 2;
-        both = 3;
+        true = 3;
     }
     optional RpbReplMode repl = 22;
 }

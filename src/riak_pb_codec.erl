@@ -329,7 +329,7 @@ encode_bucket_props([{backend, B}|Rest], Pb) ->
 encode_bucket_props([{search, S}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{search = encode_bool(S)});
 encode_bucket_props([{repl, Atom}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{repl = Atom});
+    encode_bucket_props(Rest, Pb#rpbbucketprops{repl = encode_repl(Atom)});
 encode_bucket_props([_Ignore|Rest], Pb) ->
     %% Ignore any properties not explicitly part of the PB message
     encode_bucket_props(Rest, Pb).
@@ -391,3 +391,6 @@ decode_commit_hook(#rpbcommithook{modfun = Modfun}) when Modfun =/= undefined ->
     decode_modfun(Modfun, commit_hook);
 decode_commit_hook(#rpbcommithook{name = Name}) when Name =/= undefined ->
     {struct, [{<<"name">>, Name}]}.
+
+encode_repl(both) -> true;
+encode_repl(A) -> A.
