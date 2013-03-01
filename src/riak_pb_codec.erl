@@ -396,5 +396,6 @@ decode_commit_hook(#rpbcommithook{modfun = Modfun}) when Modfun =/= undefined ->
 decode_commit_hook(#rpbcommithook{name = Name}) when Name =/= undefined ->
     {struct, [{<<"name">>, Name}]}.
 
+encode_repl(Bin) when is_binary(Bin) -> binary_to_existing_atom(Bin, latin1);
 encode_repl(both) -> true;
 encode_repl(A) -> A.

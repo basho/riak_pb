@@ -207,6 +207,7 @@ decode_link(#rpblink{bucket = B, key = K, tag = T}) ->
 %% @doc Encode a symbolic or numeric quorum value into a Protocol
 %% Buffers value
 -spec encode_quorum(symbolic_quorum() | non_neg_integer()) -> non_neg_integer().
+encode_quorum(Bin) when is_binary(Bin) -> encode_quorum(binary_to_existing_atom(Bin, latin1));
 encode_quorum(one) -> ?RIAKPB_RW_ONE;
 encode_quorum(quorum) -> ?RIAKPB_RW_QUORUM;
 encode_quorum(all) -> ?RIAKPB_RW_ALL;
