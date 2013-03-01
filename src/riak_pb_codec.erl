@@ -227,7 +227,9 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
                                     allow_mult=AM,
                                     last_write_wins=LWW,
                                     precommit=Pre,
+                                    has_precommit=HasPre,
                                     postcommit=Post,
+                                    has_postcommit=HasPost,
                                     chash_keyfun=Chash,
                                     linkfun=Link,
                                     old_vclock=Old,
@@ -256,8 +258,8 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
 
     %% Extract commit hooks
     [ {PrePostProp, decode_commit_hooks(CList)} ||
-        {PrePostProp, CList} <- [{precommit, Pre}, {postcommit, Post}],
-        CList /= [] ] ++
+        {PrePostProp, CList, Included} <- [{precommit, Pre, HasPre}, {postcommit, Post, HasPost}],
+        Included == true ] ++
 
     %% Extract modfuns
     [ {MFProp, decode_modfun(MF, MFProp)} || {MFProp, MF} <- [{chash_keyfun, Chash},
@@ -293,9 +295,11 @@ encode_bucket_props([{allow_mult, Flag} | Rest], Pb) ->
 encode_bucket_props([{last_write_wins, LWW}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{last_write_wins = encode_bool(LWW)});
 encode_bucket_props([{precommit, Precommit}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{precommit = encode_commit_hooks(Precommit)});
+    encode_bucket_props(Rest, Pb#rpbbucketprops{precommit = encode_commit_hooks(Precommit),
+                                                has_precommit = true});
 encode_bucket_props([{postcommit, Postcommit}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{postcommit = encode_commit_hooks(Postcommit)});
+    encode_bucket_props(Rest, Pb#rpbbucketprops{postcommit = encode_commit_hooks(Postcommit),
+                                                has_postcommit = true});
 encode_bucket_props([{chash_keyfun, ModFun}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{chash_keyfun = encode_modfun(ModFun)});
 encode_bucket_props([{linkfun, ModFun}|Rest], Pb) ->
@@ -392,5 +396,6 @@ decode_commit_hook(#rpbcommithook{modfun = Modfun}) when Modfun =/= undefined ->
 decode_commit_hook(#rpbcommithook{name = Name}) when Name =/= undefined ->
     {struct, [{<<"name">>, Name}]}.
 
+encode_repl(Bin) when is_binary(Bin) -> binary_to_existing_atom(Bin, latin1);
 encode_repl(both) -> true;
 encode_repl(A) -> A.

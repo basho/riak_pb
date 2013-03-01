@@ -89,29 +89,31 @@ message RpbBucketProps {
     optional bool allow_mult = 2;
     optional bool last_write_wins = 3;
     repeated RpbCommitHook precommit = 4;
-    repeated RpbCommitHook postcommit = 5;
-    optional RpbModFun chash_keyfun = 6;
+    optional bool has_precommit = 5 [default = false];
+    repeated RpbCommitHook postcommit = 6;
+    optional bool has_postcommit = 7 [default = false];
+    optional RpbModFun chash_keyfun = 8;
 
     // Declared in riak_kv_app
-    optional RpbModFun linkfun = 7;
-    optional uint32 old_vclock = 8;
-    optional uint32 young_vclock = 9;
-    optional uint32 big_vclock = 10;
-    optional uint32 small_vclock = 11;
-    optional uint32 pr = 12;
-    optional uint32 r = 13;
-    optional uint32 w = 14;
-    optional uint32 pw = 15;
-    optional uint32 dw = 16;
-    optional uint32 rw = 17;
-    optional bool basic_quorum = 18;
-    optional bool notfound_ok = 19;
+    optional RpbModFun linkfun = 9;
+    optional uint32 old_vclock = 10;
+    optional uint32 young_vclock = 11;
+    optional uint32 big_vclock = 12;
+    optional uint32 small_vclock = 13;
+    optional uint32 pr = 14;
+    optional uint32 r = 15;
+    optional uint32 w = 16;
+    optional uint32 pw = 17;
+    optional uint32 dw = 18;
+    optional uint32 rw = 19;
+    optional bool basic_quorum = 20;
+    optional bool notfound_ok = 21;
 
     // Used by riak_kv_multi_backend
-    optional bytes backend = 20;
+    optional bytes backend = 22;
 
     // Used by riak_search bucket fixup
-    optional bool search = 21;
+    optional bool search = 23;
 
     // Used by riak_repl bucket fixup
     enum RpbReplMode {
@@ -120,5 +122,5 @@ message RpbBucketProps {
         fullsync = 2;
         true = 3;
     }
-    optional RpbReplMode repl = 22;
+    optional RpbReplMode repl = 24;
 }
