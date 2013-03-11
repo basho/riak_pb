@@ -151,11 +151,13 @@ message RpbIndexReq {
     optional bytes key = 4;
     optional bytes range_min = 5;
     optional bytes range_max = 6;
+    optional bool return_terms = 7;
 }
 
 // Secondary Index query response
 message RpbIndexResp {
     repeated bytes keys = 1;
+    repeated RpbPair results = 2;
 }
 
 // Content message included in get/put responses
