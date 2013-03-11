@@ -157,6 +157,7 @@ message RpbIndexReq {
 // Secondary Index query response
 message RpbIndexResp {
     repeated bytes keys = 1;
+    repeated RpbPair results = 2;
 }
 
 // Content message included in get/put responses
