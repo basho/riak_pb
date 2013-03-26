@@ -89,4 +89,4 @@ class build_proto(Command):
     if result is not None and result[1] is not 0:
       raise SystemError("protoc command failed: '%s'" % protoc_command.join(' '))
 
-setup(packages=['riak_pb'], cmdclass={'build_proto': build_proto, 'clean': clean_proto})
+setup(packages=['riak_pb'], cmdclass={'build_proto': build_proto, 'clean_proto': clean_proto})
