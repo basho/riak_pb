@@ -53,6 +53,7 @@ message RpbGetReq {
     optional bytes if_modified = 7;     // fail if the supplied vclock does not match
     optional bool head = 8;             // return everything but the value
     optional bool deletedvclock = 9;    // return the tombstone's vclock, if applicable
+    optional uint32 timeout = 10;
 }
 
 // Get Response - if the record was not found there will be no content/vclock
@@ -77,6 +78,7 @@ message RpbPutReq {
     optional bool if_not_modified = 9;
     optional bool if_none_match = 10;
     optional bool return_head = 11;
+    optional uint32 timeout = 12;
 }
 
 // Put response - same as get response with optional key if one was generated
@@ -98,6 +100,7 @@ message RpbDelReq {
     optional uint32 pr = 7;
     optional uint32 pw = 8;
     optional uint32 dw = 9;
+    optional uint32 timeout = 10;
 }
 
 // Delete response - not defined, will return a RpbDelResp on success or RpbErrorResp on failure
