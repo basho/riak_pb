@@ -207,30 +207,6 @@ message RpbCounterGetReq {
     optional bool notfound_ok = 6;
 }
 
-
-// Counter update request
-message RpbCounterUpdateReq {
-    required bytes bucket = 1;
-    required bytes key = 2;
-    required sint64 amount = 3;
-    optional uint32 w = 4;
-    optional uint32 dw = 5;
-    optional uint32 pw = 6;
-}
-
-// Counter update response? No message | error response
-message RpbCounterUpdateResp {}
-
-// counter value
-message RpbCounterGetReq {
-    required bytes bucket = 1;
-    required bytes key = 2;
-    optional uint32 r = 3;
-    optional uint32 pr = 4;
-    optional bool basic_quorum = 5;
-    optional bool notfound_ok = 6;
-}
-
 // Counter value response
 message RpbCounterGetResp {
     optional sint64 value = 1;
