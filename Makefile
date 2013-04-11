@@ -31,11 +31,12 @@ erl_test: erl_compile
 # Python specific build steps
 python_compile:
 	@echo "==> Python (compile)"
+	@./proto_cmd.py build_proto
 	@./setup.py build
 
 python_clean:
 	@echo "==> Python (clean)"
-	@./setup.py clean
+	@./proto_cmd.py clean_proto
 
 python_release: python_compile
 	@echo "==> Python (release)"

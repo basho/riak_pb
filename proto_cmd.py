@@ -1,8 +1,11 @@
+#!/usr/bin/env python
+
 from distutils.spawn import find_executable
 from distutils.command.build import build
 from distutils.command.clean import clean
 from distutils.cmd import Command
 from distutils import log
+from distutils.core import setup
 import sys
 import os
 
@@ -86,5 +89,4 @@ class build_proto(Command):
     if result is not None and result[1] is not 0:
       raise SystemError("protoc command failed: '%s'" % protoc_command.join(' '))
 
-# Inject our .proto compiler into the front of the build commands
-build.sub_commands.insert(0, ('build_proto', None))
+setup(packages=['riak_pb'], cmdclass={'build_proto': build_proto, 'clean_proto': clean_proto})
