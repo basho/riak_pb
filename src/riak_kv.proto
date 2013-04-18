@@ -79,6 +79,7 @@ message RpbPutReq {
     optional bool if_none_match = 10;
     optional bool return_head = 11;
     optional uint32 timeout = 12;
+    optional bool asis = 13;
 }
 
 // Put response - same as get response with optional key if one was generated
@@ -106,16 +107,22 @@ message RpbDelReq {
 // Delete response - not defined, will return a RpbDelResp on success or RpbErrorResp on failure
 
 // List buckets request - no message defined, just send RpbListBucketsReq
+message RpbListBucketsReq {
+    optional uint32 timeout = 1;
+}
 
-// List buckets response
+// List buckets response - one or more of these packets will be sent
+// the last one will have done set true (and may not have any buckets in it)
 message RpbListBucketsResp {
     repeated bytes buckets = 1;
+    optional bool done = 2;
 }
 
 
 // List keys in bucket request
 message RpbListKeysReq {
     required bytes bucket = 1;
+    optional uint32 timeout = 2;
 }
 
 // List keys in bucket response - one or more of these packets will be sent
