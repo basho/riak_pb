@@ -19,7 +19,5 @@ setup(name='riak_pb',
       classifiers=['License :: OSI Approved :: Apache Software License',
                    'Intended Audience :: Developers',
                    'Operating System :: OS Independent',
-                   'Topic :: Database'],
-      cmdclass={'build_proto': build_proto,
-                'clean': clean_proto}
+                   'Topic :: Database']
       )
