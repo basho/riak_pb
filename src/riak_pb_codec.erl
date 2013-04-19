@@ -117,6 +117,8 @@ msg_type(25) -> rpbindexreq;
 msg_type(26) -> rpbindexresp;
 msg_type(27) -> rpbsearchqueryreq;
 msg_type(28) -> rpbsearchqueryresp;
+msg_type(29) -> rpbresetbucketreq;
+msg_type(30) -> rpbresetbucketresp;
 msg_type(_) -> undefined.
 
 %% @doc Converts a symbolic message name into a message code. Replaces
@@ -150,12 +152,15 @@ msg_code(rpbmapredresp)          -> 24;
 msg_code(rpbindexreq)            -> 25;
 msg_code(rpbindexresp)           -> 26;
 msg_code(rpbsearchqueryreq)      -> 27;
-msg_code(rpbsearchqueryresp)     -> 28.
+msg_code(rpbsearchqueryresp)     -> 28;
+msg_code(rpbresetbucketreq)      -> 29;
+msg_code(rpbresetbucketresp)     -> 30.
 
 %% @doc Selects the appropriate PB decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
 decoder_for(N) when N >= 0, N < 3;
-                    N == 7; N == 8 ->
+                    N == 7; N == 8;
+                    N == 29; N == 30 ->
     riak_pb;
 decoder_for(N) when N >= 3, N < 7;
                     N >= 9, N =< 26->
