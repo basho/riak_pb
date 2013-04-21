@@ -280,7 +280,7 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
         Q /= undefined ] ++
 
     %% Extract repl prop
-    [ {repl, Repl} || Repl /= undefined ].
+    [ {repl, decode_repl(Repl)} || Repl /= undefined ].
 
 
 %% @doc Convert a property list to an RpbBucketProps message
@@ -401,6 +401,14 @@ decode_commit_hook(#rpbcommithook{modfun = Modfun}) when Modfun =/= undefined ->
 decode_commit_hook(#rpbcommithook{name = Name}) when Name =/= undefined ->
     {struct, [{<<"name">>, Name}]}.
 
-encode_repl(Bin) when is_binary(Bin) -> binary_to_existing_atom(Bin, latin1);
-encode_repl(both) -> true;
-encode_repl(A) -> A.
+encode_repl(Bin) when is_binary(Bin) -> encode_repl(binary_to_existing_atom(Bin, latin1));
+encode_repl(both) -> 'TRUE';
+encode_repl(true) -> 'TRUE';
+encode_repl(false) -> 'FALSE';
+encode_repl(realtime) -> 'REALTIME';
+encode_repl(fullsync) -> 'FULLSYNC'.
+
+decode_repl('TRUE') -> true;
+decode_repl('FALSE') -> false;
+decode_repl('REALTIME') -> realtime;
+decode_repl('FULLSYNC') -> fullsync.
