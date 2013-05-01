@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from setuptools import setup
-from proto_cmd import build_proto, clean_proto
 
 setup(name='riak_pb',
       version='1.2.1',
