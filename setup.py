@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from setuptools import setup
-from proto_cmd import build_proto, clean_proto
 
 setup(name='riak_pb',
       version='1.2.1',
@@ -19,7 +18,5 @@ setup(name='riak_pb',
       classifiers=['License :: OSI Approved :: Apache Software License',
                    'Intended Audience :: Developers',
                    'Operating System :: OS Independent',
-                   'Topic :: Database'],
-      cmdclass={'build_proto': build_proto,
-                'clean': clean_proto}
+                   'Topic :: Database']
       )
