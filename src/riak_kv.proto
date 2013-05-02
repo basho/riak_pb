@@ -168,6 +168,30 @@ message RpbIndexResp {
     optional bool done = 4;
 }
 
+// added solely for riak_cs currently
+// for folding over a bucket and returning
+// objects.
+message RpbCSBucketReq {
+    required bytes bucket = 1;
+    required bytes start_key = 2;
+    optional bytes end_key = 3;
+    optional bool start_incl = 4 [default = true];
+    optional bytes continuation = 5;
+    optional uint32 max_results = 6;
+}
+
+// return for CS bucket fold
+message RpbCSBucketResp {
+    repeated RpbIndexObject objects = 1;
+    optional bytes continuation = 2;
+    optional bool done = 3;
+}
+
+message RpbIndexObject {
+    required bytes key = 1;
+    required RpbGetResp object = 2;
+}
+
 // Content message included in get/put responses
 // Holds the value and associated metadata
 message RpbContent {
