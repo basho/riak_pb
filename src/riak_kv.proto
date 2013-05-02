@@ -151,14 +151,21 @@ message RpbIndexReq {
     required bytes bucket = 1;
     required bytes index = 2;
     required IndexQueryType qtype = 3;
-    optional bytes key = 4;
+    optional bytes key = 4; // key here means equals value for index?
     optional bytes range_min = 5;
     optional bytes range_max = 6;
+    optional bool return_terms = 7;
+    optional bool stream = 9;
+    optional uint32 max_results = 10;
+    optional bytes continuation = 11;
 }
 
 // Secondary Index query response
 message RpbIndexResp {
     repeated bytes keys = 1;
+    repeated RpbPair results = 2;
+    optional bytes continuation = 3;
+    optional bool done = 4;
 }
 
 // Content message included in get/put responses

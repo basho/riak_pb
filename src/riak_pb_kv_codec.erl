@@ -39,6 +39,7 @@
          encode_content_meta/3, %% riakc_pb:pbify_rpbcontent_entry
          decode_content_meta/3,
          encode_pair/1,         %% riakc_pb:pbify_rpbpair
+         encode_index_pair/1,
          decode_pair/1,         %% riakc_pb:erlify_rpbpair
          encode_link/1,         %% riakc_pb:pbify_rpblink
          decode_link/1,         %% riakc_pb:erlify_rpblink
