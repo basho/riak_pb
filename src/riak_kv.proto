@@ -176,8 +176,9 @@ message RpbCSBucketReq {
     required bytes start_key = 2;
     optional bytes end_key = 3;
     optional bool start_incl = 4 [default = true];
-    optional bytes continuation = 5;
-    optional uint32 max_results = 6;
+    optional bool end_incl = 5 [default = false];
+    optional bytes continuation = 6;
+    optional uint32 max_results = 7;
 }
 
 // return for CS bucket fold

@@ -167,7 +167,9 @@ decoder_for(N) when N >= 0, N < 3;
                     N == 29; N == 30 ->
     riak_pb;
 decoder_for(N) when N >= 3, N < 7;
-                    N >= 9, N =< 26->
+                    N >= 9, N =< 26;
+                    N == 40;
+                    N == 41 ->
     riak_kv_pb;
 decoder_for(N) when N >= 27, N =< 28 ->
     riak_search_pb.
