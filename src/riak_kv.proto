@@ -79,6 +79,7 @@ message RpbPutReq {
     optional bool if_none_match = 10;
     optional bool return_head = 11;
     optional uint32 timeout = 12;
+    optional bool asis = 13;
 }
 
 // Put response - same as get response with optional key if one was generated
