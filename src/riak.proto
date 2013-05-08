@@ -68,6 +68,14 @@ message RpbSetBucketReq {
 // Set bucket properties response - no message defined, just send
 // RpbSetBucketResp
 
+// Reset bucket properties request
+message RpbResetBucketReq {
+    required bytes bucket = 1;
+}
+
+// Reset bucket properties response - no message defined, just send
+// RpbResetBucketResp
+
 // Module-Function pairs for commit hooks and other bucket properties
 // that take functions
 message RpbModFun {
@@ -117,10 +125,10 @@ message RpbBucketProps {
 
     // Used by riak_repl bucket fixup
     enum RpbReplMode {
-        false = 0;
-        realtime = 1;
-        fullsync = 2;
-        true = 3;
+        FALSE = 0;
+        REALTIME = 1;
+        FULLSYNC = 2;
+        TRUE = 3;
     }
     optional RpbReplMode repl = 24;
 }
