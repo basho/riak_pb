@@ -117,10 +117,13 @@ msg_type(25) -> rpbindexreq;
 msg_type(26) -> rpbindexresp;
 msg_type(27) -> rpbsearchqueryreq;
 msg_type(28) -> rpbsearchqueryresp;
-msg_type(29) -> rpbcounterupdatereq;
-msg_type(30) -> rpbcounterupdateresp;
-msg_type(31) -> rpbcountergetreq;
-msg_type(32) -> rpbcountergetresp;
+msg_type(29) -> rpbresetbucketreq;
+msg_type(30) -> rpbresetbucketresp;
+msg_type(50) -> rpbcounterupdatereq;
+msg_type(51) -> rpbcounterupdateresp;
+msg_type(52) -> rpbcountergetreq;
+msg_type(53) -> rpbcountergetresp;
+
 msg_type(_) -> undefined.
 
 %% @doc Converts a symbolic message name into a message code. Replaces
@@ -155,19 +158,24 @@ msg_code(rpbindexreq)            -> 25;
 msg_code(rpbindexresp)           -> 26;
 msg_code(rpbsearchqueryreq)      -> 27;
 msg_code(rpbsearchqueryresp)     -> 28;
-msg_code(rpbcounterupdatereq)    -> 29;
-msg_code(rpbcounterupdateresp)   -> 30;
-msg_code(rpbcountergetreq)       -> 31;
-msg_code(rpbcountergetresp)      -> 32.
+msg_code(rpbresetbucketreq)      -> 29;
+msg_code(rpbresetbucketresp)     -> 30;
+msg_code(rpbcounterupdatereq)    -> 50;
+msg_code(rpbcounterupdateresp)   -> 51;
+msg_code(rpbcountergetreq)       -> 52;
+msg_code(rpbcountergetresp)      -> 53.
+
 
 %% @doc Selects the appropriate PB decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
 decoder_for(N) when N >= 0, N < 3;
-                    N == 7; N == 8 ->
+                    N == 7; N == 8;
+                    N == 29; N == 30 ->
     riak_pb;
 decoder_for(N) when N >= 3, N < 7;
                     N >= 9, N =< 26;
-                    N >= 29, N =< 32 ->
+                    N >= 29, N =< 32;
+                    N >= 50, N =< 53 ->
     riak_kv_pb;
 decoder_for(N) when N >= 27, N =< 28 ->
     riak_search_pb.
@@ -284,7 +292,7 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
         Q /= undefined ] ++
 
     %% Extract repl prop
-    [ {repl, Repl} || Repl /= undefined ].
+    [ {repl, decode_repl(Repl)} || Repl /= undefined ].
 
 
 %% @doc Convert a property list to an RpbBucketProps message
@@ -405,6 +413,14 @@ decode_commit_hook(#rpbcommithook{modfun = Modfun}) when Modfun =/= undefined ->
 decode_commit_hook(#rpbcommithook{name = Name}) when Name =/= undefined ->
     {struct, [{<<"name">>, Name}]}.
 
-encode_repl(Bin) when is_binary(Bin) -> binary_to_existing_atom(Bin, latin1);
-encode_repl(both) -> true;
-encode_repl(A) -> A.
+encode_repl(Bin) when is_binary(Bin) -> encode_repl(binary_to_existing_atom(Bin, latin1));
+encode_repl(both) -> 'TRUE';
+encode_repl(true) -> 'TRUE';
+encode_repl(false) -> 'FALSE';
+encode_repl(realtime) -> 'REALTIME';
+encode_repl(fullsync) -> 'FULLSYNC'.
+
+decode_repl('TRUE') -> true;
+decode_repl('FALSE') -> false;
+decode_repl('REALTIME') -> realtime;
+decode_repl('FULLSYNC') -> fullsync.
