@@ -54,6 +54,8 @@ message RpbGetReq {
     optional bool head = 8;             // return everything but the value
     optional bool deletedvclock = 9;    // return the tombstone's vclock, if applicable
     optional uint32 timeout = 10;
+    optional bool sloppy_quorum = 11;   // Experimental, may change/disappear
+    optional uint32 n_val = 12;         // Experimental, may change/disappear
 }
 
 // Get Response - if the record was not found there will be no content/vclock
@@ -79,6 +81,8 @@ message RpbPutReq {
     optional bool if_none_match = 10;
     optional bool return_head = 11;
     optional uint32 timeout = 12;
+    optional bool sloppy_quorum = 13; // Experimental, may change/disappear
+    optional uint32 n_val = 14;       // Experimental, may change/disappear
 }
 
 // Put response - same as get response with optional key if one was generated
@@ -101,6 +105,8 @@ message RpbDelReq {
     optional uint32 pw = 8;
     optional uint32 dw = 9;
     optional uint32 timeout = 10;
+    optional bool sloppy_quorum = 11; // Experimental, may change/disappear
+    optional uint32 n_val = 12;       // Experimental, may change/disappear
 }
 
 // Delete response - not defined, will return a RpbDelResp on success or RpbErrorResp on failure
