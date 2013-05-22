@@ -193,10 +193,13 @@ message RpbCounterUpdateReq {
     optional uint32 w = 4;
     optional uint32 dw = 5;
     optional uint32 pw = 6;
+    optional bool returnvalue = 7;
 }
 
 // Counter update response? No message | error response
-message RpbCounterUpdateResp {}
+message RpbCounterUpdateResp {
+        optional sint64 value = 1;
+}
 
 // counter value
 message RpbCounterGetReq {
