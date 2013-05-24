@@ -155,9 +155,9 @@ message RpbIndexReq {
     optional bytes range_min = 5;
     optional bytes range_max = 6;
     optional bool return_terms = 7;
-    optional bool stream = 9;
-    optional uint32 max_results = 10;
-    optional bytes continuation = 11;
+    optional bool stream = 8;
+    optional uint32 max_results = 9;
+    optional bytes continuation = 10;
 }
 
 // Secondary Index query response
