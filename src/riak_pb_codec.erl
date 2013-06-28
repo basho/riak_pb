@@ -139,6 +139,10 @@ msg_type(80) -> dtfetchreq;
 msg_type(81) -> dtfetchresp;
 msg_type(82) -> dtupdatereq;
 msg_type(83) -> dtupdateresp;
+%% internal message codes, grow downwards from 255
+msg_type(253) -> rpbauthreq;
+msg_type(254) -> rpbauthresp;
+msg_type(255) -> rpbstarttls;
 msg_type(_) -> undefined.
 
 %% @doc Converts a symbolic message name into a message code. Replaces
@@ -194,7 +198,11 @@ msg_code(rpbyokozunaschemaputreq)   -> 60;
 msg_code(dtfetchreq)             -> 80;
 msg_code(dtfetchresp)            -> 81;
 msg_code(dtupdatereq)            -> 82;
-msg_code(dtupdateresp)           -> 83.
+msg_code(dtupdateresp)           -> 83;
+%% internal message codes, grow downwards from 255
+msg_code(rpbauthreq)             -> 253;
+msg_code(rpbauthresp)            -> 254;
+msg_code(rpbstarttls)            -> 255.
 
 %% @doc Selects the appropriate PB decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
@@ -203,7 +211,7 @@ decoder_for(N) when N >= 0, N < 3;
                     (N >= 19 andalso N =< 22);
                     N == 29; N == 30;
                     N == 31; N == 32;
-                    N == 33 ->
+                    N == 33; N >= 253 ->
     riak_pb;
 decoder_for(N) when N >= 3, N < 7;
                     N >= 9, N =< 26;
