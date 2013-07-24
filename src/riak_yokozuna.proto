@@ -1,0 +1,61 @@
+/* -------------------------------------------------------------------
+**
+** riak_yokozuna.proto: Protocol buffers for Yokozuna
+**
+** Copyright (c) 2013 Basho Technologies, Inc.  All Rights Reserved.
+**
+** This file is provided to you under the Apache License,
+** Version 2.0 (the "License"); you may not use this file
+** except in compliance with the License.  You may obtain
+** a copy of the License at
+**
+**   http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing,
+** software distributed under the License is distributed on an
+** "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+** KIND, either express or implied.  See the License for the
+** specific language governing permissions and limitations
+** under the License.
+**
+** -------------------------------------------------------------------
+*/
+
+/*
+** Revision: 1.4
+*/
+
+import "riak.proto";
+
+// java package specifiers
+option java_package = "com.basho.riak.protobuf";
+option java_outer_classname = "RiakYokozunaPB";
+
+message RpbYokozunaIndex {
+  required bytes name   =  1;  // Index name
+  optional bytes schema =  2;  // Schema name
+}
+
+// GET request - If a name is given, return matching index, else return all
+message RpbYokozunaIndexGetReq {
+  optional bytes name  =  1;  // Index name
+}
+
+message RpbYokozunaIndexGetResp {
+  repeated RpbYokozunaIndex index  =  1;
+}
+
+// PUT request - Create a new index
+message RpbYokozunaIndexPutReq {
+  required RpbYokozunaIndex index  =  1;
+}
+
+// PUT response - not defined, will return a RpbPutResp on success or RpbErrorResp on failure
+
+// DELETE request - Remove an index
+message RpbYokozunaIndexDeleteReq {
+  required bytes name  =  1;  // Index name
+}
+
+// DELETE response - not defined, will return a RpbDelResp on success or RpbErrorResp on failure
+

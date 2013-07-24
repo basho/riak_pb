@@ -166,7 +166,11 @@ msg_code(rpbcsbucketresp)        -> 41;
 msg_code(rpbcounterupdatereq)    -> 50;
 msg_code(rpbcounterupdateresp)   -> 51;
 msg_code(rpbcountergetreq)       -> 52;
-msg_code(rpbcountergetresp)      -> 53.
+msg_code(rpbcountergetresp)      -> 53;
+msg_code(rpbyokozunaindexgetreq)    -> 54;
+msg_code(rpbyokozunaindexgetresp)   -> 55;
+msg_code(rpbyokozunaindexputreq)    -> 56;
+msg_code(rpbyokozunaindexdeletereq) -> 57.
 
 %% @doc Selects the appropriate PB decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
