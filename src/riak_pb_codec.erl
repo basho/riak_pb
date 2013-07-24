@@ -125,6 +125,13 @@ msg_type(50) -> rpbcounterupdatereq;
 msg_type(51) -> rpbcounterupdateresp;
 msg_type(52) -> rpbcountergetreq;
 msg_type(53) -> rpbcountergetresp;
+msg_type(54) -> rpbyokozunaindexgetreq;
+msg_type(55) -> rpbyokozunaindexgetresp;
+msg_type(56) -> rpbyokozunaindexputreq;
+msg_type(57) -> rpbyokozunaindexdeletereq;
+msg_type(58) -> rpbyokozunaschemagetreq;
+msg_type(59) -> rpbyokozunaschemagetresp;
+msg_type(60) -> rpbyokozunaschemaputreq;
 msg_type(_) -> undefined.
 
 %% @doc Converts a symbolic message name into a message code. Replaces
@@ -170,7 +177,10 @@ msg_code(rpbcountergetresp)      -> 53;
 msg_code(rpbyokozunaindexgetreq)    -> 54;
 msg_code(rpbyokozunaindexgetresp)   -> 55;
 msg_code(rpbyokozunaindexputreq)    -> 56;
-msg_code(rpbyokozunaindexdeletereq) -> 57.
+msg_code(rpbyokozunaindexdeletereq) -> 57;
+msg_code(rpbyokozunaschemagetreq)   -> 58;
+msg_code(rpbyokozunaschemagetresp)  -> 59;
+msg_code(rpbyokozunaschemaputreq)   -> 60.
 
 %% @doc Selects the appropriate PB decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
@@ -185,7 +195,9 @@ decoder_for(N) when N >= 3, N < 7;
                     N >= 50, N =< 53 ->
     riak_kv_pb;
 decoder_for(N) when N >= 27, N =< 28 ->
-    riak_search_pb.
+    riak_search_pb;
+decoder_for(N) when N >= 54, N =< 60 ->
+    riak_yokozuna_pb.
 
 %% @doc Selects the appropriate PB encoder for a given message name.
 -spec encoder_for(atom()) -> module().
