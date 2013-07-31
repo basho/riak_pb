@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='riak_pb',
-      version='1.4.0.7',
+      version='1.4.1.1',
       description='Riak Protocol Buffers Messages',
       packages=['riak_pb'],
       requires=['protobuf(==2.4.1)'],
