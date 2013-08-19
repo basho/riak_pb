@@ -119,6 +119,9 @@ msg_type(27) -> rpbsearchqueryreq;
 msg_type(28) -> rpbsearchqueryresp;
 msg_type(29) -> rpbresetbucketreq;
 msg_type(30) -> rpbresetbucketresp;
+msg_type(31) -> rpbgetbuckettypereq;
+msg_type(32) -> rpbsetbuckettypereq;
+msg_type(33) -> rpbresetbuckettypereq;
 msg_type(40) -> rpbcsbucketreq;
 msg_type(41) -> rpbcsbucketresp;
 msg_type(50) -> rpbcounterupdatereq;
@@ -161,6 +164,9 @@ msg_code(rpbsearchqueryreq)      -> 27;
 msg_code(rpbsearchqueryresp)     -> 28;
 msg_code(rpbresetbucketreq)      -> 29;
 msg_code(rpbresetbucketresp)     -> 30;
+msg_code(rpbsetbuckettypereq)    -> 31;
+msg_code(rpbresetbuckettypereq)  -> 32;
+msg_code(rpbgetbuckettypereq)    -> 33;
 msg_code(rpbcsbucketreq)         -> 40;
 msg_code(rpbcsbucketresp)        -> 41;
 msg_code(rpbcounterupdatereq)    -> 50;
@@ -172,7 +178,10 @@ msg_code(rpbcountergetresp)      -> 53.
 -spec decoder_for(pos_integer()) -> module().
 decoder_for(N) when N >= 0, N < 3;
                     N == 7; N == 8;
-                    N == 29; N == 30 ->
+                    (N >= 19 andalso N =< 22);
+                    N == 29; N == 30,
+                    N == 30; N == 31;
+                    N == 32 ->
     riak_pb;
 decoder_for(N) when N >= 3, N < 7;
                     N >= 9, N =< 26;
