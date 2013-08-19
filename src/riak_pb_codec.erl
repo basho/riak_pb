@@ -164,9 +164,9 @@ msg_code(rpbsearchqueryreq)      -> 27;
 msg_code(rpbsearchqueryresp)     -> 28;
 msg_code(rpbresetbucketreq)      -> 29;
 msg_code(rpbresetbucketresp)     -> 30;
-msg_code(rpbsetbuckettypereq)    -> 31;
-msg_code(rpbresetbuckettypereq)  -> 32;
-msg_code(rpbgetbuckettypereq)    -> 33;
+msg_code(rpbgetbuckettypereq)    -> 31;
+msg_code(rpbsetbuckettypereq)    -> 32;
+msg_code(rpbresetbuckettypereq)  -> 33;
 msg_code(rpbcsbucketreq)         -> 40;
 msg_code(rpbcsbucketresp)        -> 41;
 msg_code(rpbcounterupdatereq)    -> 50;
@@ -180,8 +180,8 @@ decoder_for(N) when N >= 0, N < 3;
                     N == 7; N == 8;
                     (N >= 19 andalso N =< 22);
                     N == 29; N == 30,
-                    N == 30; N == 31;
-                    N == 32 ->
+                    N == 31; N == 32;
+                    N == 33 ->
     riak_pb;
 decoder_for(N) when N >= 3, N < 7;
                     N >= 9, N =< 26;
