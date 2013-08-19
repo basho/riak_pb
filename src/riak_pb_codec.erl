@@ -179,7 +179,7 @@ msg_code(rpbcountergetresp)      -> 53.
 decoder_for(N) when N >= 0, N < 3;
                     N == 7; N == 8;
                     (N >= 19 andalso N =< 22);
-                    N == 29; N == 30,
+                    N == 29; N == 30;
                     N == 31; N == 32;
                     N == 33 ->
     riak_pb;
