@@ -29,7 +29,7 @@
 option java_package = "com.basho.riak.protobuf";
 option java_outer_classname = "RiakDtPB";
 
-/* 
+/*
  * =============== DATA STRUCTURES =================
  */
 
@@ -68,7 +68,7 @@ message MapEntry {
     optional bool     flag_value     = 5;
 }
 
-/* 
+/*
  * =============== FETCH =================
  */
 
@@ -77,11 +77,11 @@ message MapEntry {
  * request-time options are limited to ones that are relevant to
  * structured data-types.
  */
-message Fetch {
-    // The identifier: bucket, key and optional bucket-type
+message DtFetch {
+    // The identifier: bucket, key and bucket-type
     required bytes bucket = 1;
     required bytes key    = 2;
-    optional bytes btype  = 3;
+    required bytes type  = 3;
 
     // Request options
     optional uint32 r             =  4;
@@ -105,7 +105,7 @@ message Fetch {
  * send a vclock for KV updates. The `type` field indicates which
  * value field to expect.
  */
-message FetchResponse {
+message DtFetchResponse {
     enum DataType {
         COUNTER = 1;
         SET = 2;
@@ -121,17 +121,17 @@ message FetchResponse {
     repeated MapEntry map_value     = 5;
 }
 
-/* 
+/*
  * =============== UPDATE =================
  */
 
 /*
  * An operation to update a Counter, either on its own or inside a
- * Map. The `amount` field can be positive or negative. When absent,
+ * Map. The `increment` field can be positive or negative. When absent,
  * the meaning is an increment by 1.
  */
-message CounterIncrement {
-    optional sint64 amount = 1;
+message CounterOp {
+    optional sint64 increment = 1;
 }
 
 /*
@@ -139,7 +139,7 @@ message CounterIncrement {
  * Set members are opaque binary values, you can only add or remove
  * them from a Set.
  */
-message SetOperation {
+message SetOp {
     enum SetOpType {
         ADD = 1;
         REMOVE = 2;
@@ -154,32 +154,32 @@ message SetOperation {
  * contents of an UPDATE operation. The operation field that is
  * present depends on the type of the field to which it is applied.
  */
-message MapMemberOperation {
+message MapFieldOp {
     /*
      * Flags only exist inside Maps and can only be enabled or
      * disabled, and there are no arguments to the operations.
      */
-    enum FlagOperation {
+    enum FlagOp {
         ENABLE  = 1;
         DISABLE = 2;
     }
 
-    optional CounterIncrement counter_op  = 1;
-    optional SetOperation     set_op      = 2;
+    optional CounterOp counter_op  = 1;
+    optional SetOp     set_op      = 2;
 
-    /* 
+    /*
      * There is only one operation on a register, which is to set its
      * value, therefore the "operation" is the new value.
      */
-    optional bytes            register_op = 3; 
-    optional FlagOperation    flag_op     = 4;
+    optional bytes     register_op = 3;
+    optional FlagOp    flag_op     = 4;
 }
 
 /*
  * An operation to update a Map. All operations apply to individual
  * fields in the Map.
  */
-message MapOperation {
+message MapOp {
     /*
      * ADD creates a new, "empty" value under a field. REMOVE removes
      * a field and value from the Map. UPDATE applies type-specific
@@ -191,22 +191,22 @@ message MapOperation {
         UPDATE = 3;
     }
 
-    required MapOpType          op        = 1;
-    required MapField           field     = 2;
+    required MapOpType   op        = 1;
+    required MapField    field     = 2;
     /*
      * Field operations are only relevant to UPDATE.
      */
-    repeated MapMemberOperation field_ops = 3;
+    repeated MapFieldOp field_ops = 3;
 }
 
 /*
  * A "union" type for update operations. The included operation
  * depends on the datatype being updated.
  */
-message Operation {
-    optional CounterIncrement counter_op = 1;
-    optional SetOperation     set_op     = 2;
-    optional MapOperation     map_op     = 3;
+message DtOperation {
+    optional CounterOp counter_op = 1;
+    optional SetOp     set_op     = 2;
+    optional MapOp     map_op     = 3;
 }
 
 /*
@@ -215,17 +215,17 @@ message Operation {
  * options are limited to ones that are relevant to structured
  * data-types.
  */
-message Update {
+message DtUpdate {
     // The identifier
     required bytes bucket = 1;
-    required bytes key    = 2;
-    optional bytes btype  = 3;
+    optional bytes key    = 2; // missing key results in server-assigned key, like KV
+    required bytes type  = 3; // bucket type, not data-type (but the data-type is constrained per bucket-type)
 
     // Opaque update-context
     optional bytes context = 4;
 
     // The operations
-    repeated Operation ops = 5;
+    repeated DtOperation ops = 5;
 
     // Request options
     optional uint32 w             =  6;
@@ -236,4 +236,3 @@ message Update {
     optional bool   sloppy_quorum = 11;  // Experimental, may change/disappear
     optional uint32 n_val         = 12;  // Experimental, may change/disappear
 }
-
