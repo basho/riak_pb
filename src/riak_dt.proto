@@ -146,7 +146,7 @@ message SetOp {
     }
 
     required SetOpType op     = 1;
-    required bytes     member = 2;
+    repeated bytes     member = 2;
 }
 
 /*
@@ -191,12 +191,17 @@ message MapOp {
         UPDATE = 3;
     }
 
-    required MapOpType   op        = 1;
-    required MapField    field     = 2;
+    required MapOpType   op = 1;
     /*
-     * Field operations are only relevant to UPDATE.
+     * ADD/REMOVE can operate on multiple fields in a single message,
+     * since they do not require operations specific to the type.
      */
-    repeated MapFieldOp field_ops = 3;
+    repeated MapField   add_remove_fields = 2;
+    /*
+     * Per-field operations are only relevant to UPDATE.
+     */
+    optional MapField   update_field = 3;
+    repeated MapFieldOp field_ops    = 4;
 }
 
 /*
