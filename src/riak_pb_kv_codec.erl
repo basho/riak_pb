@@ -30,8 +30,6 @@
 -include("riak_kv_pb.hrl").
 -include("riak_pb_kv_codec.hrl").
 
--import(riak_pb_codec, [to_list/1, decode_bool/1, encode_bool/1]).
-
 -export([encode_contents/1,     %% riakc_pb:pbify_rpbcontents
          decode_contents/1,     %% riakc_pb:erlify_rpbcontents
          encode_content/1,      %% riakc_pb:pbify_rpbcontent
@@ -47,6 +45,8 @@
          decode_quorum/1        %% riak_kv_pb_socket:normalize_rw_value
         ]).
 
+-export_type([quorum/0]).
+-type quorum() :: symbolic_quorum() | non_neg_integer().
 -type symbolic_quorum() :: one | quorum | all | default.
 -type value() :: binary().
 -type metadata() :: dict().
@@ -207,7 +207,7 @@ decode_link(#rpblink{bucket = B, key = K, tag = T}) ->
 
 %% @doc Encode a symbolic or numeric quorum value into a Protocol
 %% Buffers value
--spec encode_quorum(symbolic_quorum() | non_neg_integer()) -> non_neg_integer().
+-spec encode_quorum(quorum()) -> non_neg_integer().
 encode_quorum(Bin) when is_binary(Bin) -> encode_quorum(binary_to_existing_atom(Bin, latin1));
 encode_quorum(one) -> ?RIAKPB_RW_ONE;
 encode_quorum(quorum) -> ?RIAKPB_RW_QUORUM;
@@ -218,7 +218,7 @@ encode_quorum(I) when is_integer(I), I >= 0 -> I.
 
 %% @doc Decodes a Protocol Buffers value into a symbolic or numeric
 %% quorum.
--spec decode_quorum(non_neg_integer()) -> symbolic_quorum() | non_neg_integer().
+-spec decode_quorum(non_neg_integer()) -> quorum().
 decode_quorum(?RIAKPB_RW_ONE) -> one;
 decode_quorum(?RIAKPB_RW_QUORUM) -> quorum;
 decode_quorum(?RIAKPB_RW_ALL) -> all;
