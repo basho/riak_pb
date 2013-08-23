@@ -278,8 +278,8 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
                                     notfound_ok=NFOK,
                                     backend=Backend,
                                     search=Search,
-                                    repl=Repl
-
+                                    repl=Repl,
+                                    yz_index=Index
                                    }) ->
     %% Extract numerical properties
     [ {P,V} || {P,V} <- [ {n_val, N}, {old_vclock, Old}, {young_vclock, Young},
@@ -311,7 +311,11 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
         Q /= undefined ] ++
 
     %% Extract repl prop
-    [ {repl, decode_repl(Repl)} || Repl /= undefined ].
+    [ {repl, decode_repl(Repl)} || Repl /= undefined ] ++
+
+    %% Yokozuna index
+    [ {yz_index, Index} || is_binary(Index) ].
+
 
 
 %% @doc Convert a property list to an RpbBucketProps message
@@ -370,6 +374,8 @@ encode_bucket_props([{search, S}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{search = encode_bool(S)});
 encode_bucket_props([{repl, Atom}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{repl = encode_repl(Atom)});
+encode_bucket_props([{yz_index, B}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{yz_index = to_binary(B)});
 encode_bucket_props([_Ignore|Rest], Pb) ->
     %% Ignore any properties not explicitly part of the PB message
     encode_bucket_props(Rest, Pb).
