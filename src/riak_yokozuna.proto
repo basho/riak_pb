@@ -34,51 +34,44 @@ option java_outer_classname = "RiakYokozunaPB";
 // Index queries
 
 message RpbYokozunaIndex {
-  required bytes name   =  1;  // Index name
-  optional bytes schema =  2;  // Schema name
+    required bytes name   =  1;  // Index name
+    optional bytes schema =  2;  // Schema name
 }
 
 // GET request - If a name is given, return matching index, else return all
 message RpbYokozunaIndexGetReq {
-  optional bytes name  =  1;  // Index name
+    optional bytes name  =  1;  // Index name
 }
 
 message RpbYokozunaIndexGetResp {
-  repeated RpbYokozunaIndex index  =  1;
+    repeated RpbYokozunaIndex index  =  1;
 }
 
 // PUT request - Create a new index
 message RpbYokozunaIndexPutReq {
-  required RpbYokozunaIndex index  =  1;
+    required RpbYokozunaIndex index  =  1;
 }
-
-// PUT response - not defined, will return a RpbPutResp on success or RpbErrorResp on failure
 
 // DELETE request - Remove an index
 message RpbYokozunaIndexDeleteReq {
-  required bytes name  =  1;  // Index name
+    required bytes name  =  1;  // Index name
 }
-
-// DELETE response - not defined, will return a RpbDelResp on success or RpbErrorResp on failure
-
 
 // Schema queries
 
 message RpbYokozunaSchema {
-  required bytes name    =  1;  // Index name
-  optional bytes content =  2;  // Schema data
+    required bytes name    =  1;  // Index name
+    optional bytes content =  2;  // Schema data
 }
 
-// PUT request - create a new schema
+// PUT request - create or potentially update a new schema
 message RpbYokozunaSchemaPutReq {
-  required RpbYokozunaSchema schema =  1;
+    required RpbYokozunaSchema schema =  1;
 }
-
-// PUT response - not defined, will return a RpbPutResp on success or RpbErrorResp on failure
 
 // GET request - Return matching schema by name
 message RpbYokozunaSchemaGetReq {
-  required bytes name  =  1;  // Schema name
+    required bytes name  =  1;  // Schema name
 }
 
 message RpbYokozunaSchemaGetResp {
