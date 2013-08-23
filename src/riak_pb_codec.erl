@@ -135,10 +135,10 @@ msg_type(57) -> rpbyokozunaindexdeletereq;
 msg_type(58) -> rpbyokozunaschemagetreq;
 msg_type(59) -> rpbyokozunaschemagetresp;
 msg_type(60) -> rpbyokozunaschemaputreq;
-msg_type(80) -> dtfetch;
-msg_type(81) -> dtfetchresponse;
-msg_type(82) -> dtupdate;
-msg_type(83) -> dtupdateresponse;
+msg_type(80) -> dtfetchreq;
+msg_type(81) -> dtfetchresp;
+msg_type(82) -> dtupdatereq;
+msg_type(83) -> dtupdateresp;
 msg_type(_) -> undefined.
 
 %% @doc Converts a symbolic message name into a message code. Replaces
@@ -191,10 +191,10 @@ msg_code(rpbyokozunaindexdeletereq) -> 57;
 msg_code(rpbyokozunaschemagetreq)   -> 58;
 msg_code(rpbyokozunaschemagetresp)  -> 59;
 msg_code(rpbyokozunaschemaputreq)   -> 60;
-msg_code(dtfetch)                -> 80;
-msg_code(dtfetchresponse)        -> 81;
-msg_code(dtupdate)               -> 82;
-msg_code(dtupdateresponse)       -> 83.
+msg_code(dtfetchreq)             -> 80;
+msg_code(dtfetchresp)            -> 81;
+msg_code(dtupdatereq)            -> 82;
+msg_code(dtupdateresp)           -> 83.
 
 %% @doc Selects the appropriate PB decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().

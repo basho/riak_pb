@@ -112,101 +112,101 @@ encode_map_entry({{Name, flag=Type}, Value}) when is_boolean(Value) ->
 
 
 %% @doc Encodes a fetch request into a DtFetch message.
--spec encode_fetch_request({binary(), binary()}, binary()) -> #dtfetch{}.
+-spec encode_fetch_request({binary(), binary()}, binary()) -> #dtfetchreq{}.
 encode_fetch_request(BucketAndType, Key) ->
     encode_fetch_request(BucketAndType, Key, []).
 
--spec encode_fetch_request({binary(), binary()}, binary(), [fetch_opt()]) -> #dtfetch{}.
+-spec encode_fetch_request({binary(), binary()}, binary(), [fetch_opt()]) -> #dtfetchreq{}.
 encode_fetch_request({BType,Bucket}, Key, Options) ->
-    encode_fetch_options(#dtfetch{bucket=Bucket,key=Key,type=BType}, Options).
+    encode_fetch_options(#dtfetchreq{bucket=Bucket,key=Key,type=BType}, Options).
 
 %% @doc Encodes request-time fetch options onto the DtFetch message.
 %% @private
--spec encode_fetch_options(#dtfetch{}, [fetch_opt()]) -> #dtfetch{}.
+-spec encode_fetch_options(#dtfetchreq{}, [fetch_opt()]) -> #dtfetchreq{}.
 encode_fetch_options(Fetch, []) ->
     Fetch;
 encode_fetch_options(Fetch, [{r,R}|Tail]) ->
-    encode_fetch_options(Fetch#dtfetch{r=encode_quorum(R)},Tail);
+    encode_fetch_options(Fetch#dtfetchreq{r=encode_quorum(R)},Tail);
 encode_fetch_options(Fetch, [{pr,PR}|Tail]) ->
-    encode_fetch_options(Fetch#dtfetch{pr=encode_quorum(PR)},Tail);
+    encode_fetch_options(Fetch#dtfetchreq{pr=encode_quorum(PR)},Tail);
 encode_fetch_options(Fetch, [basic_quorum|Tail]) ->
     encode_fetch_options(Fetch, [{basic_quorum, true}|Tail]);
 encode_fetch_options(Fetch, [{basic_quorum, BQ}|Tail]) ->
-    encode_fetch_options(Fetch#dtfetch{basic_quorum=BQ},Tail);
+    encode_fetch_options(Fetch#dtfetchreq{basic_quorum=BQ},Tail);
 encode_fetch_options(Fetch, [notfound_ok|Tail]) ->
     encode_fetch_options(Fetch, [{notfound_ok, true}|Tail]);
 encode_fetch_options(Fetch, [{notfound_ok, NOK}|Tail]) ->
-    encode_fetch_options(Fetch#dtfetch{notfound_ok=NOK},Tail);
+    encode_fetch_options(Fetch#dtfetchreq{notfound_ok=NOK},Tail);
 encode_fetch_options(Fetch, [{timeout, TO}|Tail]) ->
-    encode_fetch_options(Fetch#dtfetch{timeout=TO},Tail);
+    encode_fetch_options(Fetch#dtfetchreq{timeout=TO},Tail);
 encode_fetch_options(Fetch, [sloppy_quorum|Tail]) ->
     encode_fetch_options(Fetch, [{sloppy_quorum, true}|Tail]);
 encode_fetch_options(Fetch, [{sloppy_quorum, RB}|Tail]) ->
-    encode_fetch_options(Fetch#dtfetch{sloppy_quorum=RB},Tail);
+    encode_fetch_options(Fetch#dtfetchreq{sloppy_quorum=RB},Tail);
 encode_fetch_options(Fetch, [{n_val, N}|Tail]) ->
-    encode_fetch_options(Fetch#dtfetch{n_val=N}, Tail);
+    encode_fetch_options(Fetch#dtfetchreq{n_val=N}, Tail);
 encode_fetch_options(Fetch, [include_context|Tail]) ->
     encode_fetch_options(Fetch, [{include_context, true}|Tail]);
 encode_fetch_options(Fetch, [{include_context, IC}|Tail]) ->
-    encode_fetch_options(Fetch#dtfetch{include_context=IC},Tail);
+    encode_fetch_options(Fetch#dtfetchreq{include_context=IC},Tail);
 encode_fetch_options(Fetch, [_|Tail]) ->
     encode_fetch_options(Fetch, Tail).
 
 %% @doc Decodes a FetchResponse into tuple of type, value and context.
--spec decode_fetch_response(#dtfetchresponse{}) -> {toplevel_type(), toplevel_value(), context()}.
-decode_fetch_response(#dtfetchresponse{context=Context, type='COUNTER', counter_value=Val}) ->
+-spec decode_fetch_response(#dtfetchresp{}) -> {toplevel_type(), toplevel_value(), context()}.
+decode_fetch_response(#dtfetchresp{context=Context, type='COUNTER', counter_value=Val}) ->
     {counter, Val, Context};
-decode_fetch_response(#dtfetchresponse{context=Context, type='SET', set_value=Val}) ->
+decode_fetch_response(#dtfetchresp{context=Context, type='SET', set_value=Val}) ->
     {set, Val, Context};
-decode_fetch_response(#dtfetchresponse{context=Context, type='MAP', map_value=Val}) ->
+decode_fetch_response(#dtfetchresp{context=Context, type='MAP', map_value=Val}) ->
     {map, [ decode_map_entry(Entry) || Entry <- Val ], Context}.
 
 %% @doc Encodes the result of a fetch request into a FetchResponse message.
--spec encode_fetch_response(toplevel_type(), toplevel_value(), context()) -> #dtfetchresponse{}.
+-spec encode_fetch_response(toplevel_type(), toplevel_value(), context()) -> #dtfetchresp{}.
 encode_fetch_response(Type, undefined, _Context) ->
     %% TODO: "Not found" may be undefined, or it may be the
     %% bottom-value of the type, but we need to send something back.
     %% There is also no "context" for a missing datatype, or its
     %% bottom-value.
-    #dtfetchresponse{type=encode_type(Type)};
+    #dtfetchresp{type=encode_type(Type)};
 encode_fetch_response(Type, Value, Context) ->
-    Response = #dtfetchresponse{context=Context, type=encode_type(Type)},
+    Response = #dtfetchresp{context=Context, type=encode_type(Type)},
     case Type of
         counter ->
-            Response#dtfetchresponse{counter_value=Value};
+            Response#dtfetchresp{counter_value=Value};
         set ->
-            Response#dtfetchresponse{set_value=Value};
+            Response#dtfetchresp{set_value=Value};
         map ->
-            Response#dtfetchresponse{map_value=[encode_map_entry(Entry) || Entry <- Value]}
+            Response#dtfetchresp{map_value=[encode_map_entry(Entry) || Entry <- Value]}
     end.
 
 %% @doc Decodes a DtOperation message into a datatype-specific operation.
--spec decode_operation(#dtoperation{}) -> toplevel_op().
-decode_operation(#dtoperation{counter_op=#counterop{}=Op}) ->
+-spec decode_operation(#dtop{}) -> toplevel_op().
+decode_operation(#dtop{counter_op=#counterop{}=Op}) ->
     decode_counter_op(Op);
-decode_operation(#dtoperation{set_op=#setop{}=Op}) ->
+decode_operation(#dtop{set_op=#setop{}=Op}) ->
     decode_set_op(Op);
-decode_operation(#dtoperation{map_op=#mapop{op='UPDATE', update_field=Field, field_ops=Ops}}) ->
+decode_operation(#dtop{map_op=#mapop{op='UPDATE', update_field=Field, field_ops=Ops}}) ->
     {_,FType} = DecodedField = decode_map_field(Field),
     {update, DecodedField, [decode_map_field_op(MOp, FType) || MOp <- Ops]};
-decode_operation(#dtoperation{map_op=#mapop{op=Op, add_remove_fields=Fields}}) ->
+decode_operation(#dtop{map_op=#mapop{op=Op, add_remove_fields=Fields}}) ->
     {decode_op_type(Op), [ decode_map_field(Field) || Field <- Fields ]}.
 
 %% @doc Encodes a datatype-specific operation into a DtOperation message.
--spec encode_operation(toplevel_op(), toplevel_type()) -> #dtoperation{}.
+-spec encode_operation(toplevel_op(), toplevel_type()) -> #dtop{}.
 encode_operation(Op, counter) ->
-    #dtoperation{counter_op=encode_counter_op(Op)};
+    #dtop{counter_op=encode_counter_op(Op)};
 encode_operation(Op, set) ->
-    #dtoperation{set_op=encode_set_op(Op)};
+    #dtop{set_op=encode_set_op(Op)};
 encode_operation({update, {_,Type}=Field, FieldOps}, map) ->
     MapOp = #mapop{
                op='UPDATE',
                update_field=encode_map_field(Field),
                field_ops=[ encode_map_field_op(Op,Type) || Op <- FieldOps ]
               },
-    #dtoperation{map_op=MapOp};
+    #dtop{map_op=MapOp};
 encode_operation({Op, Fields}, map) when add == Op orelse remove == Op ->
-    #dtoperation{map_op=#mapop{op=encode_op_type(Op),
+    #dtop{map_op=#mapop{op=encode_op_type(Op),
                                add_remove_fields=Fields}}.
 
 
@@ -295,13 +295,13 @@ encode_type(flag)     -> 'FLAG';
 encode_type(map)      -> 'MAP'.
 
 %% @doc Encodes an update request into a DtUpdate message.
--spec encode_update_request({binary(), binary()}, binary() | undefined, toplevel_type(), [toplevel_op()]) -> #dtupdate{}.
+-spec encode_update_request({binary(), binary()}, binary() | undefined, toplevel_type(), [toplevel_op()]) -> #dtupdatereq{}.
 encode_update_request({_,_}=BucketAndType, Key, Type, Ops) ->
     encode_update_request(BucketAndType, Key, Type, Ops, []).
 
--spec encode_update_request({binary(), binary()}, binary() | undefined, toplevel_type(), [toplevel_op()], [update_opt()]) -> #dtupdate{}.
+-spec encode_update_request({binary(), binary()}, binary() | undefined, toplevel_type(), [toplevel_op()], [update_opt()]) -> #dtupdatereq{}.
 encode_update_request({BType, Bucket}, Key, DType, Ops, Options) ->
-    Update = #dtupdate{bucket=Bucket,
+    Update = #dtupdatereq{bucket=Bucket,
                        key=Key,
                        type=BType,
                        ops=[encode_operation(Op, DType) || Op <- Ops]},
@@ -309,26 +309,26 @@ encode_update_request({BType, Bucket}, Key, DType, Ops, Options) ->
 
 %% @doc Encodes request-time update options onto the DtUpdate message.
 %% @private
--spec encode_update_options(#dtupdate{}, [proplists:property()]) -> #dtupdate{}.
+-spec encode_update_options(#dtupdatereq{}, [proplists:property()]) -> #dtupdatereq{}.
 encode_update_options(Update, []) ->
     Update;
 encode_update_options(Update, [{w,W}|Tail]) ->
-    encode_update_options(Update#dtupdate{w=encode_quorum(W)},Tail);
+    encode_update_options(Update#dtupdatereq{w=encode_quorum(W)},Tail);
 encode_update_options(Update, [{dw,DW}|Tail]) ->
-    encode_update_options(Update#dtupdate{dw=encode_quorum(DW)},Tail);
+    encode_update_options(Update#dtupdatereq{dw=encode_quorum(DW)},Tail);
 encode_update_options(Update, [{pw,PW}|Tail]) ->
-    encode_update_options(Update#dtupdate{pw=encode_quorum(PW)},Tail);
+    encode_update_options(Update#dtupdatereq{pw=encode_quorum(PW)},Tail);
 encode_update_options(Update, [return_body|Tail]) ->
     encode_update_options(Update, [{return_body, true}|Tail]);
 encode_update_options(Update, [{return_body, RB}|Tail]) ->
-    encode_update_options(Update#dtupdate{return_body=RB},Tail);
+    encode_update_options(Update#dtupdatereq{return_body=RB},Tail);
 encode_update_options(Update, [{timeout, TO}|Tail]) ->
-    encode_update_options(Update#dtupdate{timeout=TO},Tail);
+    encode_update_options(Update#dtupdatereq{timeout=TO},Tail);
 encode_update_options(Update, [sloppy_quorum|Tail]) ->
     encode_update_options(Update, [{sloppy_quorum, true}|Tail]);
 encode_update_options(Update, [{sloppy_quorum, RB}|Tail]) ->
-    encode_update_options(Update#dtupdate{sloppy_quorum=RB},Tail);
+    encode_update_options(Update#dtupdatereq{sloppy_quorum=RB},Tail);
 encode_update_options(Update, [{n_val, N}|Tail]) ->
-    encode_update_options(Update#dtupdate{n_val=N}, Tail);
+    encode_update_options(Update#dtupdatereq{n_val=N}, Tail);
 encode_update_options(Update, [_|Tail]) ->
     encode_update_options(Update, Tail).
