@@ -30,7 +30,9 @@
          encode_fetch_response/3,
          encode_update_request/4,
          encode_update_request/5,
-         decode_operation/1
+         decode_operation/1,
+         decode_update_response/3,
+         encode_update_response/4
         ]).
 
 -import(riak_pb_kv_codec, [encode_quorum/1]).
@@ -38,6 +40,7 @@
 -export_type([context/0]).
 
 %% Value types
+-opaque context() :: binary().
 -type counter_value() :: integer().
 -type set_value() :: [ binary() ].
 -type register_value() :: binary().
@@ -47,7 +50,7 @@
 -type map_value() :: [ map_entry() ].
 -type embedded_value() :: counter_value() | set_value() | register_value() | flag_value().
 -type toplevel_value() :: counter_value() | set_value() | map_value().
--opaque context() :: binary().
+-type fetch_response() :: {toplevel_type(), toplevel_value(), context()}.
 
 %% Type names as atoms
 -type embedded_type() :: counter | set | register | flag.
@@ -153,7 +156,7 @@ encode_fetch_options(Fetch, [_|Tail]) ->
     encode_fetch_options(Fetch, Tail).
 
 %% @doc Decodes a FetchResponse into tuple of type, value and context.
--spec decode_fetch_response(#dtfetchresp{}) -> {toplevel_type(), toplevel_value(), context()}.
+-spec decode_fetch_response(#dtfetchresp{}) -> fetch_response().
 decode_fetch_response(#dtfetchresp{context=Context, type='COUNTER', counter_value=Val}) ->
     {counter, Val, Context};
 decode_fetch_response(#dtfetchresp{context=Context, type='SET', set_value=Val}) ->
@@ -330,5 +333,38 @@ encode_update_options(Update, [{sloppy_quorum, RB}|Tail]) ->
     encode_update_options(Update#dtupdatereq{sloppy_quorum=RB},Tail);
 encode_update_options(Update, [{n_val, N}|Tail]) ->
     encode_update_options(Update#dtupdatereq{n_val=N}, Tail);
+encode_update_options(Update, [include_context|Tail]) ->
+    encode_update_options(Update, [{include_context, true}|Tail]);
+encode_update_options(Update, [{include_context, IC}|Tail]) ->
+    encode_update_options(Update#dtupdatereq{include_context=IC},Tail);
 encode_update_options(Update, [_|Tail]) ->
     encode_update_options(Update, Tail).
+
+%% @doc Decodes a DtUpdateResp message into erlang values.
+-spec decode_update_response(#dtupdateresp{}, Type::toplevel_type(), ReturnBodyExpected::boolean()) ->
+                                    ok | {ok, Key::binary()} | {Key::binary(), fetch_response()} | fetch_response().
+decode_update_response(#dtupdateresp{key=K}, _, false) ->
+    case K of
+        undefined -> ok;
+        _ -> {ok, K}
+    end;
+decode_update_response(#dtupdateresp{counter_value=C, context=Ctx}=Resp, counter, true) ->
+    maybe_wrap_key({counter, C, Ctx}, Resp);
+decode_update_response(#dtupdateresp{set_value=S, context=Ctx}=Resp, set, true) ->
+    maybe_wrap_key({set, S, Ctx}, Resp);
+decode_update_response(#dtupdateresp{map_value=M, context=Ctx}=Resp, map, true) ->
+    maybe_wrap_key({map, [ decode_map_field(F) || F <- M ], Ctx}, Resp).
+
+maybe_wrap_key(Term, #dtupdateresp{key=undefined}) -> Term;
+maybe_wrap_key(Term, #dtupdateresp{key=K}) -> {K, Term}.
+
+%% @doc Encodes an update response into a DtUpdateResp message.
+-spec encode_update_response(toplevel_type(), toplevel_value(), binary(), context()) -> #dtupdateresp{}.
+encode_update_response(counter, Value, Key, Context) ->
+    #dtupdateresp{key=Key, context=Context, counter_value=Value};
+encode_update_response(set, Value, Key, Context) ->
+    #dtupdateresp{key=Key, context=Context, set_value=Value};
+encode_update_response(map, undefined, Key, Context) ->
+    #dtupdateresp{key=Key, context=Context};
+encode_update_response(map, Value, Key, Context) when is_list(Value) ->
+    #dtupdateresp{key=Key, context=Context, map_value=[ encode_map_entry(Entry) || Entry <- Value ]}.
