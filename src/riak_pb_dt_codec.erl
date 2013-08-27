@@ -61,10 +61,10 @@
 
 %% Operations
 -type counter_op() :: increment | decrement | {increment | decrement, integer()}.
--type set_op() :: {add, binary() | [binary()]} | {remove, binary() | [binary()]}.
+-type set_op() :: {add, binary() | [binary()]} | {remove, binary() | [binary()]} | {update, Adds::[binary()], Removes::[binary()]}.
 -type flag_op() :: enable | disable.
 -type register_op() :: {assign, binary()}.
--type map_op() :: {add | remove, [map_field()]} | {update, map_field(), [embedded_type_op()]}.
+-type map_op() :: {update, Adds::[map_field()], Removes::[map_field()], Updates::[{map_field(), embedded_type_op()}]}.
 -type embedded_type_op() :: counter_op() | set_op() | register_op() | flag_op().
 -type toplevel_op() :: counter_op() | set_op() | map_op().
 
@@ -86,6 +86,10 @@
 %% Server-side type<->module mappings
 -type type_mappings() :: [{embedded_type(), module()}].
 
+
+%% =========================
+%% DATA STRUCTURES AND TYPES
+%% =========================
 
 %% @doc Decodes a MapField message into a tuple of name and type.
 -spec decode_map_field(#mapfield{}) -> map_field().
@@ -126,11 +130,6 @@ decode_map_entry(#mapentry{field=#mapfield{type='FLAG'}=Field, flag_value=Val}, 
     {decode_map_field(Field, Mods), Val}.
 
 %% @doc Encodes a tuple of field and value into a MapEntry message.
--spec encode_map_entry(map_entry()) -> #mapentry{}.
-encode_map_entry(Entry) ->
-    encode_map_entry(Entry, []).
-
-%% @doc Encodes a tuple of field and value into a MapEntry message.
 -spec encode_map_entry(map_entry(), type_mappings()) -> #mapentry{}.
 encode_map_entry({{Name, counter=Type}, Value}, _Mods) when is_integer(Value) ->
     #mapentry{field=encode_map_field({Name, Type}), counter_value=Value};
@@ -150,6 +149,44 @@ encode_map_entry({{Name, Type}, Value}, Mods) ->
         {AtomType, Type} ->
             encode_map_entry({{Name,AtomType}, Value}, Mods)
     end.
+
+%% @doc Decodes a PB message type name into a module name according to
+%% the passed mappings.
+-spec decode_type(atom(), type_mappings()) -> atom().
+decode_type(PBType, Mods) ->
+    AtomType = decode_type(PBType),
+    proplists:get_value(AtomType, Mods, AtomType).
+
+%% @doc Decodes a PB message type name into an atom.
+-spec decode_type(atom()) -> atom().
+decode_type('COUNTER')  -> counter;
+decode_type('SET')      -> set;
+decode_type('REGISTER') -> register;
+decode_type('FLAG')     -> flag;
+decode_type('MAP')      -> map.
+
+%% @doc Encodes an atom type into the PB message equivalent, using the
+%% pass mappings to convert module names into shortnames.
+-spec encode_type(atom(), type_mappings()) -> atom().
+encode_type(TypeOrMod, Mods) ->
+    case lists:keyfind(TypeOrMod, 2, Mods) of
+        {AtomType, TypeOrMod} ->
+            encode_type(AtomType);
+        false ->
+            encode_type(TypeOrMod)
+    end.
+
+%% @doc Encodes an atom type name into the PB message equivalent.
+-spec encode_type(atom()) -> atom().
+encode_type(counter)  -> 'COUNTER';
+encode_type(set)      -> 'SET';
+encode_type(register) -> 'REGISTER';
+encode_type(flag)     -> 'FLAG';
+encode_type(map)      -> 'MAP'.
+
+%% ========================
+%% FETCH REQUEST / RESPONSE
+%% ========================
 
 %% @doc Encodes a fetch request into a DtFetch message.
 -spec encode_fetch_request({binary(), binary()}, binary()) -> #dtfetchreq{}.
@@ -225,61 +262,9 @@ encode_fetch_response(Type, Value, Context, Mods) ->
             Response#dtfetchresp{map_value=[encode_map_entry(Entry, Mods) || Entry <- Value]}
     end.
 
-%% @doc Decodes a DtOperation message into a datatype-specific operation.
--spec decode_operation(#dtop{}) -> toplevel_op().
-decode_operation(Op) ->
-    decode_operation(Op, []).
-
--spec decode_operation(#dtop{}, [{embedded_type(), module()}]) -> toplevel_op().
-decode_operation(#dtop{counter_op=#counterop{}=Op}, _) ->
-    decode_counter_op(Op);
-decode_operation(#dtop{set_op=#setop{}=Op}, _) ->
-    decode_set_op(Op);
-decode_operation(#dtop{map_op=#mapop{op='UPDATE', update_field=Field, field_ops=Ops}}, Mods) ->
-    {_,FType} = decode_map_field(Field),
-    {update, decode_map_field(Field, Mods), [decode_map_field_op(MOp, FType) || MOp <- Ops]};
-decode_operation(#dtop{map_op=#mapop{op=Op, add_remove_fields=Fields}}, Mods) ->
-    {decode_op_type(Op), [ decode_map_field(Field, Mods) || Field <- Fields ]}.
-
-%% @doc Encodes a datatype-specific operation into a DtOperation message.
--spec encode_operation(toplevel_op(), toplevel_type()) -> #dtop{}.
-encode_operation(Op, counter) ->
-    #dtop{counter_op=encode_counter_op(Op)};
-encode_operation(Op, set) ->
-    #dtop{set_op=encode_set_op(Op)};
-encode_operation({update, {_,Type}=Field, FieldOps}, map) ->
-    MapOp = #mapop{
-               op='UPDATE',
-               update_field=encode_map_field(Field),
-               field_ops=[ encode_map_field_op(Op,Type) || Op <- FieldOps ]
-              },
-    #dtop{map_op=MapOp};
-encode_operation({Op, Fields}, map) when add == Op orelse remove == Op ->
-    #dtop{map_op=#mapop{op=encode_op_type(Op),
-                               add_remove_fields=Fields}}.
-
-
-%% @doc Decodes a MapFieldOp message into a datatype-specific operation.
--spec decode_map_field_op(#mapfieldop{}, embedded_type()) -> embedded_type_op().
-decode_map_field_op(#mapfieldop{counter_op=Op}, counter) ->
-    decode_counter_op(Op);
-decode_map_field_op(#mapfieldop{set_op=Op}, set) ->
-    decode_set_op(Op);
-decode_map_field_op(#mapfieldop{register_op=Value}, register) ->
-    {assign, Value};
-decode_map_field_op(#mapfieldop{flag_op=Op}, flag) ->
-    decode_op_type(Op).
-
-%% @doc Encodes a datatype-specific operation into a MapFieldOp message.
--spec encode_map_field_op(embedded_type_op(), embedded_type()) -> #mapfieldop{}.
-encode_map_field_op(Op, counter) ->
-    #mapfieldop{counter_op=encode_counter_op(Op)};
-encode_map_field_op(Op, set) ->
-    #mapfieldop{set_op=encode_set_op(Op)};
-encode_map_field_op({set, Value}, register) ->
-    #mapfieldop{register_op=Value};
-encode_map_field_op(Op, flag) ->
-    #mapfieldop{flag_op=encode_op_type(Op)}.
+%% =========================
+%% UPDATE REQUEST / RESPONSE
+%% =========================
 
 %% @doc Decodes a CounterOp message into a counter operation.
 -spec decode_counter_op(#counterop{}) -> counter_op().
@@ -301,65 +286,96 @@ encode_counter_op({decrement, Int}) when is_integer(Int) ->
 
 %% @doc Decodes a SetOp message into a set operation.
 -spec decode_set_op(#setop{}) -> set_op().
-decode_set_op(#setop{op=Op, member=Member}) ->
-    {decode_op_type(Op), Member}.
+decode_set_op(#setop{adds=A, removes=R}) ->
+    {update, A, R}.
 
 %% @doc Encodes a set operation into a SetOp message.
 -spec encode_set_op(set_op()) -> #setop{}.
 encode_set_op({Op, Member}) when is_binary(Member) ->
     encode_set_op({Op, [Member]});
-encode_set_op({Op, Members}) when is_list(Members) andalso (add == Op orelse remove == Op) ->
-    #setop{op=encode_op_type(Op), member=Members}.
+encode_set_op({add, Members}) when is_list(Members) ->
+    #setop{adds=Members};
+encode_set_op({remove, Members}) when is_list(Members) ->
+    #setop{removes=Members};
+encode_set_op({update, Adds, Removes}) when is_list(Adds), is_list(Removes) ->
+    #setop{adds=Adds, removes=Removes}.
 
 %% @doc Decodes a operation name from a PB message into an atom.
--spec decode_op_type(atom()) -> atom().
-decode_op_type('ENABLE')  -> enable;
-decode_op_type('DISABLE') -> disable;
-decode_op_type('ADD')     -> add;
-decode_op_type('REMOVE')  -> remove;
-decode_op_type('UPDATE')  -> update.
+-spec decode_flag_op(atom()) -> atom().
+decode_flag_op('ENABLE')  -> enable;
+decode_flag_op('DISABLE') -> disable.
 
 %% @doc Encodes an atom operation name into the PB message equivalent.
--spec encode_op_type(atom()) -> atom().
-encode_op_type(enable)  -> 'ENABLE';
-encode_op_type(disable) -> 'DISABLE';
-encode_op_type(add)     -> 'ADD';
-encode_op_type(remove)  -> 'REMOVE';
-encode_op_type(update)  -> 'UPDATE'.
+-spec encode_flag_op(atom()) -> atom().
+encode_flag_op(enable)  -> 'ENABLE';
+encode_flag_op(disable) -> 'DISABLE'.
 
-%% @doc Decodes a PB message type name into a module name according to
-%% the passed mappings.
--spec decode_type(atom(), type_mappings()) -> atom().
-decode_type(PBType, Mods) ->
-    AtomType = decode_type(PBType),
-    proplists:get_value(AtomType, Mods, AtomType).
+%% @doc Decodes a MapUpdate message into a map field operation.
+-spec decode_map_update(#mapupdate{}, type_mappings()) -> {map_field(), embedded_type_op()}.
+decode_map_update(#mapupdate{field=#mapfield{name=N, type='COUNTER'=Type}, counter_op=#counterop{}=Op}, Mods) ->
+    COp = decode_counter_op(Op),
+    FType = decode_type(Type, Mods),
+    {{N, FType}, COp};
+decode_map_update(#mapupdate{field=#mapfield{name=N, type='SET'=Type}, set_op=#setop{}=Op}, Mods) ->
+    SOp = decode_set_op(Op),
+    FType = decode_type(Type, Mods),
+    {{N, FType}, SOp};
+decode_map_update(#mapupdate{field=#mapfield{name=N, type='REGISTER'=Type}, register_op=Op}, Mods) ->
+    FType = decode_type(Type, Mods),
+    {{N, FType}, {assign, Op}};
+decode_map_update(#mapupdate{field=#mapfield{name=N, type='FLAG'=Type}, flag_op=Op}, Mods) ->
+    FOp = decode_flag_op(Op),
+    FType = decode_type(Type, Mods),
+    {{N, FType}, FOp}.
 
-%% @doc Decodes a PB message type name into an atom.
--spec decode_type(atom()) -> atom().
-decode_type('COUNTER')  -> counter;
-decode_type('SET')      -> set;
-decode_type('REGISTER') -> register;
-decode_type('FLAG')     -> flag;
-decode_type('MAP')      -> map.
+%% @doc Encodes a map field operation into a MapUpdate message.
+-spec encode_map_update(map_field(), embedded_type_op()) -> #mapupdate{}.
+encode_map_update({_Name, counter}=Key, Op) ->
+    #mapupdate{field=encode_map_field(Key), counter_op=encode_counter_op(Op)};
+encode_map_update({_Name, set}=Key, Op) ->
+    #mapupdate{field=encode_map_field(Key), set_op=encode_set_op(Op)};
+encode_map_update({_Name, register}=Key, {assign, Value}) ->
+    #mapupdate{field=encode_map_field(Key), register_op=Value};
+encode_map_update({_Name, flag}=Key, Op) ->
+    #mapupdate{field=encode_map_field(Key), flag_op=encode_flag_op(Op)}.
 
-%% @doc Encodes an atom type into the PB message equivalent, using the
-%% pass mappings to convert module names into shortnames.
--spec encode_type(atom(), type_mappings()) -> atom().
-encode_type(TypeOrMod, Mods) ->
-    case lists:keyfind(TypeOrMod, 2, Mods) of
-        {AtomType, TypeOrMod} ->
-            encode_type(AtomType);
-        false ->
-            encode_type(TypeOrMod)
-    end.
+%% @doc Encodes a map operation into a MapOp message.
+-spec encode_map_op(map_op()) -> #mapop{}.
+encode_map_op({update, Adds, Removes, Updates}) ->
+    #mapop{
+       adds=[ encode_map_field(A) || Adds /= undefined, A <- Adds ],
+       removes=[ encode_map_field(R) || Removes /= undefined, R <- Removes ],
+       updates=[ encode_map_update(K,O) || Updates /= undefined,
+                                           {K, O} <- Updates ]}.
 
-%% @doc Encodes an atom type name into the PB message equivalent.
--spec encode_type(atom()) -> atom().
-encode_type(counter)  -> 'COUNTER';
-encode_type(set)      -> 'SET';
-encode_type(register) -> 'REGISTER';
-encode_type(flag)     -> 'FLAG';
-encode_type(map)      -> 'MAP'.
+decode_map_op(#mapop{adds=Adds, removes=Removes, updates=Updates}, Mods) ->
+    {update, 
+     [ decode_map_field(A, Mods) || A <- Adds ],
+     [ decode_map_field(R, Mods) || R <- Removes ],
+     [ decode_map_update(U, Mods) || U <- Updates ]}.
+
+%% @doc Decodes a DtOperation message into a datatype-specific operation.
+-spec decode_operation(#dtop{}) -> toplevel_op().
+decode_operation(Op) ->
+    decode_operation(Op, []).
+
+-spec decode_operation(#dtop{}, type_mappings()) -> toplevel_op().
+decode_operation(#dtop{counter_op=#counterop{}=Op}, _) ->
+    decode_counter_op(Op);
+decode_operation(#dtop{set_op=#setop{}=Op}, _) ->
+    decode_set_op(Op);
+decode_operation(#dtop{map_op=#mapop{}=Op}, Mods) ->
+    decode_map_op(Op, Mods).
+
+%% @doc Encodes a datatype-specific operation into a DtOperation message.
+-spec encode_operation(toplevel_op(), toplevel_type()) -> #dtop{}.
+encode_operation(Op, counter) ->
+    #dtop{counter_op=encode_counter_op(Op)};
+encode_operation(Op, set) ->
+    #dtop{set_op=encode_set_op(Op)};
+encode_operation(Op, map) ->
+    #dtop{map_op=encode_map_op(Op)}.
+
 
 %% @doc Encodes an update request into a DtUpdate message.
 -spec encode_update_request({binary(), binary()}, binary() | undefined, toplevel_type(), [toplevel_op()]) -> #dtupdatereq{}.
@@ -367,11 +383,11 @@ encode_update_request({_,_}=BucketAndType, Key, Type, Ops) ->
     encode_update_request(BucketAndType, Key, Type, Ops, []).
 
 -spec encode_update_request({binary(), binary()}, binary() | undefined, toplevel_type(), [toplevel_op()], [update_opt()]) -> #dtupdatereq{}.
-encode_update_request({BType, Bucket}, Key, DType, Ops, Options) ->
+encode_update_request({BType, Bucket}, Key, DType, Op, Options) ->
     Update = #dtupdatereq{bucket=Bucket,
-                       key=Key,
-                       type=BType,
-                       ops=[encode_operation(Op, DType) || Op <- Ops]},
+                          key=Key,
+                          type=BType,
+                          op=encode_operation(Op, DType)},
     encode_update_options(Update, Options).
 
 %% @doc Encodes request-time update options onto the DtUpdate message.
@@ -433,7 +449,7 @@ encode_update_response(counter, Value, Key, Context, _Mods) ->
     #dtupdateresp{key=Key, context=Context, counter_value=Value};
 encode_update_response(set, Value, Key, Context, _Mods) ->
     #dtupdateresp{key=Key, context=Context, set_value=Value};
-encode_update_response(map, undefined, Key, Context, _Mods) ->
-    #dtupdateresp{key=Key, context=Context};
 encode_update_response(map, Value, Key, Context, Mods) when is_list(Value) ->
-    #dtupdateresp{key=Key, context=Context, map_value=[ encode_map_entry(Entry, Mods) || Entry <- Value ]}.
+    #dtupdateresp{key=Key, context=Context, 
+                  map_value=[ encode_map_entry(Entry, Mods) || Value /= undefined, 
+                                                               Entry <- Value ]}.

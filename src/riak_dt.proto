@@ -108,8 +108,8 @@ message DtFetchReq {
 message DtFetchResp {
     enum DataType {
         COUNTER = 1;
-        SET = 2;
-        MAP = 3;
+        SET     = 2;
+        MAP     = 3;
     }
 
     optional bytes    context = 1;
@@ -140,13 +140,8 @@ message CounterOp {
  * them from a Set.
  */
 message SetOp {
-    enum SetOpType {
-        ADD = 1;
-        REMOVE = 2;
-    }
-
-    required SetOpType op     = 1;
-    repeated bytes     member = 2;
+    repeated bytes adds    = 1;
+    repeated bytes removes = 2;
 }
 
 /*
@@ -154,11 +149,13 @@ message SetOp {
  * contents of an UPDATE operation. The operation field that is
  * present depends on the type of the field to which it is applied.
  */
-message MapFieldOp {
+message MapUpdate {
     /*
      * Flags only exist inside Maps and can only be enabled or
      * disabled, and there are no arguments to the operations.
      */
+    required MapField field = 1;
+
     enum FlagOp {
         ENABLE  = 1;
         DISABLE = 2;
@@ -185,23 +182,9 @@ message MapOp {
      * a field and value from the Map. UPDATE applies type-specific
      * operations to the values stored in the Map.
      */
-    enum MapOpType {
-        ADD    = 1;
-        REMOVE = 2;
-        UPDATE = 3;
-    }
-
-    required MapOpType   op = 1;
-    /*
-     * ADD/REMOVE can operate on multiple fields in a single message,
-     * since they do not require operations specific to the type.
-     */
-    repeated MapField   add_remove_fields = 2;
-    /*
-     * Per-field operations are only relevant to UPDATE.
-     */
-    optional MapField   update_field = 3;
-    repeated MapFieldOp field_ops    = 4;
+    repeated MapField  adds    = 1;
+    repeated MapField  removes = 2;
+    repeated MapUpdate updates = 3;
 }
 
 /*
@@ -230,7 +213,7 @@ message DtUpdateReq {
     optional bytes context = 4;
 
     // The operations
-    repeated DtOp  ops = 5;
+    required DtOp  op = 5;
 
     // Request options
     optional uint32 w               =  6;
