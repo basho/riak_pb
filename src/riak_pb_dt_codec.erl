@@ -28,11 +28,14 @@
          encode_fetch_request/3,
          decode_fetch_response/1,
          encode_fetch_response/3,
+         encode_fetch_response/4,
          encode_update_request/4,
          encode_update_request/5,
          decode_operation/1,
+         decode_operation/2,
          decode_update_response/3,
-         encode_update_response/4
+         encode_update_response/4,
+         encode_update_response/5
         ]).
 
 -import(riak_pb_kv_codec, [encode_quorum/1]).
@@ -80,39 +83,73 @@
                      {n_val, pos_integer()} |
                      include_context | {include_context, boolean()}.
 
+%% Server-side type<->module mappings
+-type type_mappings() :: [{embedded_type(), module()}].
+
 
 %% @doc Decodes a MapField message into a tuple of name and type.
 -spec decode_map_field(#mapfield{}) -> map_field().
-decode_map_field(#mapfield{name=Name,type=Type}) ->
-    {Name, decode_type(Type)}.
+decode_map_field(MapField) ->
+    decode_map_field(MapField, []).
+
+%% @doc Decodes a MapField message into a tuple of name and type.
+-spec decode_map_field(#mapfield{}, type_mappings()) -> map_field().
+decode_map_field(#mapfield{name=Name,type=Type}, Mods) ->
+    {Name, decode_type(Type, Mods)}.
 
 %% @doc Encodes a tuple of name and type into a MapField message.
 -spec encode_map_field(map_field()) -> #mapfield{}.
-encode_map_field({Name, Type}) ->
-    #mapfield{name=Name, type=encode_type(Type)}.
+encode_map_field(Field) ->
+    encode_map_field(Field, []).
+
+%% @doc Encodes a tuple of name and type into a MapField message,
+%% using the given type mappings.
+-spec encode_map_field(map_field(), type_mappings()) -> #mapfield{}.
+encode_map_field({Name, Type}, Mods) ->
+    #mapfield{name=Name, type=encode_type(Type, Mods)}.
 
 %% @doc Decodes an MapEntry message into a tuple of field and value.
 -spec decode_map_entry(#mapentry{}) -> map_entry().
-decode_map_entry(#mapentry{field=#mapfield{type='COUNTER'}=Field, counter_value=Val}) ->
-    {decode_map_field(Field), Val};
-decode_map_entry(#mapentry{field=#mapfield{type='SET'}=Field, set_value=Val}) ->
-    {decode_map_field(Field), Val};
-decode_map_entry(#mapentry{field=#mapfield{type='REGISTER'}=Field, register_value=Val}) ->
-    {decode_map_field(Field), Val};
-decode_map_entry(#mapentry{field=#mapfield{type='FLAG'}=Field, flag_value=Val}) ->
-    {decode_map_field(Field), Val}.
+decode_map_entry(Entry) ->
+    decode_map_entry(Entry, []).
+
+%% @doc Decodes an MapEntry message into a tuple of field and value,
+%% using the given type mappings.
+-spec decode_map_entry(#mapentry{}, type_mappings()) -> map_entry().
+decode_map_entry(#mapentry{field=#mapfield{type='COUNTER'}=Field, counter_value=Val}, Mods) ->
+    {decode_map_field(Field, Mods), Val};
+decode_map_entry(#mapentry{field=#mapfield{type='SET'}=Field, set_value=Val}, Mods) ->
+    {decode_map_field(Field, Mods), Val};
+decode_map_entry(#mapentry{field=#mapfield{type='REGISTER'}=Field, register_value=Val}, Mods) ->
+    {decode_map_field(Field, Mods), Val};
+decode_map_entry(#mapentry{field=#mapfield{type='FLAG'}=Field, flag_value=Val}, Mods) ->
+    {decode_map_field(Field, Mods), Val}.
 
 %% @doc Encodes a tuple of field and value into a MapEntry message.
 -spec encode_map_entry(map_entry()) -> #mapentry{}.
-encode_map_entry({{Name, counter=Type}, Value}) when is_integer(Value) ->
-    #mapentry{field=encode_map_field({Name, Type}), counter_value=Value};
-encode_map_entry({{Name, set=Type}, Value}) when is_list(Value) ->
-    #mapentry{field=encode_map_field({Name, Type}), set_value=Value};
-encode_map_entry({{Name, register=Type}, Value}) when is_binary(Value) ->
-    #mapentry{field=encode_map_field({Name, Type}), register_value=Value};
-encode_map_entry({{Name, flag=Type}, Value}) when is_boolean(Value) ->
-    #mapentry{field=encode_map_field({Name, Type}), flag_value=Value}.
+encode_map_entry(Entry) ->
+    encode_map_entry(Entry, []).
 
+%% @doc Encodes a tuple of field and value into a MapEntry message.
+-spec encode_map_entry(map_entry(), type_mappings()) -> #mapentry{}.
+encode_map_entry({{Name, counter=Type}, Value}, _Mods) when is_integer(Value) ->
+    #mapentry{field=encode_map_field({Name, Type}), counter_value=Value};
+encode_map_entry({{Name, set=Type}, Value}, _Mods) when is_list(Value) ->
+    #mapentry{field=encode_map_field({Name, Type}), set_value=Value};
+encode_map_entry({{Name, register=Type}, Value}, _Mods) when is_binary(Value) ->
+    #mapentry{field=encode_map_field({Name, Type}), register_value=Value};
+encode_map_entry({{Name, flag=Type}, Value}, _Mods) when is_boolean(Value) ->
+    #mapentry{field=encode_map_field({Name, Type}), flag_value=Value};
+encode_map_entry({{Name, Type}, Value}, Mods) ->
+    %% We reach this clause if the type is not in the shortname yet,
+    %% but is a module name.
+    case lists:keyfind(Type, 2, Mods) of
+        false ->
+            %% If you don't have a mapping, we can't encode it.
+            erlang:error(badarg, [{{Name,Type},Value}, Mods]);
+        {AtomType, Type} ->
+            encode_map_entry({{Name,AtomType}, Value}, Mods)
+    end.
 
 %% @doc Encodes a fetch request into a DtFetch message.
 -spec encode_fetch_request({binary(), binary()}, binary()) -> #dtfetchreq{}.
@@ -166,13 +203,18 @@ decode_fetch_response(#dtfetchresp{context=Context, type='MAP', map_value=Val}) 
 
 %% @doc Encodes the result of a fetch request into a FetchResponse message.
 -spec encode_fetch_response(toplevel_type(), toplevel_value(), context()) -> #dtfetchresp{}.
-encode_fetch_response(Type, undefined, _Context) ->
+encode_fetch_response(Type, Value, Context) ->
+    encode_fetch_response(Type, Value, Context, []).
+
+%% @doc Encodes the result of a fetch request into a FetchResponse message.
+-spec encode_fetch_response(toplevel_type(), toplevel_value(), context(), type_mappings()) -> #dtfetchresp{}.
+encode_fetch_response(Type, undefined, _Context, _Mods) ->
     %% TODO: "Not found" may be undefined, or it may be the
     %% bottom-value of the type, but we need to send something back.
     %% There is also no "context" for a missing datatype, or its
     %% bottom-value.
     #dtfetchresp{type=encode_type(Type)};
-encode_fetch_response(Type, Value, Context) ->
+encode_fetch_response(Type, Value, Context, Mods) ->
     Response = #dtfetchresp{context=Context, type=encode_type(Type)},
     case Type of
         counter ->
@@ -180,20 +222,24 @@ encode_fetch_response(Type, Value, Context) ->
         set ->
             Response#dtfetchresp{set_value=Value};
         map ->
-            Response#dtfetchresp{map_value=[encode_map_entry(Entry) || Entry <- Value]}
+            Response#dtfetchresp{map_value=[encode_map_entry(Entry, Mods) || Entry <- Value]}
     end.
 
 %% @doc Decodes a DtOperation message into a datatype-specific operation.
 -spec decode_operation(#dtop{}) -> toplevel_op().
-decode_operation(#dtop{counter_op=#counterop{}=Op}) ->
+decode_operation(Op) ->
+    decode_operation(Op, []).
+
+-spec decode_operation(#dtop{}, [{embedded_type(), module()}]) -> toplevel_op().
+decode_operation(#dtop{counter_op=#counterop{}=Op}, _) ->
     decode_counter_op(Op);
-decode_operation(#dtop{set_op=#setop{}=Op}) ->
+decode_operation(#dtop{set_op=#setop{}=Op}, _) ->
     decode_set_op(Op);
-decode_operation(#dtop{map_op=#mapop{op='UPDATE', update_field=Field, field_ops=Ops}}) ->
-    {_,FType} = DecodedField = decode_map_field(Field),
-    {update, DecodedField, [decode_map_field_op(MOp, FType) || MOp <- Ops]};
-decode_operation(#dtop{map_op=#mapop{op=Op, add_remove_fields=Fields}}) ->
-    {decode_op_type(Op), [ decode_map_field(Field) || Field <- Fields ]}.
+decode_operation(#dtop{map_op=#mapop{op='UPDATE', update_field=Field, field_ops=Ops}}, Mods) ->
+    {_,FType} = decode_map_field(Field),
+    {update, decode_map_field(Field, Mods), [decode_map_field_op(MOp, FType) || MOp <- Ops]};
+decode_operation(#dtop{map_op=#mapop{op=Op, add_remove_fields=Fields}}, Mods) ->
+    {decode_op_type(Op), [ decode_map_field(Field, Mods) || Field <- Fields ]}.
 
 %% @doc Encodes a datatype-specific operation into a DtOperation message.
 -spec encode_operation(toplevel_op(), toplevel_type()) -> #dtop{}.
@@ -281,6 +327,13 @@ encode_op_type(add)     -> 'ADD';
 encode_op_type(remove)  -> 'REMOVE';
 encode_op_type(update)  -> 'UPDATE'.
 
+%% @doc Decodes a PB message type name into a module name according to
+%% the passed mappings.
+-spec decode_type(atom(), type_mappings()) -> atom().
+decode_type(PBType, Mods) ->
+    AtomType = decode_type(PBType),
+    proplists:get_value(AtomType, Mods, AtomType).
+
 %% @doc Decodes a PB message type name into an atom.
 -spec decode_type(atom()) -> atom().
 decode_type('COUNTER')  -> counter;
@@ -288,6 +341,17 @@ decode_type('SET')      -> set;
 decode_type('REGISTER') -> register;
 decode_type('FLAG')     -> flag;
 decode_type('MAP')      -> map.
+
+%% @doc Encodes an atom type into the PB message equivalent, using the
+%% pass mappings to convert module names into shortnames.
+-spec encode_type(atom(), type_mappings()) -> atom().
+encode_type(TypeOrMod, Mods) ->
+    case lists:keyfind(TypeOrMod, 2, Mods) of
+        {AtomType, TypeOrMod} ->
+            encode_type(AtomType);
+        false ->
+            encode_type(TypeOrMod)
+    end.
 
 %% @doc Encodes an atom type name into the PB message equivalent.
 -spec encode_type(atom()) -> atom().
@@ -360,11 +424,16 @@ maybe_wrap_key(Term, #dtupdateresp{key=K}) -> {K, Term}.
 
 %% @doc Encodes an update response into a DtUpdateResp message.
 -spec encode_update_response(toplevel_type(), toplevel_value(), binary(), context()) -> #dtupdateresp{}.
-encode_update_response(counter, Value, Key, Context) ->
+encode_update_response(Type, Value, Key, Context) ->
+    encode_update_response(Type, Value, Key, Context, []).
+
+%% @doc Encodes an update response into a DtUpdateResp message.
+-spec encode_update_response(toplevel_type(), toplevel_value(), binary(), context(), type_mappings()) -> #dtupdateresp{}.
+encode_update_response(counter, Value, Key, Context, _Mods) ->
     #dtupdateresp{key=Key, context=Context, counter_value=Value};
-encode_update_response(set, Value, Key, Context) ->
+encode_update_response(set, Value, Key, Context, _Mods) ->
     #dtupdateresp{key=Key, context=Context, set_value=Value};
-encode_update_response(map, undefined, Key, Context) ->
+encode_update_response(map, undefined, Key, Context, _Mods) ->
     #dtupdateresp{key=Key, context=Context};
-encode_update_response(map, Value, Key, Context) when is_list(Value) ->
-    #dtupdateresp{key=Key, context=Context, map_value=[ encode_map_entry(Entry) || Entry <- Value ]}.
+encode_update_response(map, Value, Key, Context, Mods) when is_list(Value) ->
+    #dtupdateresp{key=Key, context=Context, map_value=[ encode_map_entry(Entry, Mods) || Entry <- Value ]}.
