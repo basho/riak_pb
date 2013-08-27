@@ -22,10 +22,8 @@
 */
 
 /*
-** Revision: 1.4
+** Revision: 2.0
 */
-
-import "riak.proto";
 
 // java package specifiers
 option java_package = "com.basho.riak.protobuf";
