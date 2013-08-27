@@ -125,6 +125,13 @@ msg_type(50) -> rpbcounterupdatereq;
 msg_type(51) -> rpbcounterupdateresp;
 msg_type(52) -> rpbcountergetreq;
 msg_type(53) -> rpbcountergetresp;
+msg_type(54) -> rpbyokozunaindexgetreq;
+msg_type(55) -> rpbyokozunaindexgetresp;
+msg_type(56) -> rpbyokozunaindexputreq;
+msg_type(57) -> rpbyokozunaindexdeletereq;
+msg_type(58) -> rpbyokozunaschemagetreq;
+msg_type(59) -> rpbyokozunaschemagetresp;
+msg_type(60) -> rpbyokozunaschemaputreq;
 msg_type(_) -> undefined.
 
 %% @doc Converts a symbolic message name into a message code. Replaces
@@ -166,7 +173,14 @@ msg_code(rpbcsbucketresp)        -> 41;
 msg_code(rpbcounterupdatereq)    -> 50;
 msg_code(rpbcounterupdateresp)   -> 51;
 msg_code(rpbcountergetreq)       -> 52;
-msg_code(rpbcountergetresp)      -> 53.
+msg_code(rpbcountergetresp)      -> 53;
+msg_code(rpbyokozunaindexgetreq)    -> 54;
+msg_code(rpbyokozunaindexgetresp)   -> 55;
+msg_code(rpbyokozunaindexputreq)    -> 56;
+msg_code(rpbyokozunaindexdeletereq) -> 57;
+msg_code(rpbyokozunaschemagetreq)   -> 58;
+msg_code(rpbyokozunaschemagetresp)  -> 59;
+msg_code(rpbyokozunaschemaputreq)   -> 60.
 
 %% @doc Selects the appropriate PB decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
@@ -181,7 +195,9 @@ decoder_for(N) when N >= 3, N < 7;
                     N >= 50, N =< 53 ->
     riak_kv_pb;
 decoder_for(N) when N >= 27, N =< 28 ->
-    riak_search_pb.
+    riak_search_pb;
+decoder_for(N) when N >= 54, N =< 60 ->
+    riak_yokozuna_pb.
 
 %% @doc Selects the appropriate PB encoder for a given message name.
 -spec encoder_for(atom()) -> module().
@@ -262,8 +278,8 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
                                     notfound_ok=NFOK,
                                     backend=Backend,
                                     search=Search,
-                                    repl=Repl
-
+                                    repl=Repl,
+                                    yz_index=Index
                                    }) ->
     %% Extract numerical properties
     [ {P,V} || {P,V} <- [ {n_val, N}, {old_vclock, Old}, {young_vclock, Young},
@@ -295,7 +311,11 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
         Q /= undefined ] ++
 
     %% Extract repl prop
-    [ {repl, decode_repl(Repl)} || Repl /= undefined ].
+    [ {repl, decode_repl(Repl)} || Repl /= undefined ] ++
+
+    %% Yokozuna index
+    [ {yz_index, Index} || is_binary(Index) ].
+
 
 
 %% @doc Convert a property list to an RpbBucketProps message
@@ -354,6 +374,8 @@ encode_bucket_props([{search, S}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{search = encode_bool(S)});
 encode_bucket_props([{repl, Atom}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{repl = encode_repl(Atom)});
+encode_bucket_props([{yz_index, B}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{yz_index = to_binary(B)});
 encode_bucket_props([_Ignore|Rest], Pb) ->
     %% Ignore any properties not explicitly part of the PB message
     encode_bucket_props(Rest, Pb).
