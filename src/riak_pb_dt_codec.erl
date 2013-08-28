@@ -61,10 +61,12 @@
 
 %% Operations
 -type counter_op() :: increment | decrement | {increment | decrement, integer()}.
--type set_op() :: {add, binary() | [binary()]} | {remove, binary() | [binary()]} | {update, Adds::[binary()], Removes::[binary()]}.
+-type simple_set_op() :: {add, binary()} | {remove, binary()} | {add_all, [binary()]} | {remove_all, [binary()]}.
+-type set_op() :: simple_set_op() | {update, [simple_set_op()]}.
 -type flag_op() :: enable | disable.
 -type register_op() :: {assign, binary()}.
--type map_op() :: {update, Adds::[map_field()], Removes::[map_field()], Updates::[{map_field(), embedded_type_op()}]}.
+-type simple_map_op() :: {add, map_field()} | {remove, map_field()} | {update, map_field(), [embedded_type_op()]}.
+-type map_op() :: simple_map_op() | {update, [simple_map_op()]}.
 -type embedded_type_op() :: counter_op() | set_op() | register_op() | flag_op().
 -type toplevel_op() :: counter_op() | set_op() | map_op().
 
@@ -286,19 +288,32 @@ encode_counter_op({decrement, Int}) when is_integer(Int) ->
 
 %% @doc Decodes a SetOp message into a set operation.
 -spec decode_set_op(#setop{}) -> set_op().
+decode_set_op(#setop{adds=A, removes=[]}) ->
+    {add_all, A};
+decode_set_op(#setop{adds=[], removes=R}) ->
+    {remove_all, R};
 decode_set_op(#setop{adds=A, removes=R}) ->
-    {update, A, R}.
+    {update, [{add_all, A}, {remove_all, R}]}.
 
 %% @doc Encodes a set operation into a SetOp message.
 -spec encode_set_op(set_op()) -> #setop{}.
-encode_set_op({Op, Member}) when is_binary(Member) ->
-    encode_set_op({Op, [Member]});
-encode_set_op({add, Members}) when is_list(Members) ->
-    #setop{adds=Members};
-encode_set_op({remove, Members}) when is_list(Members) ->
-    #setop{removes=Members};
-encode_set_op({update, Adds, Removes}) when is_list(Adds), is_list(Removes) ->
-    #setop{adds=Adds, removes=Removes}.
+encode_set_op({update, Ops}) when is_list(Ops) ->
+    lists:foldr(fun encode_set_update/2, #setop{}, Ops);
+encode_set_op({C, _}=Op) when add == C; add_all == C;
+                              remove == C; remove_all == C->
+    encode_set_op({update, [Op]}).
+
+%% @doc Folds a set update into the SetOp message.
+-spec encode_set_update(simple_set_op(), #setop{}) -> #setop{}.
+encode_set_update({add, Member}, #setop{adds=A}=S) when is_binary(Member) ->
+    S#setop{adds=[Member|A]};
+encode_set_update({add_all, Members}, #setop{adds=A}=S) when is_list(Members) ->
+    S#setop{adds=Members++A};
+encode_set_update({remove, Member}, #setop{removes=R}=S) when is_binary(Member) ->
+    S#setop{removes=[Member|R]};
+encode_set_update({remove_all, Members}, #setop{removes=R}=S) when is_list(Members) ->
+    S#setop{removes=Members++R}.
+
 
 %% @doc Decodes a operation name from a PB message into an atom.
 -spec decode_flag_op(atom()) -> atom().
@@ -341,18 +356,32 @@ encode_map_update({_Name, flag}=Key, Op) ->
 
 %% @doc Encodes a map operation into a MapOp message.
 -spec encode_map_op(map_op()) -> #mapop{}.
-encode_map_op({update, Adds, Removes, Updates}) ->
-    #mapop{
-       adds=[ encode_map_field(A) || Adds /= undefined, A <- Adds ],
-       removes=[ encode_map_field(R) || Removes /= undefined, R <- Removes ],
-       updates=[ encode_map_update(K,O) || Updates /= undefined,
-                                           {K, O} <- Updates ]}.
+encode_map_op({update, Ops}) ->
+    lists:foldr(fun encode_map_op_update/2, #mapop{}, Ops);
+encode_map_op({Op, _}=C) when add == Op; remove == Op ->
+    encode_map_op({update, [C]});
+encode_map_op({update, _Field, _Ops}=C) ->
+    encode_map_op({update, [C]}).
 
+%% @doc Folds a map update into the MapOp message.
+-spec encode_map_op_update(simple_map_op(), #mapop{}) -> #mapop{}.
+encode_map_op_update({add, F}, #mapop{adds=A}=M) ->
+    M#mapop{adds=[encode_map_field(F)|A]};
+encode_map_op_update({remove, F}, #mapop{removes=R}=M) ->
+    M#mapop{removes=[encode_map_field(F)|R]};
+encode_map_op_update({update, F, Ops}, #mapop{updates=U}=M) ->
+    Updates = [ encode_map_update(F, Op) || Op <- Ops ],
+    M#mapop{updates=Updates ++ U}.
+
+-spec decode_map_op(#mapop{}, type_mappings()) -> map_op().
 decode_map_op(#mapop{adds=Adds, removes=Removes, updates=Updates}, Mods) ->
-    {update, 
-     [ decode_map_field(A, Mods) || A <- Adds ],
-     [ decode_map_field(R, Mods) || R <- Removes ],
-     [ decode_map_update(U, Mods) || U <- Updates ]}.
+    {update,
+     [ {add, decode_map_field(A, Mods)} || A <- Adds ] ++
+     [ {remove, decode_map_field(R, Mods)} || R <- Removes ] ++
+     [ begin
+           {Field, Op} = decode_map_update(U, Mods),
+           {update, Field, Op}
+       end || U <- Updates ]}.
 
 %% @doc Decodes a DtOperation message into a datatype-specific operation.
 -spec decode_operation(#dtop{}) -> toplevel_op().
@@ -450,6 +479,6 @@ encode_update_response(counter, Value, Key, Context, _Mods) ->
 encode_update_response(set, Value, Key, Context, _Mods) ->
     #dtupdateresp{key=Key, context=Context, set_value=Value};
 encode_update_response(map, Value, Key, Context, Mods) when is_list(Value) ->
-    #dtupdateresp{key=Key, context=Context, 
-                  map_value=[ encode_map_entry(Entry, Mods) || Value /= undefined, 
+    #dtupdateresp{key=Key, context=Context,
+                  map_value=[ encode_map_entry(Entry, Mods) || Value /= undefined,
                                                                Entry <- Value ]}.
