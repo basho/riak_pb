@@ -34,9 +34,9 @@ option java_outer_classname = "RiakDtPB";
  */
 
 /*
- * Field names in maps are composed binary identifiers and type. This
- * is so that two clients can create fields with the same name but
- * different types, and they converge independently.
+ * Field names in maps are composed of a binary identifier and a type.
+ * This is so that two clients can create fields with the same name
+ * but different types, and they converge independently.
  */
 message MapField {
     /*
