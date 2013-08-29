@@ -51,7 +51,7 @@ dialyzer: erl_deps erl_compile
 
 cleanplt:
 	@echo
-	@echo "Are you sure?  It takes about 1/2 hour to re-build."
+	@echo "Are you sure?  It could take a long time to rebuild."
 	@echo Deleting $(COMBO_PLT) in 5 seconds.
 	@echo
 	sleep 5
