@@ -29,8 +29,8 @@
          decode_fetch_response/1,
          encode_fetch_response/3,
          encode_fetch_response/4,
+         encode_update_request/3,
          encode_update_request/4,
-         encode_update_request/5,
          decode_operation/1,
          decode_operation/2,
          decode_update_response/3,
@@ -69,6 +69,7 @@
 -type map_op() :: simple_map_op() | {update, [simple_map_op()]}.
 -type embedded_type_op() :: counter_op() | set_op() | register_op() | flag_op().
 -type toplevel_op() :: counter_op() | set_op() | map_op().
+-type update() :: {toplevel_type(), toplevel_op(), context()}.
 
 %% Request options
 -type quorum() :: riak_pb_kv_codec:quorum().
@@ -407,15 +408,16 @@ encode_operation(Op, map) ->
 
 
 %% @doc Encodes an update request into a DtUpdate message.
--spec encode_update_request({binary(), binary()}, binary() | undefined, toplevel_type(), toplevel_op()) -> #dtupdatereq{}.
-encode_update_request({_,_}=BucketAndType, Key, Type, Ops) ->
-    encode_update_request(BucketAndType, Key, Type, Ops, []).
+-spec encode_update_request({binary(), binary()}, binary() | undefined, update()) -> #dtupdatereq{}.
+encode_update_request({_,_}=BucketAndType, Key, {_,_,_}=Update) ->
+    encode_update_request(BucketAndType, Key, Update, []).
 
--spec encode_update_request({binary(), binary()}, binary() | undefined, toplevel_type(), toplevel_op(), [update_opt()]) -> #dtupdatereq{}.
-encode_update_request({BType, Bucket}, Key, DType, Op, Options) ->
+-spec encode_update_request({binary(), binary()}, binary() | undefined, update(), [update_opt()]) -> #dtupdatereq{}.
+encode_update_request({BType, Bucket}, Key, {DType, Op, Context}, Options) ->
     Update = #dtupdatereq{bucket=Bucket,
                           key=Key,
                           type=BType,
+                          context=Context,
                           op=encode_operation(Op, DType)},
     encode_update_options(Update, Options).
 
