@@ -407,11 +407,11 @@ encode_operation(Op, map) ->
 
 
 %% @doc Encodes an update request into a DtUpdate message.
--spec encode_update_request({binary(), binary()}, binary() | undefined, toplevel_type(), [toplevel_op()]) -> #dtupdatereq{}.
+-spec encode_update_request({binary(), binary()}, binary() | undefined, toplevel_type(), toplevel_op()) -> #dtupdatereq{}.
 encode_update_request({_,_}=BucketAndType, Key, Type, Ops) ->
     encode_update_request(BucketAndType, Key, Type, Ops, []).
 
--spec encode_update_request({binary(), binary()}, binary() | undefined, toplevel_type(), [toplevel_op()], [update_opt()]) -> #dtupdatereq{}.
+-spec encode_update_request({binary(), binary()}, binary() | undefined, toplevel_type(), toplevel_op(), [update_opt()]) -> #dtupdatereq{}.
 encode_update_request({BType, Bucket}, Key, DType, Op, Options) ->
     Update = #dtupdatereq{bucket=Bucket,
                           key=Key,
