@@ -33,6 +33,7 @@
          encode_update_request/4,
          decode_operation/1,
          decode_operation/2,
+         operation_type/1,
          decode_update_response/3,
          encode_update_response/4,
          encode_update_response/5
@@ -406,6 +407,15 @@ encode_operation(Op, set) ->
 encode_operation(Op, map) ->
     #dtop{map_op=encode_map_op(Op)}.
 
+%% @doc Returns the type that the DtOp message expects to be performed
+%% on.
+-spec operation_type(#dtop{}) -> toplevel_type().
+operation_type(#dtop{counter_op=#counterop{}}) ->
+    counter;
+operation_type(#dtop{set_op=#setop{}}) ->
+    set;
+operation_type(#dtop{map_op=#mapop{}}) ->
+    map.
 
 %% @doc Encodes an update request into a DtUpdate message.
 -spec encode_update_request({binary(), binary()}, binary() | undefined, update()) -> #dtupdatereq{}.
