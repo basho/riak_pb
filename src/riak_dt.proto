@@ -219,7 +219,7 @@ message DtUpdateReq {
     optional uint32 w               =  6;
     optional uint32 dw              =  7;
     optional uint32 pw              =  8;
-    optional bool   return_body     =  9;
+    optional bool   return_body     =  9 [default=false];
     optional uint32 timeout         = 10;
     optional bool   sloppy_quorum   = 11;  // Experimental, may change/disappear
     optional uint32 n_val           = 12;  // Experimental, may change/disappear
