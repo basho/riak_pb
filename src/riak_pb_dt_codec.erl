@@ -36,7 +36,8 @@
          operation_type/1,
          decode_update_response/3,
          encode_update_response/4,
-         encode_update_response/5
+         encode_update_response/5,
+         encode_operation/2
         ]).
 
 -import(riak_pb_kv_codec, [encode_quorum/1]).
@@ -371,9 +372,12 @@ encode_map_op_update({add, F}, #mapop{adds=A}=M) ->
     M#mapop{adds=[encode_map_field(F)|A]};
 encode_map_op_update({remove, F}, #mapop{removes=R}=M) ->
     M#mapop{removes=[encode_map_field(F)|R]};
-encode_map_op_update({update, F, Ops}, #mapop{updates=U}=M) ->
+encode_map_op_update({update, F, Ops}, #mapop{updates=U}=M) when is_list(Ops) ->
     Updates = [ encode_map_update(F, Op) || Op <- Ops ],
-    M#mapop{updates=Updates ++ U}.
+    M#mapop{updates=Updates ++ U};
+encode_map_op_update({update, F, Op}, #mapop{updates=U}=M)  ->
+    M#mapop{updates=[encode_map_update(F, Op) | U]}.
+
 
 -spec decode_map_op(#mapop{}, type_mappings()) -> map_op().
 decode_map_op(#mapop{adds=Adds, removes=Removes, updates=Updates}, Mods) ->
