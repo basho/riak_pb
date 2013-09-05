@@ -53,12 +53,12 @@
 -type map_entry() :: {map_field(), embedded_value()}.
 -type map_field() :: {binary(), embedded_type()}.
 -type map_value() :: [ map_entry() ].
--type embedded_value() :: counter_value() | set_value() | register_value() | flag_value().
+-type embedded_value() :: counter_value() | set_value() | register_value() | flag_value() | map_value().
 -type toplevel_value() :: counter_value() | set_value() | map_value().
 -type fetch_response() :: {toplevel_type(), toplevel_value(), context()}.
 
 %% Type names as atoms
--type embedded_type() :: counter | set | register | flag.
+-type embedded_type() :: counter | set | register | flag | map.
 -type toplevel_type() :: counter | set | map.
 
 %% Operations
@@ -69,7 +69,7 @@
 -type register_op() :: {assign, binary()}.
 -type simple_map_op() :: {add, map_field()} | {remove, map_field()} | {update, map_field(), [embedded_type_op()]}.
 -type map_op() :: simple_map_op() | {update, [simple_map_op()]}.
--type embedded_type_op() :: counter_op() | set_op() | register_op() | flag_op().
+-type embedded_type_op() :: counter_op() | set_op() | register_op() | flag_op() | map_op().
 -type toplevel_op() :: counter_op() | set_op() | map_op().
 -type update() :: {toplevel_type(), toplevel_op(), context()}.
 
@@ -132,7 +132,10 @@ decode_map_entry(#mapentry{field=#mapfield{type='SET'}=Field, set_value=Val}, Mo
 decode_map_entry(#mapentry{field=#mapfield{type='REGISTER'}=Field, register_value=Val}, Mods) ->
     {decode_map_field(Field, Mods), Val};
 decode_map_entry(#mapentry{field=#mapfield{type='FLAG'}=Field, flag_value=Val}, Mods) ->
-    {decode_map_field(Field, Mods), Val}.
+    {decode_map_field(Field, Mods), Val};
+decode_map_entry(#mapentry{field=#mapfield{type='MAP'}=Field, map_value=Val}, Mods) ->
+    {decode_map_field(Field, Mods), [ decode_map_entry(Entry, Mods) || Entry <- Val ]}.
+
 
 %% @doc Encodes a tuple of field and value into a MapEntry message.
 -spec encode_map_entry(map_entry(), type_mappings()) -> #mapentry{}.
@@ -144,6 +147,9 @@ encode_map_entry({{Name, register=Type}, Value}, _Mods) when is_binary(Value) ->
     #mapentry{field=encode_map_field({Name, Type}), register_value=Value};
 encode_map_entry({{Name, flag=Type}, Value}, _Mods) when is_boolean(Value) ->
     #mapentry{field=encode_map_field({Name, Type}), flag_value=Value};
+encode_map_entry({{Name, map=Type}, Value}, Mods) when is_list(Value) ->
+    #mapentry{field=encode_map_field({Name, Type}),
+              map_value=[ encode_map_entry(Entry, Mods) || Entry <- Value ]};
 encode_map_entry({{Name, Type}, Value}, Mods) ->
     %% We reach this clause if the type is not in the shortname yet,
     %% but is a module name.
@@ -344,7 +350,11 @@ decode_map_update(#mapupdate{field=#mapfield{name=N, type='REGISTER'=Type}, regi
 decode_map_update(#mapupdate{field=#mapfield{name=N, type='FLAG'=Type}, flag_op=Op}, Mods) ->
     FOp = decode_flag_op(Op),
     FType = decode_type(Type, Mods),
-    {{N, FType}, FOp}.
+    {{N, FType}, FOp};
+decode_map_update(#mapupdate{field=#mapfield{name=N, type='MAP'=Type}, map_op=Op}, Mods) ->
+    MOp = decode_map_op(Op, Mods),
+    FType = decode_type(Type, Mods),
+    {{N, FType}, MOp}.
 
 %% @doc Encodes a map field operation into a MapUpdate message.
 -spec encode_map_update(map_field(), embedded_type_op()) -> #mapupdate{}.
@@ -355,7 +365,9 @@ encode_map_update({_Name, set}=Key, Op) ->
 encode_map_update({_Name, register}=Key, {assign, Value}) ->
     #mapupdate{field=encode_map_field(Key), register_op=Value};
 encode_map_update({_Name, flag}=Key, Op) ->
-    #mapupdate{field=encode_map_field(Key), flag_op=encode_flag_op(Op)}.
+    #mapupdate{field=encode_map_field(Key), flag_op=encode_flag_op(Op)};
+encode_map_update({_Name, map}=Key, Op) ->
+    #mapupdate{field=encode_map_field(Key), map_op=encode_map_op(Op)}.
 
 %% @doc Encodes a map operation into a MapOp message.
 -spec encode_map_op(map_op()) -> #mapop{}.

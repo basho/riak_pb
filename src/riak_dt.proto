@@ -49,6 +49,7 @@ message MapField {
         SET      = 2;
         REGISTER = 3;
         FLAG     = 4;
+        MAP      = 5;
     }
 
     required bytes        name = 1;
@@ -66,6 +67,7 @@ message MapEntry {
     repeated bytes    set_value      = 3;
     optional bytes    register_value = 4;
     optional bool     flag_value     = 5;
+    repeated MapEntry map_value      = 6;
 }
 
 /*
@@ -170,6 +172,7 @@ message MapUpdate {
      */
     optional bytes     register_op = 4;
     optional FlagOp    flag_op     = 5;
+    optional MapOp     map_op      = 6;
 }
 
 /*
