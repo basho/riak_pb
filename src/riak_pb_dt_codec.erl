@@ -241,12 +241,17 @@ encode_fetch_options(Fetch, [_|Tail]) ->
     encode_fetch_options(Fetch, Tail).
 
 %% @doc Decodes a FetchResponse into tuple of type, value and context.
--spec decode_fetch_response(#dtfetchresp{}) -> fetch_response().
-decode_fetch_response(#dtfetchresp{context=Context, type='COUNTER', counter_value=Val}) ->
+-spec decode_fetch_response(#dtfetchresp{}) -> fetch_response() | {notfound, toplevel_type()}.
+decode_fetch_response(#dtfetchresp{type=T, value=undefined}) ->
+    {notfound, decode_type(T)};
+decode_fetch_response(#dtfetchresp{context=Context, type='COUNTER',
+                                   value=#dtvalue{counter_value=Val}}) ->
     {counter, Val, Context};
-decode_fetch_response(#dtfetchresp{context=Context, type='SET', set_value=Val}) ->
+decode_fetch_response(#dtfetchresp{context=Context, type='SET',
+                                   value=#dtvalue{set_value=Val}}) ->
     {set, Val, Context};
-decode_fetch_response(#dtfetchresp{context=Context, type='MAP', map_value=Val}) ->
+decode_fetch_response(#dtfetchresp{context=Context, type='MAP',
+                                   value=#dtvalue{map_value=Val}}) ->
     {map, [ decode_map_entry(Entry) || Entry <- Val ], Context}.
 
 %% @doc Encodes the result of a fetch request into a FetchResponse message.
@@ -257,20 +262,16 @@ encode_fetch_response(Type, Value, Context) ->
 %% @doc Encodes the result of a fetch request into a FetchResponse message.
 -spec encode_fetch_response(toplevel_type(), toplevel_value(), context(), type_mappings()) -> #dtfetchresp{}.
 encode_fetch_response(Type, undefined, _Context, _Mods) ->
-    %% TODO: "Not found" may be undefined, or it may be the
-    %% bottom-value of the type, but we need to send something back.
-    %% There is also no "context" for a missing datatype, or its
-    %% bottom-value.
     #dtfetchresp{type=encode_type(Type)};
 encode_fetch_response(Type, Value, Context, Mods) ->
     Response = #dtfetchresp{context=Context, type=encode_type(Type)},
     case Type of
         counter ->
-            Response#dtfetchresp{counter_value=Value};
+            Response#dtfetchresp{value=#dtvalue{counter_value=Value}};
         set ->
-            Response#dtfetchresp{set_value=Value};
+            Response#dtfetchresp{value=#dtvalue{set_value=Value}};
         map ->
-            Response#dtfetchresp{map_value=[encode_map_entry(Entry, Mods) || Entry <- Value]}
+            Response#dtfetchresp{value=#dtvalue{map_value=[encode_map_entry(Entry, Mods) || Entry <- Value]}}
     end.
 
 %% =========================
