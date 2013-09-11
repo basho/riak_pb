@@ -41,8 +41,7 @@ option java_outer_classname = "RiakDtPB";
 message MapField {
     /*
      * The types that can be stored in a map are limited to counters,
-     * sets, registers, and flags. Other types may be allowed in the
-     * future.
+     * sets, registers, flags, and maps.
      */
     enum MapFieldType {
         COUNTER  = 1;
