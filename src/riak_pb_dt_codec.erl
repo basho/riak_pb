@@ -146,7 +146,7 @@ encode_map_entry({{Name, set=Type}, Value}, _Mods) when is_list(Value) ->
 encode_map_entry({{Name, register=Type}, Value}, _Mods) when is_binary(Value) ->
     #mapentry{field=encode_map_field({Name, Type}), register_value=Value};
 encode_map_entry({{Name, flag=Type}, Value}, _Mods) when is_boolean(Value) ->
-    #mapentry{field=encode_map_field({Name, Type}), flag_value=Value};
+    #mapentry{field=encode_map_field({Name, Type}), flag_value=encode_flag_value(Value)};
 encode_map_entry({{Name, map=Type}, Value}, Mods) when is_list(Value) ->
     #mapentry{field=encode_map_field({Name, Type}),
               map_value=[ encode_map_entry(Entry, Mods) || Entry <- Value ]};
@@ -194,6 +194,11 @@ encode_type(set)      -> 'SET';
 encode_type(register) -> 'REGISTER';
 encode_type(flag)     -> 'FLAG';
 encode_type(map)      -> 'MAP'.
+
+%% @doc Encodes a flag value into its PB message equivalent.
+encode_flag_value(on) -> true;
+encode_flag_value(off) -> false;
+encode_flag_value(Other) -> Other.
 
 %% ========================
 %% FETCH REQUEST / RESPONSE
@@ -327,6 +332,7 @@ encode_set_update({remove_all, Members}, #setop{removes=R}=S) when is_list(Membe
 
 %% @doc Decodes a operation name from a PB message into an atom.
 -spec decode_flag_op(atom()) -> atom().
+
 decode_flag_op('ENABLE')  -> enable;
 decode_flag_op('DISABLE') -> disable.
 
