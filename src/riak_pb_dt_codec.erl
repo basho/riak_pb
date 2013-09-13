@@ -145,7 +145,7 @@ encode_map_entry({{Name, set=Type}, Value}, _Mods) when is_list(Value) ->
     #mapentry{field=encode_map_field({Name, Type}), set_value=Value};
 encode_map_entry({{Name, register=Type}, Value}, _Mods) when is_binary(Value) ->
     #mapentry{field=encode_map_field({Name, Type}), register_value=Value};
-encode_map_entry({{Name, flag=Type}, Value}, _Mods) when is_boolean(Value) ->
+encode_map_entry({{Name, flag=Type}, Value}, _Mods) when is_atom(Value) ->
     #mapentry{field=encode_map_field({Name, Type}), flag_value=encode_flag_value(Value)};
 encode_map_entry({{Name, map=Type}, Value}, Mods) when is_list(Value) ->
     #mapentry{field=encode_map_field({Name, Type}),
