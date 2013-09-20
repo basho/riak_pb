@@ -67,7 +67,7 @@
 -type set_op() :: simple_set_op() | {update, [simple_set_op()]}.
 -type flag_op() :: enable | disable.
 -type register_op() :: {assign, binary()}.
--type simple_map_op() :: {add, map_field()} | {remove, map_field()} | {update, map_field(), [embedded_type_op()]}.
+-type simple_map_op() :: {add, map_field()} | {remove, map_field()} | {update, map_field(), embedded_type_op()}.
 -type map_op() :: simple_map_op() | {update, [simple_map_op()]}.
 -type embedded_type_op() :: counter_op() | set_op() | register_op() | flag_op() | map_op().
 -type toplevel_op() :: counter_op() | set_op() | map_op().
@@ -177,7 +177,7 @@ decode_type('FLAG')     -> flag;
 decode_type('MAP')      -> map.
 
 %% @doc Encodes an atom type into the PB message equivalent, using the
-%% pass mappings to convert module names into shortnames.
+%% passed mappings to convert module names into shortnames.
 -spec encode_type(atom(), type_mappings()) -> atom().
 encode_type(TypeOrMod, Mods) ->
     case lists:keyfind(TypeOrMod, 2, Mods) of
