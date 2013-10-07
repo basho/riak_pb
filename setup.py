@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 from setuptools import setup
+import version
 
 setup(name='riak_pb',
-      version='2.0.0.7',
+      version=version.get_version(),
       description='Riak Protocol Buffers Messages',
       packages=['riak_pb'],
       requires=['protobuf(==2.4.1)'],
