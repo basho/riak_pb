@@ -179,6 +179,7 @@ message RpbIndexReq {
     optional bytes continuation = 10;
     optional uint32 timeout = 11;
     optional bytes type = 12;         // Bucket type, if not set we assume the 'default' type
+    optional bytes term_regex = 13;
 }
 
 // Secondary Index query response
