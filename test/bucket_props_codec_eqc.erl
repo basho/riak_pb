@@ -34,7 +34,7 @@
 bucket_codec_test_() ->
     [{"bucket properties encode decode",
       ?_test(begin
-                 eqc:quickcheck(?QC_OUT(eqc:numtests(2000, prop_codec())))
+                 eqc:quickcheck(?QC_OUT(eqc:testing_time(4, prop_codec())))
              end)}].
 
 %%====================================================================
@@ -90,7 +90,9 @@ bucket_prop() ->
            flag(notfound_ok),
            backend(),
            flag(search),
-           repl()]).
+           repl(),
+           yz_index(),
+           datatype()]).
 
 sortuniq(Gen) ->
     ?LET(L, Gen, lists:ukeysort(1,L)).
@@ -132,4 +134,9 @@ atom() ->
 linkfun() ->
     ?LET({M,F}, {atom(), atom()}, {linkfun, {modfun, M, F}}).
 
+datatype() ->
+    {datatype, elements([counter, set, map])}.
+
+yz_index() ->
+    {search_index, non_empty(binary())}.
 -endif.
