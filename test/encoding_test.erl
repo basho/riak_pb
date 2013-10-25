@@ -89,12 +89,12 @@ pb_test_() ->
              end)}
     ].
 
-
+msg_code_encode_decode(256) -> ok;
 msg_code_encode_decode(N) ->
     case riak_pb_codec:msg_type(N) of
         undefined ->
-            ok;
+            ignore;
         MsgType ->
-            ?assertEqual(N, riak_pb_codec:msg_code(MsgType)),
-            msg_code_encode_decode(N+1)
-    end.
+            ?assertEqual(N, riak_pb_codec:msg_code(MsgType))
+    end,
+    msg_code_encode_decode(N+1).
