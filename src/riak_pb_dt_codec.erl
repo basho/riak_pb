@@ -97,11 +97,6 @@
 %% =========================
 
 %% @doc Decodes a MapField message into a tuple of name and type.
--spec decode_map_field(#mapfield{}) -> map_field().
-decode_map_field(MapField) ->
-    decode_map_field(MapField, []).
-
-%% @doc Decodes a MapField message into a tuple of name and type.
 -spec decode_map_field(#mapfield{}, type_mappings()) -> map_field().
 decode_map_field(#mapfield{name=Name,type=Type}, Mods) ->
     {Name, decode_type(Type, Mods)}.
@@ -497,7 +492,7 @@ decode_update_response(#dtupdateresp{counter_value=C, context=Ctx}=Resp, counter
 decode_update_response(#dtupdateresp{set_value=S, context=Ctx}=Resp, set, true) ->
     maybe_wrap_key({set, S, Ctx}, Resp);
 decode_update_response(#dtupdateresp{map_value=M, context=Ctx}=Resp, map, true) ->
-    maybe_wrap_key({map, [ decode_map_field(F) || F <- M ], Ctx}, Resp).
+    maybe_wrap_key({map, [ decode_map_entry(F) || F <- M ], Ctx}, Resp).
 
 maybe_wrap_key(Term, #dtupdateresp{key=undefined}) -> Term;
 maybe_wrap_key(Term, #dtupdateresp{key=K}) -> {K, Term}.
