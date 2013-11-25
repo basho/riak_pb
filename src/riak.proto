@@ -155,7 +155,7 @@ message RpbBucketProps {
     }
     optional RpbReplMode repl = 24;
 
-    optional bytes yz_index = 25;
+    optional bytes search_index = 25;
 }
 
 // Authentication request
