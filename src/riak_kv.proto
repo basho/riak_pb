@@ -173,6 +173,8 @@ message RpbIndexReq {
     optional uint32 max_results = 9;
     optional bytes continuation = 10;
     optional uint32 timeout = 11;
+    optional bytes unused = 12;
+    optional bytes term_regex = 13;
 }
 
 // Secondary Index query response
