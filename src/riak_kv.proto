@@ -175,6 +175,8 @@ message RpbIndexReq {
     optional uint32 timeout = 11;
     optional bytes unused = 12;
     optional bytes term_regex = 13;
+    // Whether to use pagination sort for non-paginated queries
+    optional bool pagination_sort = 14;
 }
 
 // Secondary Index query response
