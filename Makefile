@@ -4,14 +4,14 @@ all: deps compile
 
 deps: erl_deps
 
-compile: erl_compile python_compile java_compile
+compile: erl_compile python_compile java_compile c_compile
 
-clean: erl_clean python_clean java_clean
+clean: erl_clean python_clean java_clean c_clean
 
 distclean: clean
 	rm -rf dist
 
-release: python_release java_release
+release: python_release java_release c_release
 
 test: erl_test
 
@@ -91,3 +91,16 @@ else
 	@mvn clean
 	@mvn deploy -Dgithub.downloads=true
 endif
+
+# C specific build steps
+c_compile:
+	@echo "==> C (compile)"
+	@./build-c.sh
+
+c_clean:
+	@echo "==> C (clean)"
+	@rm -rf c
+
+c_release: c_compile
+	@echo "==> C"
+	@echo "Left to the user as an exercise"
