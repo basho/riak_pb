@@ -76,28 +76,13 @@ message RpbResetBucketReq {
     optional bytes type = 2;
 }
 
+// Reset bucket properties response - no message defined, just send
+// RpbResetBucketResp
+
 // Get bucket properties request
 message RpbGetBucketTypeReq {
     required bytes type = 1;
 }
-
-// Set bucket properties request
-message RpbSetBucketTypeReq {
-    required bytes type = 1;
-    required RpbBucketProps props = 2;
-}
-
-// Set bucket properties response - no message defined, just send
-// RpbSetBucketResp
-
-// Reset bucket properties request
-message RpbResetBucketTypeReq {
-    required bytes type = 1;
-}
-
-
-// Reset bucket properties response - no message defined, just send
-// RpbResetBucketResp
 
 // Module-Function pairs for commit hooks and other bucket properties
 // that take functions
