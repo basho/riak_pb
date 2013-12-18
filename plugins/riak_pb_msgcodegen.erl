@@ -19,7 +19,7 @@
 
 -define(MODULE_COMMENTS(CSV),
         ["%% @doc This module contains message code mappings generated from\n%% ",
-         CSV,". DO NOT EDIT OR COMMIT!"]).
+         CSV,". DO NOT EDIT OR COMMIT THIS FILE!\n"]).
 
 %% ===================================================================
 %% Public API
