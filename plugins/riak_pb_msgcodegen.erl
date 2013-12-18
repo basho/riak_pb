@@ -17,6 +17,10 @@
 
 -define(FMT(Str, Args), lists:flatten(io_lib:format(Str, Args))).
 
+-define(MODULE_COMMENTS(CSV),
+        ["%% @doc This module contains message code mappings generated from\n%% ",
+         CSV,". DO NOT EDIT OR COMMIT!"]).
+
 %% ===================================================================
 %% Public API
 %% ===================================================================
@@ -56,7 +60,7 @@ generate_each(Config, [{CSV, Erl}|Rest]) ->
             Tuples = load_csv(CSV),
             Module = generate_module(mod_name(CSV), Tuples),
             Formatted = erl_prettypr:format(Module),
-            ok = file:write_file(Erl, Formatted),
+            ok = file:write_file(Erl, [?MODULE_COMMENTS(CSV), Formatted]),
             ?CONSOLE("Generated ~s~n", [Erl])
     end,
     generate_each(Config, Rest).
