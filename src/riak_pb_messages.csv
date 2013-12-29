@@ -9,8 +9,8 @@
 8,RpbGetServerInfoResp,riak
 9,RpbGetReq,riak_kv
 10,RpbGetResp,riak_kv
-11,RbpPutReq,riak_kv
-12,RbpPutResp,riak_kv
+11,RpbPutReq,riak_kv
+12,RpbPutResp,riak_kv
 13,RpbDelReq,riak_kv
 14,RpbDelResp,riak_kv
 15,RpbListBucketsReq,riak_kv
