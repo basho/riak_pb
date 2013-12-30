@@ -89,5 +89,5 @@ ifeq ($(RELEASE_GPG_KEYNAME),)
 	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
 else
 	@mvn clean
-	@mvn deploy -Dgithub.downloads=true
+	@mvn deploy 
 endif
