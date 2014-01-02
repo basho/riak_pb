@@ -124,7 +124,6 @@ class build_messages(Command):
     # Used in loading and generating
     _pb_imports = set()
     _messages = set()
-    _empty_responses = set()
     _linesep = os.linesep
     _indented_item_sep = ',{0}    '.format(_linesep)
 
@@ -163,15 +162,12 @@ class build_messages(Command):
                 message = MessageCodeMapping(*row)
                 self._messages.add(message)
                 self._pb_imports.add(message.module_name)
-                if message.message_class is None:
-                    self._empty_responses.add(message)
 
     def _generate(self):
         self._contents = []
         self._generate_doc()
         self._generate_imports()
         self._generate_codes()
-        self._generate_empties()
         self._generate_classes()
         write_file(self.destination, self._contents)
 
@@ -191,18 +187,6 @@ class build_messages(Command):
         for message in sorted(self._messages):
             self._contents.append("{0} = {1}".format(message.message_code_name,
                                                      message.code))
-
-    def _generate_empties(self):
-        # Write empty responses
-        names = [message.message_code_name
-                 for message in sorted(self._empty_responses)]
-        items = self._indented_item_sep.join(names)
-        self._contents.extend(['',
-                               "# These responses don't include messages",
-                               'EMPTY_RESPONSES = [',
-                               '    ' + items,
-                               ']'
-                               ])
 
     def _generate_classes(self):
         # Write message classes
