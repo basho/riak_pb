@@ -113,7 +113,7 @@ $(C_DIR):
 
 $(C_DIR)/%.pb-c.c $(C_DIR)/%.pb-c.h: src/%.proto
 	@echo "Generating $@ from $<"
-	$(PROTOC) -Isrc $< --c_out=$(C_DIR)
+	@$(PROTOC) -Isrc $< --c_out=$(C_DIR)
 
 c_clean:
 	@echo "==> C (clean)"
