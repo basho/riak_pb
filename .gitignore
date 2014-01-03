@@ -20,3 +20,6 @@ dist/*.egg
 
 # Java
 target/*
+
+# C
+c/*

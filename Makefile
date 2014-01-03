@@ -97,9 +97,10 @@ PROTOC	 = protoc-c
 PROTOS	:= $(wildcard src/*.proto)
 C_DIR	 = c
 C_FILES	:= $(patsubst src/%.proto,$(C_DIR)/%.pb-c.c,$(PROTOS))
+H_FILES	:= $(patsubst src/%.proto,$(C_DIR)/%.pb-c.h,$(PROTOS))
 C_PREFIX := /usr/local/riak_pb_c
 
-c_compile: c_announce c_protoc_check $(C_DIR) $(C_FILES)
+c_compile: c_announce c_protoc_check $(C_DIR) $(C_FILES) $(H_FILES)
 
 c_announce:
 	@echo "==> C (compile)"
