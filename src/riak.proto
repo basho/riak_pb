@@ -146,7 +146,11 @@ message RpbBucketProps {
     }
     optional RpbReplMode repl = 24;
 
+    // Search index
     optional bytes search_index = 25;
+
+    // KV Datatypes
+    optional bytes datatype = 26;
 }
 
 // Authentication request
