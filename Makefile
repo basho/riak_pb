@@ -93,14 +93,37 @@ else
 endif
 
 # C specific build steps
-c_compile:
+PROTOC	 = protoc-c
+PROTOS	:= $(wildcard src/*.proto)
+C_DIR	 = c
+C_FILES	:= $(patsubst src/%.proto,$(C_DIR)/%.pb-c.c,$(PROTOS))
+C_PREFIX := /usr/local/riak_pb_c
+
+c_compile: c_announce c_protoc_check $(C_DIR) $(C_FILES)
+
+c_announce:
 	@echo "==> C (compile)"
-	@./build-c.sh
+	@true
+
+c_protoc_check: PROTOC-exists
+PROTOC-exists: ; @which $(PROTOC) > /dev/null
+
+$(C_DIR):
+	@mkdir -p $(C_DIR)
+
+$(C_DIR)/%.pb-c.c $(C_DIR)/%.pb-c.h: src/%.proto
+	@echo "Generating $@ from $<"
+	$(PROTOC) -Isrc $< --c_out=$(C_DIR)
 
 c_clean:
 	@echo "==> C (clean)"
-	@rm -rf c
+	@rm -rf $(C_DIR)
 
 c_release: c_compile
-	@echo "==> C"
-	@echo "Left to the user as an exercise"
+	@echo "==> C (release)"
+	@echo "Installing in $(C_PREFIX)"
+	@mkdir -p $(C_PREFIX)
+	@mkdir -p $(C_PREFIX)/include
+	@cp -p $(C_DIR)/*.c $(C_PREFIX)
+	@cp -p $(C_DIR)/*.h $(C_PREFIX)/include
+
