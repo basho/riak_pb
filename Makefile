@@ -4,14 +4,14 @@ all: deps compile
 
 deps: erl_deps
 
-compile: erl_compile python_compile java_compile
+compile: erl_compile python_compile java_compile c_compile
 
-clean: erl_clean python_clean java_clean
+clean: erl_clean python_clean java_clean c_clean
 
 distclean: clean
 	rm -rf dist
 
-release: python_release java_release
+release: python_release java_release c_release
 
 test: erl_test
 
@@ -91,3 +91,40 @@ else
 	@mvn clean
 	@mvn deploy 
 endif
+
+# C specific build steps
+PROTOC	 = protoc-c
+PROTOS	:= $(wildcard src/*.proto)
+C_DIR	 = c
+C_FILES	:= $(patsubst src/%.proto,$(C_DIR)/%.pb-c.c,$(PROTOS))
+H_FILES	:= $(patsubst src/%.proto,$(C_DIR)/%.pb-c.h,$(PROTOS))
+C_PREFIX := /usr/local/riak_pb_c
+
+c_compile: c_announce c_protoc_check $(C_DIR) $(C_FILES) $(H_FILES)
+
+c_announce:
+	@echo "==> C (compile)"
+	@true
+
+c_protoc_check: PROTOC-exists
+PROTOC-exists: ; @which $(PROTOC) > /dev/null
+
+$(C_DIR):
+	@mkdir -p $(C_DIR)
+
+$(C_DIR)/%.pb-c.c $(C_DIR)/%.pb-c.h: src/%.proto
+	@echo "Generating $@ from $<"
+	@$(PROTOC) -Isrc $< --c_out=$(C_DIR)
+
+c_clean:
+	@echo "==> C (clean)"
+	@rm -rf $(C_DIR)
+
+c_release: c_compile
+	@echo "==> C (release)"
+	@echo "Installing in $(C_PREFIX)"
+	@mkdir -p $(C_PREFIX)
+	@mkdir -p $(C_PREFIX)/include
+	@cp -p $(C_DIR)/*.c $(C_PREFIX)
+	@cp -p $(C_DIR)/*.h $(C_PREFIX)/include
+
