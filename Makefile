@@ -69,10 +69,14 @@ python_clean:
 	@./setup.py clean clean_messages
 
 python_release: python_compile
+ifeq ($(RELEASE_GPG_KEYNAME),)
+	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
+else
 	@echo "==> Python (release)"
-	@python2.6 setup.py bdist_egg upload
-	@python2.7 setup.py bdist_egg upload
-	@python2.6 setup.py sdist upload
+	@python2.6 setup.py bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
+	@python2.7 setup.py bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
+	@python2.6 setup.py sdist upload -s -i $(RELEASE_GPG_KEYNAME)
+endif
 
 # Java specific build steps
 java_compile:
