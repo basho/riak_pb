@@ -2,6 +2,7 @@
 
 from setuptools import setup
 import version
+from msgcodegen import build_messages, clean_messages
 
 setup(name='riak_pb',
       version=version.get_version(),
@@ -16,6 +17,8 @@ setup(name='riak_pb',
       author_email='clients@basho.com',
       url='https://github.com/basho/riak_pb',
       zip_safe=True,
+      cmdclass={'build_messages': build_messages,
+                'clean_messages': clean_messages},
       classifiers=['License :: OSI Approved :: Apache Software License',
                    'Intended Audience :: Developers',
                    'Operating System :: OS Independent',

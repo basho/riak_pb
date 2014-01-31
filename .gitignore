@@ -15,6 +15,7 @@ src/riak_pb_messages.erl
 # Python
 riak_pb.egg-info
 riak_pb/*_pb2.py
+riak_pb/messages.py
 build
 *.pyc
 dist/*.egg

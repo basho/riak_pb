@@ -61,12 +61,12 @@ cleanplt:
 python_compile:
 	@echo "==> Python (compile)"
 	@protoc -Isrc --python_out=riak_pb src/*.proto
-	@./setup.py build
+	@./setup.py build_messages build
 
 python_clean:
 	@echo "==> Python (clean)"
 	@rm -f riak_pb/*_pb2.py
-	@./setup.py clean
+	@./setup.py clean clean_messages
 
 python_release: python_compile
 	@echo "==> Python (release)"
