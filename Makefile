@@ -93,7 +93,7 @@ ifeq ($(RELEASE_GPG_KEYNAME),)
 	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
 else
 	@mvn clean
-	@mvn deploy 
+	@mvn deploy
 endif
 
 # C specific build steps
@@ -131,4 +131,3 @@ c_release: c_compile
 	@mkdir -p $(C_PREFIX)/include
 	@cp -p $(C_DIR)/*.c $(C_PREFIX)
 	@cp -p $(C_DIR)/*.h $(C_PREFIX)/include
-
