@@ -56,7 +56,7 @@ public class TemplateController
             sb.append(prefix).append(constName).append(" = ");
             
             int code = Integer.valueOf(csv[0]);
-            if (code > 128)
+            if (code > 127)
             {
                 sb.append(cast);
             }
