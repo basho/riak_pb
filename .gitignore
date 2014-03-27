@@ -11,6 +11,7 @@ doc/*
 .eqc-info
 current_counterexample.eqc
 src/riak_pb_messages.erl
+.local_dialyzer_plt
 
 # Python
 riak_pb.egg-info
