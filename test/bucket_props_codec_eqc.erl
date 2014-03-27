@@ -92,7 +92,8 @@ bucket_prop() ->
            flag(search),
            repl(),
            yz_index(),
-           datatype()]).
+           datatype(),
+           flag(consistent)]).
 
 sortuniq(Gen) ->
     ?LET(L, Gen, lists:ukeysort(1,L)).
