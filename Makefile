@@ -1,10 +1,10 @@
 .PHONY: deps
 
-all: deps compile
+all: deps compile_all
 
 deps: erl_deps
 
-compile: erl_compile python_compile java_compile c_compile
+compile_all: erl_compile python_compile java_compile c_compile
 
 clean: erl_clean python_clean java_clean c_clean
 
@@ -13,49 +13,20 @@ distclean: clean
 
 release: python_release java_release c_release
 
-test: erl_test
-
 # Erlang-specific build steps
+DIALYZER_APPS = kernel stdlib erts crypto compiler hipe syntax_tools
+include tools.mk
+
 erl_deps:
-	@./rebar get-deps
+	@${REBAR} get-deps
 
 erl_compile:
-	@./rebar compile
+	@${REBAR} compile
 
 erl_clean:
-	@./rebar clean
+	@${REBAR} clean
 
-erl_test: erl_compile
-	@./rebar eunit skip_deps=true
-
-REPO = riak_pb
-APPS = kernel stdlib sasl erts ssl tools os_mon runtime_tools crypto inets \
-	xmerl webtool snmp public_key mnesia eunit syntax_tools compiler
-COMBO_PLT = $(HOME)/.$(REPO)_combo_dialyzer_plt
-
-check_plt: erl_deps erl_compile
-	dialyzer --check_plt --plt $(COMBO_PLT) --apps $(APPS) \
-		deps/*/ebin
-
-build_plt: erl_deps erl_compile
-	dialyzer --build_plt --output_plt $(COMBO_PLT) --apps $(APPS) \
-		deps/*/ebin
-
-dialyzer: erl_deps erl_compile
-	@echo
-	@echo Use "'make check_plt'" to check PLT prior to using this target.
-	@echo Use "'make build_plt'" to build PLT prior to using this target.
-	@echo
-	@sleep 1
-	dialyzer -Wno_return --plt $(COMBO_PLT) deps/*/ebin
-
-cleanplt:
-	@echo
-	@echo "Are you sure?  It could take a long time to rebuild."
-	@echo Deleting $(COMBO_PLT) in 5 seconds.
-	@echo
-	sleep 5
-	rm $(COMBO_PLT)
+compile: erl_compile # Hack for tools.mk
 
 # Python specific build steps
 python_compile:
