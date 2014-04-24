@@ -49,7 +49,7 @@
 -type quorum() :: symbolic_quorum() | non_neg_integer().
 -type symbolic_quorum() :: one | quorum | all | default.
 -type value() :: binary().
--type metadata() :: dict().
+-type metadata() :: dict:dict(binary(), binary()).
 -type contents() :: [{metadata(), value()}].
 
 %% @doc Convert a list of object {MetaData,Value} pairs to protocol
