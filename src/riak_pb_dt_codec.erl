@@ -45,7 +45,7 @@
 -export_type([context/0]).
 
 %% Value types
--opaque context() :: binary().
+-type context() :: binary() | undefined.
 -type counter_value() :: integer().
 -type set_value() :: [ binary() ].
 -type register_value() :: binary().
@@ -54,7 +54,7 @@
 -type map_field() :: {binary(), embedded_type()}.
 -type map_value() :: [ map_entry() ].
 -type embedded_value() :: counter_value() | set_value() | register_value() | flag_value() | map_value().
--type toplevel_value() :: counter_value() | set_value() | map_value().
+-type toplevel_value() :: counter_value() | set_value() | map_value() | undefined.
 -type fetch_response() :: {toplevel_type(), toplevel_value(), context()}.
 
 %% Type names as atoms
