@@ -72,61 +72,61 @@ single request. The response message will typically include a boolean
 
 ### Registered Message Codes
 
-Code | Message |
-:----|:--------|
-0 | `RpbErrorResp` |
-1 | `RpbPingReq` |
-2 | `RpbPingResp` |
-3 | `RpbGetClientIdReq` |
-4 | `RpbGetClientIdResp` |
-5 | `RpbSetClientIdReq` |
-6 | `RpbSetClientIdResp` |
-7 | `RpbGetServerInfoReq` |
-8 | `RpbGetServerInfoResp` |
-9 | `RpbGetReq` |
-10 | `RpbGetResp` |
-11 | `RpbPutReq` |
-12 | `RpbPutResp` |
-13 | `RpbDelReq` |
-14 | `RpbDelResp` |
-15 | `RpbListBucketsReq` |
-16 | `RpbListBucketsResp` |
-17 | `RpbListKeysReq` |
-18 | `RpbListKeysResp` |
-19 | `RpbGetBucketReq` |
-20 | `RpbGetBucketResp` |
-21 | `RpbSetBucketReq` |
-22 | `RpbSetBucketResp` |
-23 | `RpbMapRedReq` |
-24 | `RpbMapRedResp` |
-25 | `RpbIndexReq` |
-26 | `RpbIndexResp` |
-27 | `RpbSearchQueryReq` |
-28 | `RbpSearchQueryResp` |
-29 | `RpbResetBucketReq` |
-30 | `RpbResetBucketResp` |
-31 | `RpbGetBucketTypeReq` |
-32 | `RpbSetBucketTypeResp` |
-40 | `RpbCSBucketReq` |
-41 | `RpbCSUpdateReq` |
-50 | `RpbCounterUpdateReq` |
-51 | `RpbCounterUpdateResp` |
-52 | `RpbCounterGetReq` |
-53 | `RpbCounterGetResp` |
-54 | `RpbYokozunaIndexGetReq` |
-55 | `RpbYokozunaIndexGetResp` |
-56 | `RpbYokozunaIndexPutReq` |
-57 | `RpbYokozunaIndexPutResp` |
-58 | `RpbYokozunaSchemaGetReq` |
-59 | `RpbYokozunaSchemaGetResp` |
-60 | `RpbYokozunaSchemaPutReq` |
-80 | `DtFetchReq` |
-81 | `DtFetchResp` |
-82 | `DtUpdateReq` |
-83 | `RpbAuthReq` |
-253 | `RpbAuthReq` |
-254 | `RpbAuthResp` |
-255 | `RpbStartTls` |
+Code | Message | Subsystem |
+:----|:--------|:----------|
+0 | `RpbErrorResp` | riak
+1 | `RpbPingReq` | riak
+2 | `RpbPingResp` | riak
+3 | `RpbGetClientIdReq` | riak
+4 | `RpbGetClientIdResp` | riak_kv
+5 | `RpbSetClientIdReq` | riak_kv
+6 | `RpbSetClientIdResp` | riak_kv
+7 | `RpbGetServerInfoReq` | riak
+8 | `RpbGetServerInfoResp` | riak
+9 | `RpbGetReq` | riak_kv
+10 | `RpbGetResp` | riak_kv
+11 | `RpbPutReq` | riak_kv
+12 | `RpbPutResp` | riak_kv
+13 | `RpbDelReq` | riak_kv
+14 | `RpbDelResp` | riak_kv
+15 | `RpbListBucketsReq` | riak_kv
+16 | `RpbListBucketsResp` | riak_kv
+17 | `RpbListKeysReq` | riak_kv
+18 | `RpbListKeysResp` | riak_kv
+19 | `RpbGetBucketReq` | riak
+20 | `RpbGetBucketResp` | riak
+21 | `RpbSetBucketReq` | riak
+22 | `RpbSetBucketResp` | riak
+23 | `RpbMapRedReq` | riak_kv
+24 | `RpbMapRedResp` | riak_kv
+25 | `RpbIndexReq` | riak_kv
+26 | `RpbIndexResp` | riak_kv
+27 | `RpbSearchQueryReq` | riak_search
+28 | `RbpSearchQueryResp` | riak_search
+29 | `RpbResetBucketReq` | riak
+30 | `RpbResetBucketResp` | riak
+31 | `RpbGetBucketTypeReq` | riak
+32 | `RpbSetBucketTypeResp` | riak
+40 | `RpbCSBucketReq` | riak_kv
+41 | `RpbCSUpdateReq` | riak_kv
+50 | `RpbCounterUpdateReq` | riak_kv
+51 | `RpbCounterUpdateResp` | riak_kv
+52 | `RpbCounterGetReq` | riak_kv
+53 | `RpbCounterGetResp` | riak_kv
+54 | `RpbYokozunaIndexGetReq` | riak_yokozuna
+55 | `RpbYokozunaIndexGetResp` | riak_yokozuna
+56 | `RpbYokozunaIndexPutReq` | riak_yokozuna
+57 | `RpbYokozunaIndexPutResp` | riak_yokozuna
+58 | `RpbYokozunaSchemaGetReq` | riak_yokozuna
+59 | `RpbYokozunaSchemaGetResp` | riak_yokozuna
+60 | `RpbYokozunaSchemaPutReq` | riak_yokozuna
+80 | `DtFetchReq` | riak_dt
+81 | `DtFetchResp` | riak_dt
+82 | `DtUpdateReq` | riak_dt
+83 | `DtUpdateResp` | riak_dt
+253 | `RpbAuthReq` | riak
+254 | `RpbAuthResp` | riak
+255 | `RpbStartTls` | riak
 
 ## Contributing
 
