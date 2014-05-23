@@ -72,35 +72,61 @@ single request. The response message will typically include a boolean
 
 ### Registered Message Codes
 
-     0 - RpbErrorResp
-     1 - RpbPingReq - 0 length
-     2 - RpbPingResp (pong) - 0 length
-     3 - RpbGetClientIdReq
-     4 - RpbGetClientIdResp
-     5 - RpbSetClientIdReq
-     6 - RpbSetClientIdResp
-     7 - RpbGetServerInfoReq
-     8 - RpbGetServerInfoResp
-     9 - RpbGetReq
-    10 - RpbGetResp
-    11 - RpbPutReq
-    12 - RpbPutResp - 0 length
-    13 - RpbDelReq
-    14 - RpbDelResp
-    15 - RpbListBucketsReq
-    16 - RpbListBucketsResp
-    17 - RpbListKeysReq
-    18 - RpbListKeysResp{1,}
-    19 - RpbGetBucketReq
-    20 - RpbGetBucketResp
-    21 - RpbSetBucketReq
-    22 - RpbSetBucketResp
-    23 - RpbMapRedReq
-    24 - RpbMapRedResp{1,}
-    25 - RpbIndexReq
-    26 - RpbIndexResp
-    27 - RpbSearchQueryReq
-    28 - RbpSearchQueryResp
+Code | Message |
+:----|:--------|
+0 | `RpbErrorResp` |
+1 | `RpbPingReq` |
+2 | `RpbPingResp` |
+3 | `RpbGetClientIdReq` |
+4 | `RpbGetClientIdResp` |
+5 | `RpbSetClientIdReq` |
+6 | `RpbSetClientIdResp` |
+7 | `RpbGetServerInfoReq` |
+8 | `RpbGetServerInfoResp` |
+9 | `RpbGetReq` |
+10 | `RpbGetResp` |
+11 | `RpbPutReq` |
+12 | `RpbPutResp` |
+13 | `RpbDelReq` |
+14 | `RpbDelResp` |
+15 | `RpbListBucketsReq` |
+16 | `RpbListBucketsResp` |
+17 | `RpbListKeysReq` |
+18 | `RpbListKeysResp` |
+19 | `RpbGetBucketReq` |
+20 | `RpbGetBucketResp` |
+21 | `RpbSetBucketReq` |
+22 | `RpbSetBucketResp` |
+23 | `RpbMapRedReq` |
+24 | `RpbMapRedResp` |
+25 | `RpbIndexReq` |
+26 | `RpbIndexResp` |
+27 | `RpbSearchQueryReq` |
+28 | `RbpSearchQueryResp` |
+29 | `RpbResetBucketReq` |
+30 | `RpbResetBucketResp` |
+31 | `RpbGetBucketTypeReq` |
+32 | `RpbSetBucketTypeResp` |
+40 | `RpbCSBucketReq` |
+41 | `RpbCSUpdateReq` |
+50 | `RpbCounterUpdateReq` |
+51 | `RpbCounterUpdateResp` |
+52 | `RpbCounterGetReq` |
+53 | `RpbCounterGetResp` |
+54 | `RpbYokozunaIndexGetReq` |
+55 | `RpbYokozunaIndexGetResp` |
+56 | `RpbYokozunaIndexPutReq` |
+57 | `RpbYokozunaIndexPutResp` |
+58 | `RpbYokozunaSchemaGetReq` |
+59 | `RpbYokozunaSchemaGetResp` |
+60 | `RpbYokozunaSchemaPutReq` |
+80 | `DtFetchReq` |
+81 | `DtFetchResp` |
+82 | `DtUpdateReq` |
+83 | `RpbAuthReq` |
+253 | `RpbAuthReq` |
+254 | `RpbAuthResp` |
+255 | `RpbStartTls` |
 
 ## Contributing
 
