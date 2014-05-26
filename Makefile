@@ -112,3 +112,6 @@ go_compile:
 
 go_clean:
 	@rm -rf  $(GO_DIR)/*.go
+
+go_test:
+	go test github.com/basho/riak_pb/test
