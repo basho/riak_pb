@@ -4,9 +4,9 @@ all: deps compile_all
 
 deps: erl_deps
 
-compile_all: erl_compile python_compile java_compile c_compile
+compile_all: erl_compile python_compile java_compile c_compile go_compile
 
-clean: erl_clean python_clean java_clean c_clean
+clean: erl_clean python_clean java_clean c_clean go_clean
 
 distclean: clean
 	rm -rf dist
@@ -102,3 +102,13 @@ c_release: c_compile
 	@mkdir -p $(C_PREFIX)/include
 	@cp -p $(C_DIR)/*.c $(C_PREFIX)
 	@cp -p $(C_DIR)/*.h $(C_PREFIX)/include
+
+# Go specific build steps
+GO_DIR = gorpb
+
+go_compile:
+	@echo "==> Go (compile)"
+	@protoc --go_out=$(GO_DIR) --proto_path=./src ./src/*.proto
+
+go_clean:
+	@rm -rf  $(GO_DIR)/*.go
