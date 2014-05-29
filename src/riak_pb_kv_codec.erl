@@ -168,7 +168,7 @@ decode_content_meta(deleted, DeletedVal, _Pb) ->
 
 
 %% @doc Convert an rpccontent pb message to an erlang {MetaData,Value} tuple
--spec decode_content(PBContent::tuple()) -> {dict(), binary()}.
+-spec decode_content(PBContent::tuple()) -> {metadata(), binary()}.
 decode_content(PbC) ->
     MD =  decode_content_meta(content_type, PbC#rpbcontent.content_type, PbC) ++
           decode_content_meta(charset, PbC#rpbcontent.charset, PbC) ++
