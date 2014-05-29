@@ -12,6 +12,9 @@ doc/*
 current_counterexample.eqc
 src/riak_pb_messages.erl
 .local_dialyzer_plt
+dialyzer_unhandled_warnings
+dialyzer_warnings
+.rebar/*
 
 # Python
 riak_pb.egg-info
@@ -19,7 +22,7 @@ riak_pb/*_pb2.py
 riak_pb/messages.py
 build
 *.pyc
-dist/*.egg
+dist/*
 
 # Java
 target/*
