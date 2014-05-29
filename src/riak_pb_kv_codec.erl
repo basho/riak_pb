@@ -197,7 +197,7 @@ encode_pair(Pair) ->
 
 %% @doc Convert RpbPair PB message to erlang {K,V} tuple
 %% @equiv riak_pb_codec:decode_pair/1
--spec decode_pair(#rpbpair{}) -> {string(), string()}.
+-spec decode_pair(#rpbpair{}) -> {binary(), binary()}.
 decode_pair(PB) ->
     riak_pb_codec:decode_pair(PB).
 
