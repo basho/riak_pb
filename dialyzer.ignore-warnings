@@ -1,3 +1,4 @@
+## Generated protobuffs code
 riak_dt_pb.erl:46: Guard test is_list(Records::tuple()) can never succeed
 riak_dt_pb.erl:73: The pattern <_, 'repeated_packed', 'undefined', _, _> can never match the type <1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
 riak_dt_pb.erl:74: The pattern <_, 'repeated_packed', [], _, _> can never match the type <1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
@@ -29,3 +30,5 @@ riak_yokozuna_pb.erl:102: Function enum_to_int/2 has no local return
 riak_yokozuna_pb.erl:102: The pattern <'pikachu', 'value'> can never match the type <'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32',atom()>
 riak_yokozuna_pb.erl:201: The pattern <Binary, 'string'> can never match the type <_,'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32'>
 riak_yokozuna_pb.erl:221: The pattern <Types, [{Fnum, Bytes} | Tail], Acc> can never match the type <_,[],[{_,_}]>
+## Insufficient typing on record in generated code
+riak_pb_codec.erl:338: Invalid type specification for function riak_pb_codec:decode_commit_hooks/1. The success typing is ([any()]) -> [{atom(),atom() | [any(),...]} | {'modfun',atom(),atom() | [any(),...]}]
