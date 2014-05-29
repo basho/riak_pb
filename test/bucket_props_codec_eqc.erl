@@ -32,7 +32,7 @@
 %% Eunit integration
 %%====================================================================
 bucket_codec_test_() ->
-    [{"bucket properties encode decode",
+    [{timeout, 10,
       ?_test(begin
                  eqc:quickcheck(?QC_OUT(eqc:testing_time(4, prop_codec())))
              end)}].
