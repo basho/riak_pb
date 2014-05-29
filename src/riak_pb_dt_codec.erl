@@ -67,7 +67,7 @@
 -type set_op() :: simple_set_op() | {update, [simple_set_op()]}.
 -type flag_op() :: enable | disable.
 -type register_op() :: {assign, binary()}.
--type simple_map_op() :: {add, map_field()} | {remove, map_field()} | {update, map_field(), embedded_type_op()}.
+-type simple_map_op() :: {remove, map_field()} | {update, map_field(), embedded_type_op()}.
 -type map_op() :: simple_map_op() | {update, [simple_map_op()]}.
 -type embedded_type_op() :: counter_op() | set_op() | register_op() | flag_op() | map_op().
 -type toplevel_op() :: counter_op() | set_op() | map_op().
@@ -384,8 +384,6 @@ encode_map_op({update, _Field, _Ops}=C) ->
 
 %% @doc Folds a map update into the MapOp message.
 -spec encode_map_op_update(simple_map_op(), #mapop{}) -> #mapop{}.
-encode_map_op_update({add, F}, #mapop{adds=A}=M) ->
-    M#mapop{adds=[encode_map_field(F)|A]};
 encode_map_op_update({remove, F}, #mapop{removes=R}=M) ->
     M#mapop{removes=[encode_map_field(F)|R]};
 encode_map_op_update({update, F, Ops}, #mapop{updates=U}=M) when is_list(Ops) ->
@@ -396,9 +394,8 @@ encode_map_op_update({update, F, Op}, #mapop{updates=U}=M)  ->
 
 
 -spec decode_map_op(#mapop{}, type_mappings()) -> map_op().
-decode_map_op(#mapop{adds=Adds, removes=Removes, updates=Updates}, Mods) ->
+decode_map_op(#mapop{removes=Removes, updates=Updates}, Mods) ->
     {update,
-     [ {add, decode_map_field(A, Mods)} || A <- Adds ] ++
      [ {remove, decode_map_field(R, Mods)} || R <- Removes ] ++
      [ begin
            {Field, Op} = decode_map_update(U, Mods),
