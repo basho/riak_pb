@@ -47,9 +47,8 @@ dialyzer-run:
 			exit 1; \
 		fi; \
 		dialyzer $(DIALYZER_FLAGS) --plts $${PLTS} -c ebin > dialyzer_warnings ; \
-		egrep -v "^\s*(done|Checking|Proceeding|Compiling)" dialyzer_warnings | grep -F -f dialyzer.ignore-warnings -v > dialyzer_unhandled_warnings ; \
-		cat dialyzer_warnings ; \
-		cat dialyzer_unhandled_warnings ; wc -c dialyzer_unhandled_warnings ; \
+		egrep -v "^[[:space:]]*(done|Checking|Proceeding|Compiling)" dialyzer_warnings | grep -F -f dialyzer.ignore-warnings -v > dialyzer_unhandled_warnings ; \
+		cat dialyzer_unhandled_warnings ; \
 		[ $$(cat dialyzer_unhandled_warnings | wc -l) -eq 0 ] ; \
 	else \
 		dialyzer $(DIALYZER_FLAGS) --plts $${PLTS} -c ebin; \
