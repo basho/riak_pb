@@ -1,0 +1,65 @@
+## Generated protobuffs code
+riak_dt_pb.erl:47: Guard test is_list(Records::tuple()) can never succeed
+riak_dt_pb.erl:74: The pattern <_, 'repeated_packed', 'undefined', _, _> can never match the type <1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_dt_pb.erl:75: The pattern <_, 'repeated_packed', [], _, _> can never match the type <1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_dt_pb.erl:86: The pattern <FNum, 'repeated_packed', Data, Type, _> can never match the type <1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_dt_pb.erl:222: The pattern <Types, [{Fnum, Bytes} | Tail], Acc> can never match the type <_,[],[{_,_}]>
+riak_kv_pb.erl:47: Guard test is_list(Records::tuple()) can never succeed
+riak_kv_pb.erl:74: The pattern <_, 'repeated_packed', 'undefined', _, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_kv_pb.erl:75: The pattern <_, 'repeated_packed', [], _, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_kv_pb.erl:86: The pattern <FNum, 'repeated_packed', Data, Type, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_kv_pb.erl:222: The pattern <Types, [{Fnum, Bytes} | Tail], Acc> can never match the type <_,[],[{_,_}]>
+riak_pb.erl:47: Guard test is_list(Records::tuple()) can never succeed
+riak_pb.erl:74: The pattern <_, 'repeated_packed', 'undefined', _, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,'bool' | 'bytes' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_pb.erl:75: The pattern <_, 'repeated_packed', [], _, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,'bool' | 'bytes' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_pb.erl:86: The pattern <FNum, 'repeated_packed', Data, Type, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,'bool' | 'bytes' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_pb.erl:202: The pattern <Binary, 'string'> can never match the type <_,'bool' | 'bytes' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'uint32'>
+riak_pb.erl:222: The pattern <Types, [{Fnum, Bytes} | Tail], Acc> can never match the type <_,[],[{_,_}]>
+riak_search_pb.erl:47: Guard test is_list(Records::tuple()) can never succeed
+riak_search_pb.erl:74: The pattern <_, 'repeated_packed', 'undefined', _, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,'bool' | 'bytes' | 'float' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'rpbpair' | 'rpbsearchdoc' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_search_pb.erl:75: The pattern <_, 'repeated_packed', [], _, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,'bool' | 'bytes' | 'float' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'rpbpair' | 'rpbsearchdoc' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_search_pb.erl:86: The pattern <FNum, 'repeated_packed', Data, Type, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,'bool' | 'bytes' | 'float' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'rpbpair' | 'rpbsearchdoc' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_search_pb.erl:202: The pattern <Binary, 'string'> can never match the type <_,'bool' | 'bytes' | 'float' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'rpbpair' | 'rpbsearchdoc' | 'uint32'>
+riak_search_pb.erl:222: The pattern <Types, [{Fnum, Bytes} | Tail], Acc> can never match the type <_,[],[{_,_}]>
+riak_yokozuna_pb.erl:47: Guard test is_list(Records::tuple()) can never succeed
+riak_yokozuna_pb.erl:74: The pattern <_, 'repeated_packed', 'undefined', _, _> can never match the type <1 | 2 | 3,'optional' | 'repeated' | 'required',_,'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_yokozuna_pb.erl:75: The pattern <_, 'repeated_packed', [], _, _> can never match the type <1 | 2 | 3,'optional' | 'repeated' | 'required',_,'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_yokozuna_pb.erl:86: The pattern <FNum, 'repeated_packed', Data, Type, _> can never match the type <1 | 2 | 3,'optional' | 'repeated' | 'required',_,'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_yokozuna_pb.erl:101: The call riak_yokozuna_pb:enum_to_int(Type::'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32',Data::atom()) will never return since it differs in the 1st argument from the success typing arguments: ('pikachu','value')
+riak_yokozuna_pb.erl:202: The pattern <Binary, 'string'> can never match the type <_,'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32'>
+riak_yokozuna_pb.erl:222: The pattern <Types, [{Fnum, Bytes} | Tail], Acc> can never match the type <_,[],[{_,_}]>
+riak_dt_pb.erl:46: Guard test is_list(Records::tuple()) can never succeed
+riak_dt_pb.erl:73: The pattern <_, 'repeated_packed', 'undefined', _, _> can never match the type <1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_dt_pb.erl:74: The pattern <_, 'repeated_packed', [], _, _> can never match the type <1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_dt_pb.erl:85: The pattern <FNum, 'repeated_packed', Data, Type, _> can never match the type <1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_dt_pb.erl:221: The pattern <Types, [{Fnum, Bytes} | Tail], Acc> can never match the type <_,[],[{_,_}]>
+riak_kv_pb.erl:46: Guard test is_list(Records::tuple()) can never succeed
+riak_kv_pb.erl:73: The pattern <_, 'repeated_packed', 'undefined', _, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_kv_pb.erl:74: The pattern <_, 'repeated_packed', [], _, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_kv_pb.erl:85: The pattern <FNum, 'repeated_packed', Data, Type, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,atom(),[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_kv_pb.erl:221: The pattern <Types, [{Fnum, Bytes} | Tail], Acc> can never match the type <_,[],[{_,_}]>
+riak_pb.erl:46: Guard test is_list(Records::tuple()) can never succeed
+riak_pb.erl:73: The pattern <_, 'repeated_packed', 'undefined', _, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,'bool' | 'bytes' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_pb.erl:74: The pattern <_, 'repeated_packed', [], _, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,'bool' | 'bytes' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_pb.erl:85: The pattern <FNum, 'repeated_packed', Data, Type, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,'bool' | 'bytes' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_pb.erl:201: The pattern <Binary, 'string'> can never match the type <_,'bool' | 'bytes' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'uint32'>
+riak_pb.erl:221: The pattern <Types, [{Fnum, Bytes} | Tail], Acc> can never match the type <_,[],[{_,_}]>
+riak_search_pb.erl:46: Guard test is_list(Records::tuple()) can never succeed
+riak_search_pb.erl:73: The pattern <_, 'repeated_packed', 'undefined', _, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,'bool' | 'bytes' | 'float' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'rpbpair' | 'rpbsearchdoc' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_search_pb.erl:74: The pattern <_, 'repeated_packed', [], _, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,'bool' | 'bytes' | 'float' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'rpbpair' | 'rpbsearchdoc' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_search_pb.erl:85: The pattern <FNum, 'repeated_packed', Data, Type, _> can never match the type <1..255,'optional' | 'repeated' | 'required',_,'bool' | 'bytes' | 'float' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'rpbpair' | 'rpbsearchdoc' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_search_pb.erl:201: The pattern <Binary, 'string'> can never match the type <_,'bool' | 'bytes' | 'float' | 'rpbbucketprops' | 'rpbbucketprops_rpbreplmode' | 'rpbcommithook' | 'rpbmodfun' | 'rpbpair' | 'rpbsearchdoc' | 'uint32'>
+riak_search_pb.erl:221: The pattern <Types, [{Fnum, Bytes} | Tail], Acc> can never match the type <_,[],[{_,_}]>
+riak_yokozuna_pb.erl:46: Guard test is_list(Records::tuple()) can never succeed
+riak_yokozuna_pb.erl:73: The pattern <_, 'repeated_packed', 'undefined', _, _> can never match the type <1 | 2 | 3,'optional' | 'repeated' | 'required',_,'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_yokozuna_pb.erl:74: The pattern <_, 'repeated_packed', [], _, _> can never match the type <1 | 2 | 3,'optional' | 'repeated' | 'required',_,'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_yokozuna_pb.erl:85: The pattern <FNum, 'repeated_packed', Data, Type, _> can never match the type <1 | 2 | 3,'optional' | 'repeated' | 'required',_,'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32',[[binary() | maybe_improper_list(any(),binary() | [])]]>
+riak_yokozuna_pb.erl:100: The call riak_yokozuna_pb:enum_to_int(Type::'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32',Data::atom()) will never return since it differs in the 1st argument from the success typing arguments: ('pikachu','value')
+riak_yokozuna_pb.erl:102: Function enum_to_int/2 has no local return
+riak_yokozuna_pb.erl:102: The pattern <'pikachu', 'value'> can never match the type <'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32',atom()>
+riak_yokozuna_pb.erl:201: The pattern <Binary, 'string'> can never match the type <_,'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32'>
+riak_yokozuna_pb.erl:221: The pattern <Types, [{Fnum, Bytes} | Tail], Acc> can never match the type <_,[],[{_,_}]>
+## Insufficient typing on record in generated code
+riak_pb_codec.erl:338: Invalid type specification for function riak_pb_codec:decode_commit_hooks/1. The success typing is ([any()]) -> [{atom(),atom() | [any(),...]} | {'modfun',atom(),atom() | [any(),...]}]
+## Internal calls only pass empty-list, but calls from other libraries pass proplists
+riak_pb_dt_codec.erl:181: The pattern {AtomType, _} can never match the type 'false'

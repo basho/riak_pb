@@ -150,7 +150,7 @@ encode_pair({K,V}) ->
     #rpbpair{key = to_binary(K), value = to_binary(V)}.
 
 %% @doc Convert RpbPair PB message to erlang {K,V} tuple
--spec decode_pair(#rpbpair{}) -> {string(), string()}.
+-spec decode_pair(#rpbpair{}) -> {binary(), binary()}.
 decode_pair(#rpbpair{key = K, value = V}) ->
     {K, V}.
 

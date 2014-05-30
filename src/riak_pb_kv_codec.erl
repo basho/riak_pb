@@ -168,7 +168,7 @@ decode_content_meta(deleted, DeletedVal, _Pb) ->
 
 
 %% @doc Convert an rpccontent pb message to an erlang {MetaData,Value} tuple
--spec decode_content(PBContent::tuple()) -> {riakc_obj:metadata(), riakc_obj:value()}.
+-spec decode_content(PBContent::tuple()) -> {metadata(), binary()}.
 decode_content(PbC) ->
     MD =  decode_content_meta(content_type, PbC#rpbcontent.content_type, PbC) ++
           decode_content_meta(charset, PbC#rpbcontent.charset, PbC) ++
@@ -197,7 +197,7 @@ encode_pair(Pair) ->
 
 %% @doc Convert RpbPair PB message to erlang {K,V} tuple
 %% @equiv riak_pb_codec:decode_pair/1
--spec decode_pair(#rpbpair{}) -> {string(), string()}.
+-spec decode_pair(#rpbpair{}) -> {binary(), binary()}.
 decode_pair(PB) ->
     riak_pb_codec:decode_pair(PB).
 
