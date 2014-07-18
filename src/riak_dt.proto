@@ -70,6 +70,17 @@ message MapEntry {
 }
 
 /*
+ * A RangeReg is a register that keeps track of the largest, smallest,
+ * first and last values that have been assigned to it.
+ */
+message RangeRegEntry {
+    optional sint64 max_value   = 1;
+    optional sint64 min_value   = 2;
+    optional sint64 first_value = 3;
+    optional sint64 last_value  = 4;
+}
+
+/*
  * =============== FETCH =================
  */
 
@@ -104,9 +115,10 @@ message DtFetchReq {
  * then empty values (sets, maps) should be treated as such.
  */
 message DtValue {
-    optional sint64   counter_value = 1;
-    repeated bytes    set_value     = 2;
-    repeated MapEntry map_value     = 3;
+    optional sint64        counter_value  = 1;
+    repeated bytes         set_value      = 2;
+    repeated MapEntry      map_value      = 3;
+    optional RangeRegEntry rangereg_value = 6;
 }
 
 
@@ -121,9 +133,10 @@ message DtValue {
  */
 message DtFetchResp {
     enum DataType {
-        COUNTER = 1;
-        SET     = 2;
-        MAP     = 3;
+        COUNTER  = 1;
+        SET      = 2;
+        MAP      = 3;
+        RANGEREG = 4;
     }
 
     optional bytes    context = 1;
@@ -198,13 +211,22 @@ message MapOp {
 }
 
 /*
+ * An operation to update a RangeReg. A RangeReg is updated with a single integer,
+ * and it keeps it if it's the smallest, largest, first or last value it has seen.
+ */
+message RangeRegOp {
+    required sint64 value = 1;
+}
+
+/*
  * A "union" type for update operations. The included operation
  * depends on the datatype being updated.
  */
 message DtOp {
-    optional CounterOp counter_op = 1;
-    optional SetOp     set_op     = 2;
-    optional MapOp     map_op     = 3;
+    optional CounterOp  counter_op  = 1;
+    optional SetOp      set_op      = 2;
+    optional MapOp      map_op      = 3;
+    optional RangeRegOp rangereg_op = 4;
 }
 
 /*
@@ -244,11 +266,12 @@ message DtUpdateReq {
  */
 message DtUpdateResp {
     // The key, if assigned by the server
-    optional bytes    key           = 1;
+    optional bytes         key            = 1;
 
     // The opaque update context and value, if return_body was set.
-    optional bytes    context       = 2;
-    optional sint64   counter_value = 3;
-    repeated bytes    set_value     = 4;
-    repeated MapEntry map_value     = 5;
+    optional bytes         context        = 2;
+    optional sint64        counter_value  = 3;
+    repeated bytes         set_value      = 4;
+    repeated MapEntry      map_value      = 5;
+    optional RangeRegEntry rangereg_value = 6;
 }
