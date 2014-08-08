@@ -25,6 +25,8 @@
 ** Revision: 2.0
 */
 
+package riak_pb;
+
 // java package specifiers
 option java_package = "com.basho.riak.protobuf";
 option java_outer_classname = "RiakYokozunaPB";

@@ -25,6 +25,8 @@
 ** Revision: 1.4
 */
 
+package riak_pb;
+
 import "riak.proto";
 
 // java package specifiers
