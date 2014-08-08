@@ -60,6 +60,6 @@ riak_yokozuna_pb.erl:102: The pattern <'pikachu', 'value'> can never match the t
 riak_yokozuna_pb.erl:201: The pattern <Binary, 'string'> can never match the type <_,'bytes' | 'rpbyokozunaindex' | 'rpbyokozunaschema' | 'uint32'>
 riak_yokozuna_pb.erl:221: The pattern <Types, [{Fnum, Bytes} | Tail], Acc> can never match the type <_,[],[{_,_}]>
 ## Insufficient typing on record in generated code
-riak_pb_codec.erl:338: Invalid type specification for function riak_pb_codec:decode_commit_hooks/1. The success typing is ([any()]) -> [{atom(),atom() | [any(),...]} | {'modfun',atom(),atom() | [any(),...]}]
+riak_pb_codec.erl:345: Invalid type specification for function riak_pb_codec:decode_commit_hooks/1. The success typing is ([any()]) -> [{atom(),atom() | [any(),...]} | {'modfun',atom(),atom() | [any(),...]}]
 ## Internal calls only pass empty-list, but calls from other libraries pass proplists
 riak_pb_dt_codec.erl:181: The pattern {AtomType, _} can never match the type 'false'
