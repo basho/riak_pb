@@ -25,7 +25,9 @@
 %% Public API
 %% ===================================================================
 preprocess(Config, _AppFile) ->
-    case rebar_config:get(Config, current_command, undefined) of
+    CurrentCommand = rebar_config:get(Config, current_command,
+                      rebar_config:get_xconf(Config, current_command, undefined)),
+    case CurrentCommand of
         'compile' ->
             case rebar_utils:find_files("src", ".*\\.csv") of
                 [] ->
