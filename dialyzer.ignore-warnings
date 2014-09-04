@@ -62,4 +62,4 @@ riak_yokozuna_pb.erl:221: The pattern <Types, [{Fnum, Bytes} | Tail], Acc> can n
 ## Insufficient typing on record in generated code
 riak_pb_codec.erl:338: Invalid type specification for function riak_pb_codec:decode_commit_hooks/1. The success typing is ([any()]) -> [{atom(),atom() | [any(),...]} | {'modfun',atom(),atom() | [any(),...]}]
 ## Internal calls only pass empty-list, but calls from other libraries pass proplists
-riak_pb_dt_codec.erl:185: The pattern {AtomType, _} can never match the type 'false'
+riak_pb_dt_codec.erl:187: The pattern {AtomType, _} can never match the type 'false'

@@ -34,6 +34,17 @@ option java_outer_classname = "RiakDtPB";
  */
 
 /*
+ * A RangeReg is a register that keeps track of the largest, smallest,
+ * first and last values that have been assigned to it.
+ */
+message RangeRegEntry {
+    optional sint64 max_value   = 1;
+    optional sint64 min_value   = 2;
+    optional sint64 first_value = 3;
+    optional sint64 last_value  = 4;
+}
+
+/*
  * Field names in maps are composed of a binary identifier and a type.
  * This is so that two clients can create fields with the same name
  * but different types, and they converge independently.
@@ -49,6 +60,7 @@ message MapField {
         REGISTER = 3;
         FLAG     = 4;
         MAP      = 5;
+        RANGEREG = 6;
     }
 
     required bytes        name = 1;
@@ -67,17 +79,7 @@ message MapEntry {
     optional bytes    register_value = 4;
     optional bool     flag_value     = 5;
     repeated MapEntry map_value      = 6;
-}
-
-/*
- * A RangeReg is a register that keeps track of the largest, smallest,
- * first and last values that have been assigned to it.
- */
-message RangeRegEntry {
-    optional sint64 max_value   = 1;
-    optional sint64 min_value   = 2;
-    optional sint64 first_value = 3;
-    optional sint64 last_value  = 4;
+    optional RangeRegEntry rangereg_value = 7;
 }
 
 /*
@@ -118,7 +120,7 @@ message DtValue {
     optional sint64        counter_value  = 1;
     repeated bytes         set_value      = 2;
     repeated MapEntry      map_value      = 3;
-    optional RangeRegEntry rangereg_value = 6;
+    optional RangeRegEntry rangereg_value = 4;
 }
 
 
@@ -194,6 +196,7 @@ message MapUpdate {
     optional bytes     register_op = 4;
     optional FlagOp    flag_op     = 5;
     optional MapOp     map_op      = 6;
+    optional sint64    rangereg_op = 7;
 }
 
 /*
@@ -211,14 +214,6 @@ message MapOp {
 }
 
 /*
- * An operation to update a RangeReg. A RangeReg is updated with a single integer,
- * and it keeps it if it's the smallest, largest, first or last value it has seen.
- */
-message RangeRegOp {
-    required sint64 value = 1;
-}
-
-/*
  * A "union" type for update operations. The included operation
  * depends on the datatype being updated.
  */
@@ -226,7 +221,13 @@ message DtOp {
     optional CounterOp  counter_op  = 1;
     optional SetOp      set_op      = 2;
     optional MapOp      map_op      = 3;
-    optional RangeRegOp rangereg_op = 4;
+
+    /*
+     * Like a register in a map, there's only one operation on a rangereg,
+     * which is to assign a new value into it, so the operation is just
+     * the new value.
+     */
+    optional sint64     rangereg_op = 4;
 }
 
 /*

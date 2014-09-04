@@ -54,12 +54,12 @@
 -type map_entry() :: {map_field(), embedded_value()}.
 -type map_field() :: {binary(), embedded_type()}.
 -type map_value() :: [ map_entry() ].
--type embedded_value() :: counter_value() | set_value() | register_value() | flag_value() | map_value().
+-type embedded_value() :: counter_value() | set_value() | register_value() | flag_value() | map_value() | rangereg_value().
 -type toplevel_value() :: counter_value() | set_value() | map_value() | rangereg_value() | undefined.
 -type fetch_response() :: {toplevel_type(), toplevel_value(), context()}.
 
 %% Type names as atoms
--type embedded_type() :: counter | set | register | flag | map.
+-type embedded_type() :: counter | set | register | flag | map | rangereg.
 -type toplevel_type() :: counter | set | map | rangereg.
 -type all_type()      :: toplevel_type() | embedded_type().
 
@@ -147,6 +147,8 @@ encode_map_entry({{Name, register=Type}, undefined}, _Mods)  ->
     #mapentry{field=encode_map_field({Name, Type})};
 encode_map_entry({{Name, flag=Type}, Value}, _Mods) when is_atom(Value) ->
     #mapentry{field=encode_map_field({Name, Type}), flag_value=encode_flag_value(Value)};
+encode_map_entry({{Name, rangereg=Type}, Value}, _Mods) when is_list(Value) ->
+    #mapentry{field=encode_map_field({Name, Type}), rangereg_value=encode_rangereg_entry(Value)};
 encode_map_entry({{Name, map=Type}, Value}, Mods) when is_list(Value) ->
     #mapentry{field=encode_map_field({Name, Type}),
               map_value=[ encode_map_entry(Entry, Mods) || Entry <- Value ]};
@@ -360,14 +362,6 @@ encode_set_update({remove, Member}, #setop{removes=R}=S) when is_binary(Member) 
 encode_set_update({remove_all, Members}, #setop{removes=R}=S) when is_list(Members) ->
     S#setop{removes=Members++R}.
 
--spec decode_rangereg_op(#rangeregop{}) -> rangereg_op().
-decode_rangereg_op(#rangeregop{value=Value}) ->
-    {assign, Value}.
-
--spec encode_rangereg_op(rangereg_op()) -> #rangeregop{}.
-encode_rangereg_op({assign, Value}) ->
-    #rangeregop{value=Value}.
-
 %% @doc Decodes a operation name from a PB message into an atom.
 -spec decode_flag_op(atom()) -> flag_op().
 decode_flag_op('ENABLE')  -> enable;
@@ -395,6 +389,9 @@ decode_map_update(#mapupdate{field=#mapfield{name=N, type='FLAG'=Type}, flag_op=
     FOp = decode_flag_op(Op),
     FType = decode_type(Type, Mods),
     {{N, FType}, FOp};
+decode_map_update(#mapupdate{field=#mapfield{name=N, type='RANGEREG'=Type}, register_op=Op}, Mods) ->
+    FType = decode_type(Type, Mods),
+    {{N, FType}, {assign, Op}};
 decode_map_update(#mapupdate{field=#mapfield{name=N, type='MAP'=Type}, map_op=Op}, Mods) ->
     MOp = decode_map_op(Op, Mods),
     FType = decode_type(Type, Mods),
@@ -410,6 +407,8 @@ encode_map_update({_Name, register}=Key, {assign, Value}) ->
     #mapupdate{field=encode_map_field(Key), register_op=Value};
 encode_map_update({_Name, flag}=Key, Op) ->
     #mapupdate{field=encode_map_field(Key), flag_op=encode_flag_op(Op)};
+encode_map_update({_Name, rangereg}=Key, {assign, Value}) ->
+    #mapupdate{field=encode_map_field(Key), rangereg_op=Value};
 encode_map_update({_Name, map}=Key, Op) ->
     #mapupdate{field=encode_map_field(Key), map_op=encode_map_op(Op)}.
 
@@ -454,8 +453,8 @@ decode_operation(#dtop{set_op=#setop{}=Op}, _) ->
     decode_set_op(Op);
 decode_operation(#dtop{map_op=#mapop{}=Op}, Mods) ->
     decode_map_op(Op, Mods);
-decode_operation(#dtop{rangereg_op=#rangeregop{}=Op}, _) ->
-    decode_rangereg_op(Op).
+decode_operation(#dtop{rangereg_op=Op}, _) ->
+    {assign, Op}.
 
 
 
@@ -468,8 +467,8 @@ encode_operation(Op, set) ->
     #dtop{set_op=encode_set_op(Op)};
 encode_operation(Op, map) ->
     #dtop{map_op=encode_map_op(Op)};
-encode_operation(Op, rangereg) ->
-    #dtop{rangereg_op=encode_rangereg_op(Op)}.
+encode_operation({assign, Value}, rangereg) ->
+    #dtop{rangereg_op=Value}.
 
 %% @doc Returns the type that the DtOp message expects to be performed
 %% on.
@@ -480,7 +479,7 @@ operation_type(#dtop{set_op=#setop{}}) ->
     set;
 operation_type(#dtop{map_op=#mapop{}}) ->
     map;
-operation_type(#dtop{rangereg_op=#rangeregop{}}) ->
+operation_type(#dtop{rangereg_op=Value}) when is_integer(Value) ->
     rangereg.
 
 %% @doc Encodes an update request into a DtUpdate message.
