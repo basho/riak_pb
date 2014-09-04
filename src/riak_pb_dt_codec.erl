@@ -49,18 +49,18 @@
 -type counter_value() :: integer().
 -type set_value() :: [ binary() ].
 -type register_value() :: binary().
--type rangereg_value() :: [{atom(), integer()}].
+-type range_value() :: [{atom(), integer()}].
 -type flag_value() :: boolean().
 -type map_entry() :: {map_field(), embedded_value()}.
 -type map_field() :: {binary(), embedded_type()}.
 -type map_value() :: [ map_entry() ].
--type embedded_value() :: counter_value() | set_value() | register_value() | flag_value() | map_value() | rangereg_value().
--type toplevel_value() :: counter_value() | set_value() | map_value() | rangereg_value() | undefined.
+-type embedded_value() :: counter_value() | set_value() | register_value() | flag_value() | map_value() | range_value().
+-type toplevel_value() :: counter_value() | set_value() | map_value() | range_value() | undefined.
 -type fetch_response() :: {toplevel_type(), toplevel_value(), context()}.
 
 %% Type names as atoms
--type embedded_type() :: counter | set | register | flag | map | rangereg.
--type toplevel_type() :: counter | set | map | rangereg.
+-type embedded_type() :: counter | set | register | flag | map | range.
+-type toplevel_type() :: counter | set | map | range.
 -type all_type()      :: toplevel_type() | embedded_type().
 
 %% Operations
@@ -69,11 +69,11 @@
 -type set_op() :: simple_set_op() | {update, [simple_set_op()]}.
 -type flag_op() :: enable | disable.
 -type register_op() :: {assign, binary()}.
--type rangereg_op() :: {assign, integer()}.
+-type range_op() :: {add, integer()}.
 -type simple_map_op() :: {remove, map_field()} | {update, map_field(), embedded_type_op()}.
 -type map_op() :: simple_map_op() | {update, [simple_map_op()]}.
--type embedded_type_op() :: counter_op() | set_op() | register_op() | flag_op() | map_op().
--type toplevel_op() :: counter_op() | set_op() | map_op() | rangereg_op().
+-type embedded_type_op() :: counter_op() | set_op() | register_op() | flag_op() | map_op() | range_op().
+-type toplevel_op() :: counter_op() | set_op() | map_op() | range_op().
 -type update() :: {toplevel_type(), toplevel_op(), context()}.
 
 %% Request options
@@ -131,8 +131,8 @@ decode_map_entry(#mapentry{field=#mapfield{type='REGISTER'}=Field, register_valu
     {decode_map_field(Field, Mods), Val};
 decode_map_entry(#mapentry{field=#mapfield{type='FLAG'}=Field, flag_value=Val}, Mods) ->
     {decode_map_field(Field, Mods), Val};
-decode_map_entry(#mapentry{field=#mapfield{type='RANGEREG'}=Field, rangereg_value=Val}, Mods) ->
-    {decode_map_field(Field, Mods), decode_rangereg_entry(Val)};
+decode_map_entry(#mapentry{field=#mapfield{type='RANGE'}=Field, range_value=Val}, Mods) ->
+    {decode_map_field(Field, Mods), decode_range_entry(Val)};
 decode_map_entry(#mapentry{field=#mapfield{type='MAP'}=Field, map_value=Val}, Mods) ->
     {decode_map_field(Field, Mods), [ decode_map_entry(Entry, Mods) || Entry <- Val ]}.
 
@@ -149,8 +149,8 @@ encode_map_entry({{Name, register=Type}, undefined}, _Mods)  ->
     #mapentry{field=encode_map_field({Name, Type})};
 encode_map_entry({{Name, flag=Type}, Value}, _Mods) when is_atom(Value) ->
     #mapentry{field=encode_map_field({Name, Type}), flag_value=encode_flag_value(Value)};
-encode_map_entry({{Name, rangereg=Type}, Value}, _Mods) when is_list(Value) ->
-    #mapentry{field=encode_map_field({Name, Type}), rangereg_value=encode_rangereg_entry(Value)};
+encode_map_entry({{Name, range=Type}, Value}, _Mods) when is_list(Value) ->
+    #mapentry{field=encode_map_field({Name, Type}), range_value=encode_range_entry(Value)};
 encode_map_entry({{Name, map=Type}, Value}, Mods) when is_list(Value) ->
     #mapentry{field=encode_map_field({Name, Type}),
               map_value=[ encode_map_entry(Entry, Mods) || Entry <- Value ]};
@@ -177,7 +177,7 @@ decode_type(PBType, Mods) ->
 decode_type('COUNTER')  -> counter;
 decode_type('SET')      -> set;
 decode_type('REGISTER') -> register;
-decode_type('RANGEREG') -> rangereg;
+decode_type('RANGE')    -> range;
 decode_type('FLAG')     -> flag;
 decode_type('MAP')      -> map.
 
@@ -197,7 +197,7 @@ encode_type(TypeOrMod, Mods) ->
 encode_type(counter)  -> 'COUNTER';
 encode_type(set)      -> 'SET';
 encode_type(register) -> 'REGISTER';
-encode_type(rangereg) -> 'RANGEREG';
+encode_type(range)    -> 'RANGE';
 encode_type(flag)     -> 'FLAG';
 encode_type(map)      -> 'MAP'.
 
@@ -206,26 +206,26 @@ encode_flag_value(on) -> true;
 encode_flag_value(off) -> false;
 encode_flag_value(Other) -> Other.
 
-encode_rangereg_entry(Value) -> encode_rangereg_entry(#rangeregentry{}, Value).
+encode_range_entry(Value) -> encode_range_entry(#rangeentry{}, Value).
 
-encode_rangereg_entry(Entry, []) -> Entry;
-encode_rangereg_entry(Entry, [{max, Value} | Tail]) ->
-    encode_rangereg_entry(Entry#rangeregentry{max_value=Value}, Tail);
-encode_rangereg_entry(Entry, [{min, Value} | Tail]) ->
-    encode_rangereg_entry(Entry#rangeregentry{min_value=Value}, Tail);
-encode_rangereg_entry(Entry, [{first, Value} | Tail]) ->
-    encode_rangereg_entry(Entry#rangeregentry{first_value=Value}, Tail);
-encode_rangereg_entry(Entry, [{last, Value} | Tail]) ->
-    encode_rangereg_entry(Entry#rangeregentry{last_value=Value}, Tail);
-encode_rangereg_entry(Entry, [_|Tail]) ->
-    encode_rangereg_entry(Tail, Entry).
+encode_range_entry(Entry, []) -> Entry;
+encode_range_entry(Entry, [{max, Value} | Tail]) ->
+    encode_range_entry(Entry#rangeentry{max_value=Value}, Tail);
+encode_range_entry(Entry, [{min, Value} | Tail]) ->
+    encode_range_entry(Entry#rangeentry{min_value=Value}, Tail);
+encode_range_entry(Entry, [{first, Value} | Tail]) ->
+    encode_range_entry(Entry#rangeentry{first_value=Value}, Tail);
+encode_range_entry(Entry, [{last, Value} | Tail]) ->
+    encode_range_entry(Entry#rangeentry{last_value=Value}, Tail);
+encode_range_entry(Entry, [_|Tail]) ->
+    encode_range_entry(Tail, Entry).
 
-decode_rangereg_entry(RRE) ->
+decode_range_entry(RRE) ->
     [
-     {max,   RRE#rangeregentry.max_value},
-     {min,   RRE#rangeregentry.min_value},
-     {first, RRE#rangeregentry.first_value},
-     {last,  RRE#rangeregentry.last_value}
+     {max,   RRE#rangeentry.max_value},
+     {min,   RRE#rangeentry.min_value},
+     {first, RRE#rangeentry.first_value},
+     {last,  RRE#rangeentry.last_value}
     ].
 
 
@@ -287,9 +287,9 @@ decode_fetch_response(#dtfetchresp{context=Context, type='SET',
 decode_fetch_response(#dtfetchresp{context=Context, type='MAP',
                                    value=#dtvalue{map_value=Val}}) ->
     {map, [ decode_map_entry(Entry) || Entry <- Val ], Context};
-decode_fetch_response(#dtfetchresp{context=Context, type='RANGEREG',
-                                   value=#dtvalue{rangereg_value=Val}}) ->
-    {rangereg, decode_rangereg_entry(Val), Context}.
+decode_fetch_response(#dtfetchresp{context=Context, type='RANGE',
+                                   value=#dtvalue{range_value=Val}}) ->
+    {range, decode_range_entry(Val), Context}.
 
 
 %% @doc Encodes the result of a fetch request into a FetchResponse message.
@@ -310,8 +310,8 @@ encode_fetch_response(Type, Value, Context, Mods) ->
             Response#dtfetchresp{value=#dtvalue{set_value=Value}};
         map ->
             Response#dtfetchresp{value=#dtvalue{map_value=[encode_map_entry(Entry, Mods) || Entry <- Value]}};
-        rangereg ->
-            Response#dtfetchresp{value=#dtvalue{rangereg_value=encode_rangereg_entry(Value)}}
+        range ->
+            Response#dtfetchresp{value=#dtvalue{range_value=encode_range_entry(Value)}}
     end.
 
 %% =========================
@@ -391,9 +391,9 @@ decode_map_update(#mapupdate{field=#mapfield{name=N, type='FLAG'=Type}, flag_op=
     FOp = decode_flag_op(Op),
     FType = decode_type(Type, Mods),
     {{N, FType}, FOp};
-decode_map_update(#mapupdate{field=#mapfield{name=N, type='RANGEREG'=Type}, register_op=Op}, Mods) ->
+decode_map_update(#mapupdate{field=#mapfield{name=N, type='RANGE'=Type}, register_op=Op}, Mods) ->
     FType = decode_type(Type, Mods),
-    {{N, FType}, {assign, Op}};
+    {{N, FType}, {add, Op}};
 decode_map_update(#mapupdate{field=#mapfield{name=N, type='MAP'=Type}, map_op=Op}, Mods) ->
     MOp = decode_map_op(Op, Mods),
     FType = decode_type(Type, Mods),
@@ -409,8 +409,8 @@ encode_map_update({_Name, register}=Key, {assign, Value}) ->
     #mapupdate{field=encode_map_field(Key), register_op=Value};
 encode_map_update({_Name, flag}=Key, Op) ->
     #mapupdate{field=encode_map_field(Key), flag_op=encode_flag_op(Op)};
-encode_map_update({_Name, rangereg}=Key, {assign, Value}) ->
-    #mapupdate{field=encode_map_field(Key), rangereg_op=Value};
+encode_map_update({_Name, range}=Key, {add, Value}) ->
+    #mapupdate{field=encode_map_field(Key), range_op=Value};
 encode_map_update({_Name, map}=Key, Op) ->
     #mapupdate{field=encode_map_field(Key), map_op=encode_map_op(Op)}.
 
@@ -455,7 +455,7 @@ decode_operation(#dtop{set_op=#setop{}=Op}, _) ->
     decode_set_op(Op);
 decode_operation(#dtop{map_op=#mapop{}=Op}, Mods) ->
     decode_map_op(Op, Mods);
-decode_operation(#dtop{rangereg_op=Op}, _) ->
+decode_operation(#dtop{range_op=Op}, _) ->
     {assign, Op}.
 
 
@@ -469,8 +469,8 @@ encode_operation(Op, set) ->
     #dtop{set_op=encode_set_op(Op)};
 encode_operation(Op, map) ->
     #dtop{map_op=encode_map_op(Op)};
-encode_operation({assign, Value}, rangereg) ->
-    #dtop{rangereg_op=Value}.
+encode_operation({add, Value}, range) ->
+    #dtop{range_op=Value}.
 
 %% @doc Returns the type that the DtOp message expects to be performed
 %% on.
@@ -481,8 +481,8 @@ operation_type(#dtop{set_op=#setop{}}) ->
     set;
 operation_type(#dtop{map_op=#mapop{}}) ->
     map;
-operation_type(#dtop{rangereg_op=Value}) when is_integer(Value) ->
-    rangereg.
+operation_type(#dtop{range_op=Value}) when is_integer(Value) ->
+    range.
 
 %% @doc Encodes an update request into a DtUpdate message.
 -spec encode_update_request({binary(), binary()}, binary() | undefined, update()) -> #dtupdatereq{}.
@@ -540,6 +540,8 @@ decode_update_response(#dtupdateresp{counter_value=C, context=Ctx}=Resp, counter
     maybe_wrap_key({counter, C, Ctx}, Resp);
 decode_update_response(#dtupdateresp{set_value=S, context=Ctx}=Resp, set, true) ->
     maybe_wrap_key({set, S, Ctx}, Resp);
+decode_update_response(#dtupdateresp{range_value=R, context=Ctx}=Resp, range, true) ->
+    maybe_wrap_key({range, decode_range_entry(R), Ctx}, Resp);
 decode_update_response(#dtupdateresp{map_value=M, context=Ctx}=Resp, map, true) ->
     maybe_wrap_key({map, [ decode_map_entry(F) || F <- M ], Ctx}, Resp).
 
@@ -557,6 +559,8 @@ encode_update_response(counter, Value, Key, Context, _Mods) ->
     #dtupdateresp{key=Key, context=Context, counter_value=Value};
 encode_update_response(set, Value, Key, Context, _Mods) ->
     #dtupdateresp{key=Key, context=Context, set_value=Value};
+encode_update_response(range, Value, Key, Context, _Mods) ->
+    #dtupdateresp{key=Key, context=Context, range_value=encode_range_entry(Value)};
 encode_update_response(map, Value, Key, Context, Mods) when is_list(Value) ->
     #dtupdateresp{key=Key, context=Context,
                   map_value=[ encode_map_entry(Entry, Mods) || Value /= undefined,

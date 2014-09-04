@@ -34,10 +34,10 @@ option java_outer_classname = "RiakDtPB";
  */
 
 /*
- * A RangeReg is a register that keeps track of the largest, smallest,
+ * A Range is a register that keeps track of the largest, smallest,
  * first and last values that have been assigned to it.
  */
-message RangeRegEntry {
+message RangeEntry {
     optional sint64 max_value   = 1;
     optional sint64 min_value   = 2;
     optional sint64 first_value = 3;
@@ -60,7 +60,7 @@ message MapField {
         REGISTER = 3;
         FLAG     = 4;
         MAP      = 5;
-        RANGEREG = 6;
+        RANGE    = 6;
     }
 
     required bytes        name = 1;
@@ -79,7 +79,7 @@ message MapEntry {
     optional bytes    register_value = 4;
     optional bool     flag_value     = 5;
     repeated MapEntry map_value      = 6;
-    optional RangeRegEntry rangereg_value = 7;
+    optional RangeEntry range_value  = 7;
 }
 
 /*
@@ -117,10 +117,10 @@ message DtFetchReq {
  * then empty values (sets, maps) should be treated as such.
  */
 message DtValue {
-    optional sint64        counter_value  = 1;
-    repeated bytes         set_value      = 2;
-    repeated MapEntry      map_value      = 3;
-    optional RangeRegEntry rangereg_value = 4;
+    optional sint64     counter_value = 1;
+    repeated bytes      set_value     = 2;
+    repeated MapEntry   map_value     = 3;
+    optional RangeEntry range_value   = 4;
 }
 
 
@@ -135,10 +135,10 @@ message DtValue {
  */
 message DtFetchResp {
     enum DataType {
-        COUNTER  = 1;
-        SET      = 2;
-        MAP      = 3;
-        RANGEREG = 4;
+        COUNTER = 1;
+        SET     = 2;
+        MAP     = 3;
+        RANGE   = 4;
     }
 
     optional bytes    context = 1;
@@ -196,7 +196,7 @@ message MapUpdate {
     optional bytes     register_op = 4;
     optional FlagOp    flag_op     = 5;
     optional MapOp     map_op      = 6;
-    optional sint64    rangereg_op = 7;
+    optional sint64    range_op    = 7;
 }
 
 /*
@@ -227,7 +227,7 @@ message DtOp {
      * which is to assign a new value into it, so the operation is just
      * the new value.
      */
-    optional sint64     rangereg_op = 4;
+    optional sint64     range_op = 4;
 }
 
 /*
@@ -267,12 +267,12 @@ message DtUpdateReq {
  */
 message DtUpdateResp {
     // The key, if assigned by the server
-    optional bytes         key            = 1;
+    optional bytes      key           = 1;
 
     // The opaque update context and value, if return_body was set.
-    optional bytes         context        = 2;
-    optional sint64        counter_value  = 3;
-    repeated bytes         set_value      = 4;
-    repeated MapEntry      map_value      = 5;
-    optional RangeRegEntry rangereg_value = 6;
+    optional bytes      context       = 2;
+    optional sint64     counter_value = 3;
+    repeated bytes      set_value     = 4;
+    repeated MapEntry   map_value     = 5;
+    optional RangeEntry range_value   = 6;
 }
