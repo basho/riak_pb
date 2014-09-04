@@ -131,6 +131,8 @@ decode_map_entry(#mapentry{field=#mapfield{type='REGISTER'}=Field, register_valu
     {decode_map_field(Field, Mods), Val};
 decode_map_entry(#mapentry{field=#mapfield{type='FLAG'}=Field, flag_value=Val}, Mods) ->
     {decode_map_field(Field, Mods), Val};
+decode_map_entry(#mapentry{field=#mapfield{type='RANGEREG'}=Field, rangereg_value=Val}, Mods) ->
+    {decode_map_field(Field, Mods), decode_rangereg_entry(Val)};
 decode_map_entry(#mapentry{field=#mapfield{type='MAP'}=Field, map_value=Val}, Mods) ->
     {decode_map_field(Field, Mods), [ decode_map_entry(Entry, Mods) || Entry <- Val ]}.
 
