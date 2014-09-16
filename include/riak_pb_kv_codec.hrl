@@ -40,3 +40,7 @@
 -define(RIAKPB_RW_QUORUM, ?UINT_MAX-2).
 -define(RIAKPB_RW_ALL, ?UINT_MAX-3).
 -define(RIAKPB_RW_DEFAULT, ?UINT_MAX-4).
+
+%% DeleteMode encodings
+-define(RIAKPB_DELETE_MODE_KEEP, ?UINT_MAX-1).
+-define(RIAKPB_DELETE_MODE_IMMEDIATE, ?UINT_MAX-2).
