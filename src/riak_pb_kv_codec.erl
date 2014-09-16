@@ -44,13 +44,16 @@
          encode_link/1,         %% riakc_pb:pbify_rpblink
          decode_link/1,         %% riakc_pb:erlify_rpblink
          encode_quorum/1,
-         decode_quorum/1        %% riak_kv_pb_socket:normalize_rw_value
+         decode_quorum/1,       %% riak_kv_pb_socket:normalize_rw_value
+         encode_delete_mode/1,
+         decode_delete_mode/1
         ]).
 
 -type symbolic_quorum() :: one | quorum | all | default.
 -type value() :: binary().
 -type metadata() :: dict().
 -type contents() :: [{metadata(), value()}].
+-type delete_mode() :: keep | immediate | non_neg_integer().
 
 %% @doc Convert a list of object {MetaData,Value} pairs to protocol
 %% buffers messages.
@@ -225,3 +228,17 @@ decode_quorum(?RIAKPB_RW_ALL) -> all;
 decode_quorum(?RIAKPB_RW_DEFAULT) -> default;
 decode_quorum(undefined) -> undefined;
 decode_quorum(I) when is_integer(I), I >= 0 -> I.
+
+%% @doc Encodes a symbolic value for delete_mode
+-spec encode_delete_mode(undefined | delete_mode()) -> undefined | non_neg_integer().
+encode_delete_mode(keep) -> ?RIAKPB_DELETE_MODE_KEEP;
+encode_delete_mode(immediate) -> ?RIAKPB_DELETE_MODE_IMMEDIATE;
+encode_delete_mode(undefined) -> undefined;
+encode_delete_mode(I) when is_integer(I), I >= 0, I < ?RIAKPB_DELETE_MODE_IMMEDIATE -> I.
+
+%% @doc Decode a PB delete mode value to a corresponding symbolic mode
+-spec decode_delete_mode(undefined | non_neg_integer()) -> undefined | delete_mode().
+decode_delete_mode(?RIAKPB_DELETE_MODE_KEEP) -> keep;
+decode_delete_mode(?RIAKPB_DELETE_MODE_IMMEDIATE) -> immediate;
+decode_delete_mode(undefined) -> undefined;
+decode_delete_mode(I) when is_integer(I), I >= 0 -> I.

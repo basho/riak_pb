@@ -108,6 +108,7 @@ message RpbDelReq {
     optional uint32 timeout = 10;
     optional bool sloppy_quorum = 11; // Experimental, may change/disappear
     optional uint32 n_val = 12;       // Experimental, may change/disappear
+    optional uint32 delete_mode = 13; // Experimental, may change/disappear
 }
 
 // Delete response - not defined, will return a RpbDelResp on success or RpbErrorResp on failure
