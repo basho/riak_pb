@@ -3,13 +3,24 @@
 from setuptools import setup
 import version
 from msgcodegen import build_messages, clean_messages
+from six import PY2
+install_requires = ["six >= 1.8.0"]
+requires = ["six(>=1.8.0)"]
+if PY2:
+    name = 'riak_pb'
+    requires.append('protobuf(>=2.4.1,<2.7.0)')
+    install_requires.append('protobuf >=2.4.1, <2.7.0')
+else:
+    name = 'python3_riak_pb'
+    requires.append('python3_protobuf(>=2.4.1,<2.7.0)')
+    install_requires.append('python3_protobuf >=2.4.1, <2.7.0')
 
-setup(name='riak_pb',
+setup(name=name,
       version=version.get_version(),
       description='Riak Protocol Buffers Messages',
       packages=['riak_pb'],
-      requires=['protobuf(>=2.4.1,<2.6.0)'],
-      install_requires=['protobuf >=2.4.1, <2.6.0'],
+      requires=requires,
+      install_requires=install_requires,
       options={'easy_install': {'allow_hosts': 'pypi.python.org'}},
       license='Apache 2',
       platforms='Platform Independent',
