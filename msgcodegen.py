@@ -13,8 +13,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from pip._vendor.six import add_metaclass
-from _sqlite3 import Row
 
 """
 distutils commands for generating protocol message-code mappings.
