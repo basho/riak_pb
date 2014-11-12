@@ -69,8 +69,9 @@ ifeq ($(RELEASE_GPG_KEYNAME),)
 	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
 else
 	@echo "==> Python 3 (release)"
-	@python3 setup.py build --build-base=python3 bdist_egg upload --build-base=python3 -s -i $(RELEASE_GPG_KEYNAME)
-	@python3 setup.py sdist upload -s -i $(RELEASE_GPG_KEYNAME)
+	@python3.4 setup.py build --build-base=python3 bdist_egg upload --build-base=python3 -s -i $(RELEASE_GPG_KEYNAME)
+	@python3.4 setup.py bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
+	@python3.3 setup.py sdist upload -s -i $(RELEASE_GPG_KEYNAME)
 endif
 
 python3_install: python3_compile
