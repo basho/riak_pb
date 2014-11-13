@@ -17,6 +17,8 @@ and use the results of get_version() as your package version:
     )
 """
 
+from __future__ import print_function
+
 __all__ = ('get_version')
 
 from os.path import dirname, isdir, join
