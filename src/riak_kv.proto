@@ -93,6 +93,8 @@ message RpbPutResp {
     repeated RpbContent content = 1;
     optional bytes vclock = 2;        // the opaque vector clock for the object
     optional bytes key = 3;           // the key generated, if any
+    optional bytes bucket = 4;        // TODO: dirty hack for updates socket prototype
+    optional bytes type = 5;          // TODO: dirty hack for updates socket prototype
 }
 
 
