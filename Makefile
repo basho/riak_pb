@@ -39,14 +39,24 @@ python_clean:
 	@./setup.py clean --build-base=python clean_messages
 	@rm -rf *.pyc riak_pb/*_pb2.py riak_pb/*.pyc riak_pb.egg-info python
 
-python_release: python_compile
+python_release: python_clean
 ifeq ($(RELEASE_GPG_KEYNAME),)
 	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
 else
 	@echo "==> Python (release)"
-	@python2.6 setup.py bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
-	@python2.7 setup.py bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
-	@python2.6 setup.py sdist upload -s -i $(RELEASE_GPG_KEYNAME)
+	@protoc -Isrc --python_out=riak_pb src/*.proto
+	@python2.7 setup.py build_messages build --build-base=python
+	@python2.7 setup.py build --build-base=python bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
+	@python2.7 setup.py clean --build-base=python clean_messages
+	@rm -rf *.pyc riak_pb/*_pb2.py riak_pb/*.pyc riak_pb.egg-info python
+	@protoc -Isrc --python_out=riak_pb src/*.proto
+	@python2.7 setup.py build_messages build --build-base=python
+	@python2.7 setup.py build --build-base=python sdist upload -s -i $(RELEASE_GPG_KEYNAME)
+	@python2.6 setup.py clean --build-base=python clean_messages
+	@rm -rf riak_pb/*_pb2.pyc *.pyc python_riak_pb.egg-info python
+	@protoc -Isrc --python_out=riak_pb src/*.proto
+	@python2.6 setup.py build_messages build --build-base=python
+	@python2.6 setup.py build --build-base=python bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
 endif
 
 python_install: python_compile
@@ -62,16 +72,26 @@ python3_compile:
 python3_clean:
 	@echo "==> Python 3 (clean)"
 	@python3 setup.py clean --build-base=python3 clean_messages
-	@rm -rf *.pyc riak_pb/*_pb2.py riak_pb/*.pyc riak_pb/__pycache__ __pycache__ python3_riak_pb.egg-info python3
+	@rm -rf riak_pb/*_pb2.py riak_pb/__pycache__ __pycache__ python3_riak_pb.egg-info python3
 
-python3_release: python3_compile
+python3_release: python3_clean
 ifeq ($(RELEASE_GPG_KEYNAME),)
 	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
 else
 	@echo "==> Python 3 (release)"
-	@python3.4 setup.py build --build-base=python3 bdist_egg upload --build-base=python3 -s -i $(RELEASE_GPG_KEYNAME)
-	@python3.4 setup.py bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
-	@python3.3 setup.py sdist upload -s -i $(RELEASE_GPG_KEYNAME)
+	@protoc -Isrc --python_out=riak_pb src/*.proto
+	@python3.4 setup.py build_messages build --build-base=python3
+	@python3.4 setup.py build --build-base=python3 bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
+	@python3.4 setup.py clean --build-base=python3 clean_messages
+	@rm -rf riak_pb/*_pb2.py riak_pb/__pycache__ __pycache__ python3_riak_pb.egg-info python3
+	@protoc -Isrc --python_out=riak_pb src/*.proto
+	@python3.4 setup.py build_messages build --build-base=python3
+	@python3.4 setup.py build --build-base=python3 sdist upload -s -i $(RELEASE_GPG_KEYNAME)
+	@python3.4 setup.py clean --build-base=python3 clean_messages
+	@rm -rf riak_pb/*_pb2.py riak_pb/__pycache__ __pycache__ python3_riak_pb.egg-info python3
+	@protoc -Isrc --python_out=riak_pb src/*.proto
+	@python3.3 setup.py build_messages build --build-base=python3
+	@python3.3 setup.py build --build-base=python3 bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
 endif
 
 python3_install: python3_compile

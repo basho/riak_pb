@@ -2,18 +2,18 @@
 
 from setuptools import setup
 import version
+import platform
 from msgcodegen import build_messages, clean_messages
-from six import PY2
 install_requires = ["six >= 1.8.0"]
 requires = ["six(>=1.8.0)"]
-if PY2:
+if platform.python_version() < '3.0':
     name = 'riak_pb'
     requires.append('protobuf(>=2.4.1,<2.7.0)')
     install_requires.append('protobuf >=2.4.1, <2.7.0')
 else:
     name = 'python3_riak_pb'
-    requires.append('python3_protobuf(>=2.4.1,<2.7.0)')
-    install_requires.append('python3_protobuf >=2.4.1, <2.7.0')
+    requires.append('python3_protobuf(>=2.4.1,<2.6.0)')
+    install_requires.append('python3_protobuf >=2.4.1, <2.6.0')
 
 setup(name=name,
       version=version.get_version(),
@@ -33,5 +33,9 @@ setup(name=name,
       classifiers=['License :: OSI Approved :: Apache Software License',
                    'Intended Audience :: Developers',
                    'Operating System :: OS Independent',
+                   'Programming Language :: Python :: 2.6',
+                   'Programming Language :: Python :: 2.7',
+                   'Programming Language :: Python :: 3.3',
+                   'Programming Language :: Python :: 3.4',
                    'Topic :: Database']
       )
