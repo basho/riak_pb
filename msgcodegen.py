@@ -1,4 +1,4 @@
-# Copyright 2013 Basho Technologies, Inc.
+# Copyright 2014 Basho Technologies, Inc.
 #
 # This file is provided to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file
@@ -47,17 +47,48 @@ LICENSE = """# Copyright {0} Basho Technologies, Inc.
 """.format(date.today().year)
 
 
-class MessageCodeMapping(object):
+class ComparableMixin(object):
+    def _compare(self, other, method):
+        try:
+            return method(self._cmpkey(), other._cmpkey())
+        except (AttributeError, TypeError):
+            # _cmpkey not implemented, or return different type,
+            # so I can't compare with "other".
+            return NotImplemented
+
+    def __lt__(self, other):
+        return self._compare(other, lambda s, o: s < o)
+
+    def __le__(self, other):
+        return self._compare(other, lambda s, o: s <= o)
+
+    def __eq__(self, other):
+        return self._compare(other, lambda s, o: s == o)
+
+    def __ge__(self, other):
+        return self._compare(other, lambda s, o: s >= o)
+
+    def __gt__(self, other):
+        return self._compare(other, lambda s, o: s > o)
+
+    def __ne__(self, other):
+        return self._compare(other, lambda s, o: s != o)
+
+
+class MessageCodeMapping(ComparableMixin):
     def __init__(self, code, message, proto):
         self.code = int(code)
         self.message = message
         self.proto = proto
         self.message_code_name = self._message_code_name()
-        self.module_name = "riak_pb.{0}_pb2".format(self.proto)
+        self.module_name = 'riak_pb.{0}_pb2'.format(self.proto)
         self.message_class = self._message_class()
 
-    def __cmp__(self, other):
-        return cmp(self.code, other.code)
+    def _cmpkey(self):
+        return self.code
+
+    def __hash__(self):
+        return self.code
 
     def _message_code_name(self):
         strip_rpb = re.sub(r"^Rpb", "", self.message)
@@ -91,7 +122,7 @@ class clean_messages(Command):
     description = "clean generated protocol message code mappings"
 
     user_options = [
-        ('destination', None, 'destination Python source file')
+        ('destination=', None, 'destination Python source file')
     ]
 
     def initialize_options(self):
@@ -140,6 +171,7 @@ class build_messages(Command):
     def initialize_options(self):
         self.source = None
         self.destination = None
+        self.update_import = None
 
     def finalize_options(self):
         if self.source is None:
@@ -152,11 +184,12 @@ class build_messages(Command):
                        self._load_and_generate, [])
 
     def _load_and_generate(self):
+        self._format_python2_or_3()
         self._load()
         self._generate()
 
     def _load(self):
-        with open(self.source, 'rb') as csvfile:
+        with open(self.source, 'r', buffering=1) as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
                 message = MessageCodeMapping(*row)
@@ -182,7 +215,7 @@ class build_messages(Command):
             self._contents.append("import {0}".format(im))
 
     def _generate_codes(self):
-         # Write protocol code constants
+        # Write protocol code constants
         self._contents.extend(['', "# Protocol codes"])
         for message in sorted(self._messages):
             self._contents.append("{0} = {1}".format(message.message_code_name,
@@ -211,3 +244,38 @@ class build_messages(Command):
             # Try to satisfy PEP8, lulz
             pair = (self._linesep + '    ').join(pair.split(' '))
         return pair
+
+    def _format_python2_or_3(self):
+        """
+        Change the PB files to use full pathnames for Python 3.x
+        and modify the metaclasses to be version agnostic
+        """
+        pb_files = set()
+        with open(self.source, 'r', buffering=1) as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                _, _, proto = row
+                pb_files.add('riak_pb/{0}_pb2.py'.format(proto))
+
+        for im in sorted(pb_files):
+            with open(im, 'r', buffering=1) as pbfile:
+                contents = 'from six import *\n' + pbfile.read()
+                contents = re.sub(r'riak_pb2',
+                                  r'riak_pb.riak_pb2',
+                                  contents)
+            # Look for this pattern in the protoc-generated file:
+            #
+            # class RpbCounterGetResp(_message.Message):
+            #    __metaclass__ = _reflection.GeneratedProtocolMessageType
+            #
+            # and convert it to:
+            #
+            # @add_metaclass(_reflection.GeneratedProtocolMessageType)
+            # class RpbCounterGetResp(_message.Message):
+            contents = re.sub(
+                r'class\s+(\S+)\((\S+)\):\s*\n'
+                '\s+__metaclass__\s+=\s+(\S+)\s*\n',
+                r'@add_metaclass(\3)\nclass \1(\2):\n', contents)
+
+            with open(im, 'w', buffering=1) as pbfile:
+                pbfile.write(contents)
