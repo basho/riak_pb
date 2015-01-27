@@ -115,7 +115,7 @@ message RpbDelReq {
 
 // Delete response - not defined, will return a RpbDelResp on success or RpbErrorResp on failure
 
-// List buckets request 
+// List buckets request
 message RpbListBucketsReq {
     optional uint32 timeout = 1;
     optional bool stream = 2;
@@ -271,4 +271,23 @@ message RpbCounterGetReq {
 // Counter value response
 message RpbCounterGetResp {
     optional sint64 value = 1;
+}
+
+// Get bucket-key preflist request
+message RpbGetBucketKeyPreflistReq {
+    required bytes bucket = 1;
+    required bytes key = 2;
+    optional bytes type = 3;
+}
+
+// Get bucket-key preflist response
+message RpbGetBucketKeyPreflistResp {
+    repeated RpbBucketKeyPreflistItem preflist = 1;
+}
+
+// Preflist item
+message RpbBucketKeyPreflistItem {
+    required int64 partition = 1;
+    required bytes node = 2;
+    required bool  primary = 3;
 }

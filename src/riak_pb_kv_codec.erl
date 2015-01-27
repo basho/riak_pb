@@ -30,6 +30,10 @@
 -include("riak_kv_pb.hrl").
 -include("riak_pb_kv_codec.hrl").
 
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
+
 -export([encode_contents/1,     %% riakc_pb:pbify_rpbcontents
          decode_contents/1,     %% riakc_pb:erlify_rpbcontents
          encode_content/1,      %% riakc_pb:pbify_rpbcontent
@@ -42,7 +46,8 @@
          encode_link/1,         %% riakc_pb:pbify_rpblink
          decode_link/1,         %% riakc_pb:erlify_rpblink
          encode_quorum/1,
-         decode_quorum/1        %% riak_kv_pb_socket:normalize_rw_value
+         decode_quorum/1,       %% riak_kv_pb_socket:normalize_rw_value
+         encode_apl_ann/1
         ]).
 
 -export_type([quorum/0]).
@@ -57,6 +62,10 @@
 -endif.
 
 -type contents() :: [{metadata(), value()}].
+
+%% @doc Annotated preflist type
+-type preflist_with_pnum_ann() :: [{{non_neg_integer(), node()}, primary|fallback}].
+
 
 %% @doc Convert a list of object {MetaData,Value} pairs to protocol
 %% buffers messages.
@@ -231,3 +240,44 @@ decode_quorum(?RIAKPB_RW_ALL) -> all;
 decode_quorum(?RIAKPB_RW_DEFAULT) -> default;
 decode_quorum(undefined) -> undefined;
 decode_quorum(I) when is_integer(I), I >= 0 -> I.
+
+%% @doc Convert preflist to RpbBucketKeyPreflist.
+-spec encode_apl_ann(preflist_with_pnum_ann()) ->
+                            PBPreflist::[#rpbbucketkeypreflistitem{}].
+encode_apl_ann(Preflist) ->
+    [encode_apl_item({PartitionNumber, Node}, T) ||
+        {{PartitionNumber, Node}, T} <- Preflist].
+
+-spec encode_apl_item({non_neg_integer(), node()}, primary|fallback) ->
+                            #rpbbucketkeypreflistitem{}.
+encode_apl_item({PartitionNumber, Node}, primary) ->
+    #rpbbucketkeypreflistitem{partition=PartitionNumber,
+                              node=riak_pb_codec:to_binary(Node),
+                              primary=riak_pb_codec:encode_bool(true)};
+encode_apl_item({PartitionNumber, Node}, fallback) ->
+    #rpbbucketkeypreflistitem{partition=PartitionNumber,
+                              node=riak_pb_codec:to_binary(Node),
+                              primary=riak_pb_codec:encode_bool(false)}.
+
+
+-ifdef(TEST).
+
+encode_apl_ann_test() ->
+    Encoded = encode_apl_ann([{{1,
+                                'dev5@127.0.0.1'},
+                               primary},
+                              {{2,
+                                'dev6@127.0.0.1'},
+                               primary},
+                              {{3,
+                                'dev3@127.0.0.1'},
+                               fallback}]),
+    ?assertEqual(Encoded,
+                 [{rpbbucketkeypreflistitem,
+                   1,<<"dev5@127.0.0.1">>,true},
+                  {rpbbucketkeypreflistitem,
+                   2,<<"dev6@127.0.0.1">>,true},
+                  {rpbbucketkeypreflistitem,
+                   3,<<"dev3@127.0.0.1">>,false}]).
+
+-endif.

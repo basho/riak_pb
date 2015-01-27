@@ -100,7 +100,7 @@ msg_type(Int) -> riak_pb_messages:msg_type(Int).
 %% @doc Converts a symbolic message name into a message code. Replaces
 %% `riakc_pb:msg_code/1'.
 -spec msg_code(atom()) -> integer().
-msg_code(Atom) -> riak_pb_messages:msg_code(Atom).    
+msg_code(Atom) -> riak_pb_messages:msg_code(Atom).
 
 %% @doc Selects the appropriate PB decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
