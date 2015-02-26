@@ -1,8 +1,8 @@
 %% @doc Generates a codec-mapping module from a CSV mapping of message
 %% codes to messages in .proto files.
 -module(riak_pb_msgcodegen).
--export([preprocess/2,
-         clean/2]).
+-export([pre_compile/2,
+         pre_clean/2]).
 
 %% -include_lib("rebar/include/rebar.hrl").
 -define(FAIL, rebar_utils:abort()).
@@ -24,21 +24,16 @@
 %% ===================================================================
 %% Public API
 %% ===================================================================
-preprocess(Config, _AppFile) ->
-    case rebar_config:get(Config, current_command, undefined) of
-        'compile' ->
-            case rebar_utils:find_files("src", ".*\\.csv") of
-                [] ->
-                    ok;
-                FoundFiles ->
-                    Targets = [{CSV, fq_erl_file(CSV)} || CSV <- FoundFiles ],
-                    generate_each(Config, Targets)
-            end;
-        _ -> ok
-    end,
-    {ok, Config, []}.
+pre_compile(Config, _AppFile) ->
+    case rebar_utils:find_files("src", ".*\\.csv") of
+        [] ->
+            ok;
+        FoundFiles ->
+            Targets = [{CSV, fq_erl_file(CSV)} || CSV <- FoundFiles ],
+            generate_each(Config, Targets)
+    end.
 
-clean(_Config, _AppFile) ->
+pre_clean(_Config, _AppFile) ->
     CSVs = rebar_utils:find_files("src", ".*\\.csv"),
     ErlFiles = [fq_erl_file(CSV) || CSV <- CSVs],
     case ErlFiles of
