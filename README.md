@@ -47,60 +47,10 @@ In some cases, a client may receive multiple response messages for a
 single request. The response message will typically include a boolean
 `done` field that signifies the last message in a sequence.
 
-### Riak global Request/Response messages
-
-    RpbGetServerInfoReq -> RpbGetServerInfoResp
-    RpbPingReq -> RpbPingResp
-    RpbGetBucketReq -> RpbErrorResp | RpbGetBucketResp
-    RpbPutBucketReq -> RpbErrorResp | RpbPutBucketResp
-
-### Riak KV Request/Response messages
-
-    RpbGetClientIdReq -> RpbGetClientIdResp
-    RpbSetClientIdReq -> RpbSetClientIdResp
-    RpbGetReq -> RpbErrorResp | RbpGetResp
-    RpbPutReq -> RpbErrorResp | RpbPutResp
-    RpbDelReq -> RpbErrorResp | RpbDelResp
-    RpbListBucketsReq -> RpbErrorResp | RpbListBucketsResp
-    RpbListKeysReq -> RpbErrorResp | RpbListKeysResp{1,}
-    RpbMapRedReq -> RpbMapRedResp{1,}
-    RpbIndexReq -> RpbIndexResp
-
-### Riak Search Request/Response messages
-
-    RpbSearchQueryReq -> RpbSearchQueryResp
-
 ### Registered Message Codes
 
-     0 - RpbErrorResp
-     1 - RpbPingReq - 0 length
-     2 - RpbPingResp (pong) - 0 length
-     3 - RpbGetClientIdReq
-     4 - RpbGetClientIdResp
-     5 - RpbSetClientIdReq
-     6 - RpbSetClientIdResp
-     7 - RpbGetServerInfoReq
-     8 - RpbGetServerInfoResp
-     9 - RpbGetReq
-    10 - RpbGetResp
-    11 - RpbPutReq
-    12 - RpbPutResp - 0 length
-    13 - RpbDelReq
-    14 - RpbDelResp
-    15 - RpbListBucketsReq
-    16 - RpbListBucketsResp
-    17 - RpbListKeysReq
-    18 - RpbListKeysResp{1,}
-    19 - RpbGetBucketReq
-    20 - RpbGetBucketResp
-    21 - RpbSetBucketReq
-    22 - RpbSetBucketResp
-    23 - RpbMapRedReq
-    24 - RpbMapRedResp{1,}
-    25 - RpbIndexReq
-    26 - RpbIndexResp
-    27 - RpbSearchQueryReq
-    28 - RbpSearchQueryResp
+[Message codes](http://docs.basho.com/riak/latest/dev/references/protocol-buffers/#Message-Codes) and documentation can be found in the protocol-buffers
+[section](http://docs.basho.com/riak/latest/dev/references/protocol-buffers/) of the online docs.
 
 ## Contributing
 
