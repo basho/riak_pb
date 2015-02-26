@@ -50,10 +50,10 @@
 -type symbolic_quorum() :: one | quorum | all | default.
 -type value() :: binary().
 
--ifdef(pre17).
--type metadata() :: dict().
--else.
+-ifdef(namespaced_types).
 -type metadata() :: dict:dict(binary(), binary()).
+-else.
+-type metadata() :: dict().
 -endif.
 
 -type contents() :: [{metadata(), value()}].
