@@ -2,7 +2,7 @@
 **
 ** riak_kv.proto: Protocol buffers for riak KV
 **
-** Copyright (c) 2007-2010 Basho Technologies, Inc.  All Rights Reserved.
+** Copyright (c) 2007-2015 Basho Technologies, Inc.  All Rights Reserved.
 **
 ** This file is provided to you under the Apache License,
 ** Version 2.0 (the "License"); you may not use this file
@@ -290,4 +290,34 @@ message RpbBucketKeyPreflistItem {
     required int64 partition = 1;
     required bytes node = 2;
     required bool  primary = 3;
+}
+
+// ring API entry points coverage by bucket+key request
+enum RpbApiProto {
+    pbc = 0;
+    http = 1;
+}
+message RpbApiEp {
+    required bytes ip = 1;
+    repeated int32 ports = 2;
+}
+
+message RpbApiEpReq {
+    required bytes bucket = 1;
+    required bytes key = 2;
+    optional RpbApiProto proto = 3 [default = pbc];
+}
+// ring API entry points coverage by bucket+key response
+message RpbApiEpResp {
+    repeated RpbApiEp eplist = 1;
+}
+
+// ring API entry points full coverage request
+message RpbApiEpMapReq {
+    optional RpbApiProto proto = 1 [default = pbc];
+}
+
+// ring API entry points full coverage response
+message RpbApiEpMapResp {
+    repeated RpbApiEp eplist = 1;
 }
