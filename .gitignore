@@ -1,11 +1,11 @@
 # Erlang
-.eunit/*
-deps/*
-priv/*
+.eunit/
+deps/
+priv/
 *.o
 ebin/*.beam
 ebin/riak_pb.app
-doc/*
+doc/
 .qc
 .eqc-info
 current_counterexample.eqc
@@ -13,17 +13,19 @@ src/riak_pb_messages.erl
 .local_dialyzer_plt
 dialyzer_unhandled_warnings
 dialyzer_warnings
-.rebar/*
+.rebar/
+_build/
+mix.lock
 
 # Java
-target/*
+target/
 
 #IntelliJ
 .idea/
 riak_pb.iml
 
 # C
-c/*
+c/
 
 # Python
 __pycache__/

@@ -1,6 +1,9 @@
 Release Notes
 =============
 
+* [`2.3.1`](https://github.com/basho/riak_pb/milestone/16)
+  * *NOTE:* moving to `X.Y.Z` versioning scheme.
+  * Publish to `hex.pm`
 * [`2.3.0.0`](https://github.com/basho/riak_pb/compare/2.2.0.2...2.3.0.0)
   * Object TTL support for Riak TS
   * Use `gpb` library instead of `erlang_protobuffs`
@@ -15,4 +18,3 @@ Release Notes
  * Update `erlang_protobuffs` to `0.9.0`. Supports quoting reserved words in a `R15`-compatible way.
 * [`2.1.4.1`](https://github.com/basho/riak_pb/issues?q=milestone%3Ariak_pb-2.1.4.1)
  * OTP 19 support in `riak_pb` and dependencies.
- 
