@@ -297,27 +297,23 @@ enum RpbApiProto {
     pbc = 0;
     http = 1;
 }
+message RpbBucketKey {
+    required bytes bucket = 1;
+    required bytes key = 2;
+}
+
 message RpbApiEp {
-    required bytes ip = 1;
-    repeated int32 ports = 2;
+    required bytes addr = 1;
+    required int32 port = 2;
+    optional int64 last_checked = 3;
 }
 
 message RpbApiEpReq {
-    required bytes bucket = 1;
-    required bytes key = 2;
-    optional RpbApiProto proto = 3 [default = pbc];
-}
-// ring API entry points coverage by bucket+key response
-message RpbApiEpResp {
-    repeated RpbApiEp eplist = 1;
-}
-
-// ring API entry points full coverage request
-message RpbApiEpMapReq {
     optional RpbApiProto proto = 1 [default = pbc];
+    optional RpbBucketKey bkey = 2;
+    optional bool force_update = 3;
 }
 
-// ring API entry points full coverage response
-message RpbApiEpMapResp {
+message RpbApiEpResp {
     repeated RpbApiEp eplist = 1;
 }

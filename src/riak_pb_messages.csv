@@ -52,8 +52,6 @@
 83,DtUpdateResp,riak_dt
 90,RpbApiEpReq,riak_kv
 91,RpbApiEpResp,riak_kv
-92,RpbApiEpMapReq,riak_kv
-93,RpbApiEpMapResp,riak_kv
 253,RpbAuthReq,riak
 254,RpbAuthResp,riak
 255,RpbStartTls,riak
