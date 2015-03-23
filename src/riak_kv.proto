@@ -57,6 +57,8 @@ message RpbGetReq {
     optional bool sloppy_quorum = 11;   // Experimental, may change/disappear
     optional uint32 n_val = 12;         // Experimental, may change/disappear
     optional bytes type = 13;           // Bucket type, if not set we assume the 'default' type
+    // Request the API entry point (in this protocol) leading to vnode holding the data
+    optional RpbApiProto apiep_proto = 14;
 }
 
 // Get Response - if the record was not found there will be no content/vclock
@@ -233,6 +235,7 @@ message RpbContent {
     repeated RpbPair usermeta = 9;       // user metadata stored with the object
     repeated RpbPair indexes = 10;       // user metadata stored with the object
     optional bool deleted = 11;
+    repeated RpbApiEp apieps = 12;
 }
 
 // Link metadata
@@ -302,6 +305,7 @@ message RpbBucketKey {
     required bytes key = 2;
 }
 
+// API entry point
 message RpbApiEp {
     required bytes addr = 1;
     required int32 port = 2;
