@@ -112,6 +112,8 @@ encode_content_meta(?MD_INDEX, Indexes, PbContent) when is_list(Indexes) ->
     PbContent#rpbcontent{indexes = [encode_index_pair(E) || E <- Indexes]};
 encode_content_meta(?MD_DELETED, DeletedVal, PbContent) ->
     PbContent#rpbcontent{deleted=header_val_to_bool(DeletedVal)};
+encode_content_meta(?MD_APIEPS, EPList, PbContent) when is_list(EPList) ->
+    PbContent#rpbcontent{apieps = [encode_apiep(E) || E <- EPList]};
 encode_content_meta(_Key, _Value, PbContent) ->
     %% Ignore unknown metadata - need to add to RpbContent if it needs to make it
     %% to/from the client
@@ -258,6 +260,22 @@ encode_apl_item({PartitionNumber, Node}, fallback) ->
     #rpbbucketkeypreflistitem{partition=PartitionNumber,
                               node=riak_pb_codec:to_binary(Node),
                               primary=riak_pb_codec:encode_bool(false)}.
+
+-spec encode_apiep([{addr, inet:ip_address()|not_routed} |
+                    {port, inet:port_number()} |
+                    {last_checked, erlang:timestamp()}]) ->
+                          #rpbapiep{}.
+encode_apiep(EPList) ->
+    Addr        = proplists:get_value(addr, EPList),
+    Port        = proplists:get_value(port, EPList),
+    LastChecked = proplists:get_value(last_checked, EPList),
+    #rpbapiep{addr = if Addr == not_routed -> <<"not_routed">>;
+                        el/=se -> list_to_binary(inet:ntoa(Addr)) end,
+              port = Port,
+              last_checked = unixtime(LastChecked)}.
+
+unixtime({NowMega, NowSec, _}) ->
+    NowMega * 1000 * 1000 + NowSec.
 
 
 -ifdef(TEST).
