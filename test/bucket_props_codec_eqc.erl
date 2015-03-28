@@ -94,7 +94,7 @@ bucket_prop() ->
            yz_index(),
            datatype(),
            flag(consistent),
-           flag(fast_path)]).
+           flag(write_once)]).
 
 sortuniq(Gen) ->
     ?LET(L, Gen, lists:ukeysort(1,L)).
