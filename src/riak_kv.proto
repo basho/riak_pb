@@ -300,10 +300,6 @@ enum RpbApiProto {
     pbc = 0;
     http = 1;
 }
-message RpbBucketKey {
-    required bytes bucket = 1;
-    required bytes key = 2;
-}
 
 // API entry point
 message RpbApiEp {
@@ -314,8 +310,9 @@ message RpbApiEp {
 
 message RpbApiEpReq {
     optional RpbApiProto proto = 1 [default = pbc];
-    optional RpbBucketKey bkey = 2;
-    optional bool force_update = 3 [default = false];
+    optional bytes bucket = 2;
+    optional bytes key = 3;
+    optional bool force_update = 4 [default = false];
 }
 
 message RpbApiEpResp {
