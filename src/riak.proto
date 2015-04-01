@@ -154,6 +154,9 @@ message RpbBucketProps {
 
     // KV strong consistency
     optional bool consistent = 27;
+
+    // KV fast path
+    optional bool write_once = 28;
 }
 
 // Authentication request
