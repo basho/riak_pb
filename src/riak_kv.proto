@@ -313,6 +313,7 @@ message RpbApiEpReq {
     optional bytes bucket = 2;
     optional bytes key = 3;
     optional bool force_update = 4 [default = false];
+    optional bool check_key_exist = 5 [default = true];
 }
 
 message RpbApiEpResp {
