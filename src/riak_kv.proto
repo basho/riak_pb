@@ -2,7 +2,7 @@
 **
 ** riak_kv.proto: Protocol buffers for riak KV
 **
-** Copyright (c) 2007-2010 Basho Technologies, Inc.  All Rights Reserved.
+** Copyright (c) 2007-2015 Basho Technologies, Inc.  All Rights Reserved.
 **
 ** This file is provided to you under the Apache License,
 ** Version 2.0 (the "License"); you may not use this file
@@ -57,6 +57,8 @@ message RpbGetReq {
     optional bool sloppy_quorum = 11;   // Experimental, may change/disappear
     optional uint32 n_val = 12;         // Experimental, may change/disappear
     optional bytes type = 13;           // Bucket type, if not set we assume the 'default' type
+    // Request the API entry point (in this protocol) leading to vnode holding the data
+    optional RpbApiProto apiep_proto = 14;
 }
 
 // Get Response - if the record was not found there will be no content/vclock
@@ -233,6 +235,7 @@ message RpbContent {
     repeated RpbPair usermeta = 9;       // user metadata stored with the object
     repeated RpbPair indexes = 10;       // user metadata stored with the object
     optional bool deleted = 11;
+    repeated RpbApiEp apieps = 12;
 }
 
 // Link metadata
@@ -290,4 +293,29 @@ message RpbBucketKeyPreflistItem {
     required int64 partition = 1;
     required bytes node = 2;
     required bool  primary = 3;
+}
+
+// ring API entry points coverage by bucket+key request
+enum RpbApiProto {
+    pbc = 0;
+    http = 1;
+}
+
+// API entry point
+message RpbApiEp {
+    required bytes addr = 1;
+    required int32 port = 2;
+    optional int64 last_checked = 3;
+}
+
+message RpbApiEpReq {
+    optional RpbApiProto proto = 1 [default = pbc];
+    optional bytes bucket = 2;
+    optional bytes key = 3;
+    optional bool force_update = 4 [default = false];
+    optional bool check_key_exist = 5 [default = true];
+}
+
+message RpbApiEpResp {
+    repeated RpbApiEp eplist = 1;
 }
