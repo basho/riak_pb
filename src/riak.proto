@@ -98,20 +98,8 @@ message RpbActivateBucketTypeReq {
     required bytes type = 1;
 }
 
-// Activate bucket type request
-message RpbListBucketTypeReq {
-}
-
-// Activate bucket type request
-message RpbStatusBucketTypeReq {
-    required bytes type = 1;
-}
-
-// Activate bucket type request
-message RpbUpdateBucketTypeReq {
-    required bytes type = 1;
-    required RpbBucketProps props = 2;
-}
+// Set bucket properties response - no message defined, just send
+// RpbSetBucketResp
 
 // Set bucket properties response - no message defined, just send
 // RpbSetBucketResp
