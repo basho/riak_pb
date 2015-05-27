@@ -98,12 +98,6 @@ message RpbActivateBucketTypeReq {
     required bytes type = 1;
 }
 
-// Set bucket properties response - no message defined, just send
-// RpbSetBucketResp
-
-// Set bucket properties response - no message defined, just send
-// RpbSetBucketResp
-
 // Module-Function pairs for commit hooks and other bucket properties
 // that take functions
 message RpbModFun {
