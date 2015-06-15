@@ -182,6 +182,7 @@ message RpbIndexReq {
     optional bytes term_regex = 13;
     // Whether to use pagination sort for non-paginated queries
     optional bool pagination_sort = 14;
+    optional bool return_body = 15;
 }
 
 // Secondary Index query response
