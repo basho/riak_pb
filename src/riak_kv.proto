@@ -182,6 +182,9 @@ message RpbIndexReq {
     optional bytes term_regex = 13;
     // Whether to use pagination sort for non-paginated queries
     optional bool pagination_sort = 14;
+    // parallel extraction extension
+    optional bytes cover_context = 15; // chopped up coverage plan per-req
+
 }
 
 // Secondary Index query response
@@ -290,4 +293,23 @@ message RpbBucketKeyPreflistItem {
     required int64 partition = 1;
     required bytes node = 2;
     required bool  primary = 3;
+}
+
+message RpbCoverageReq {
+    required bytes type = 1;
+    required bytes bucket = 2;
+    required uint32 min_partitions = 3;
+    optional bytes cover_context = 4;     // For failure recovery
+    repeated bytes unavailable_hosts = 5; // combine with the planning node’s knowledge of up/down
+}
+
+message RpbCoverageResp {
+   repeated RpbCoverageEntry entry = 1;
+}
+
+message RpbCoverageEntry {
+    required bytes hostname = 1;
+    required uint32 port = 2;
+    optional bytes keyspace_desc = 3; // Some human readable description of the keyspace covered
+    required bytes cover_context = 4; // Opaque context to pass into 2I query.
 }
