@@ -46,6 +46,8 @@
 58,RpbYokozunaSchemaGetReq,riak_yokozuna
 59,RpbYokozunaSchemaGetResp,riak_yokozuna
 60,RpbYokozunaSchemaPutReq,riak_yokozuna
+70,RpbCoverageReq,riak_kv
+71,RpbCoverageResp,riak_kv
 80,DtFetchReq,riak_dt
 81,DtFetchResp,riak_dt
 82,DtUpdateReq,riak_dt
