@@ -296,9 +296,9 @@ message RpbBucketKeyPreflistItem {
 }
 
 message RpbCoverageReq {
-    required bytes type = 1;
+    optional bytes type = 1;              // Bucket type, if not set we assume the 'default' type
     required bytes bucket = 2;
-    required uint32 min_partitions = 3;
+    optional uint32 min_partitions = 3;   // If not set we assume ring_size partitions, a normal coverage plan
     optional bytes cover_context = 4;     // For failure recovery
     repeated bytes unavailable_hosts = 5; // combine with the planning node’s knowledge of up/down
 }
