@@ -295,6 +295,7 @@ message RpbBucketKeyPreflistItem {
     required bool  primary = 3;
 }
 
+// Request a segmented coverage plan for the specified bucket
 message RpbCoverageReq {
     optional bytes type = 1;              // Bucket type, if not set we assume the 'default' type
     required bytes bucket = 2;
@@ -303,10 +304,12 @@ message RpbCoverageReq {
     repeated bytes unavailable_hosts = 5; // combine with the planning node’s knowledge of up/down
 }
 
+// Segmented coverage plan response
 message RpbCoverageResp {
    repeated RpbCoverageEntry entries = 1;
 }
 
+// Segment of a coverage plan
 message RpbCoverageEntry {
     required bytes ip = 1;
     required uint32 port = 2;
