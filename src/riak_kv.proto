@@ -308,7 +308,7 @@ message RpbCoverageResp {
 }
 
 message RpbCoverageEntry {
-    required bytes hostname = 1;
+    required bytes ip = 1;
     required uint32 port = 2;
     optional bytes keyspace_desc = 3; // Some human readable description of the keyspace covered
     required bytes cover_context = 4; // Opaque context to pass into 2I query.
