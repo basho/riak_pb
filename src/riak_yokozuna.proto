@@ -49,7 +49,6 @@ message RpbYokozunaIndexGetResp {
 // PUT request - Create a new index
 message RpbYokozunaIndexPutReq {
     required RpbYokozunaIndex index  =  1;
-    optional uint32 timeout          =  2; // Timeout value
 }
 
 // DELETE request - Remove an index
