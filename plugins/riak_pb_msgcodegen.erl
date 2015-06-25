@@ -25,7 +25,7 @@
 %% Public API
 %% ===================================================================
 pre_compile(Config, _AppFile) ->
-    case rebar_utils:find_files("src", ".*\\.csv") of
+    case rebar_utils:find_files("src", ".*\\.csv", false) of
         [] ->
             ok;
         FoundFiles ->
@@ -34,7 +34,9 @@ pre_compile(Config, _AppFile) ->
     end.
 
 pre_clean(_Config, _AppFile) ->
-    CSVs = rebar_utils:find_files("src", ".*\\.csv"),
+    CSVs = rebar_utils:find_files("src", ".*\\.csv", false),  %% Recursive = false
+    %% else it will go on looking into .backups (if your emacs is
+    %% configured to keep backups in this dir) and produce a *.csv~
     ErlFiles = [fq_erl_file(CSV) || CSV <- CSVs],
     case ErlFiles of
         [] -> ok;
