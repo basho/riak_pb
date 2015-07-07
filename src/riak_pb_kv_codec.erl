@@ -47,7 +47,8 @@
          decode_link/1,         %% riakc_pb:erlify_rpblink
          encode_quorum/1,
          decode_quorum/1,       %% riak_kv_pb_socket:normalize_rw_value
-         encode_apl_ann/1
+         encode_apl_ann/1,
+         encode_get_response/1
         ]).
 
 -export_type([quorum/0]).
@@ -67,12 +68,82 @@
 -type preflist_with_pnum_ann() :: [{{non_neg_integer(), node()}, primary|fallback}].
 
 
+encode_get_response(<<53:8/integer, 1:8/integer,
+                      VCLen:32/integer,VCBin:VCLen/binary,
+                      BinContents/binary>>) ->
+    Contents = encode_contents(BinContents),
+    #rpbgetresp{vclock = VCBin, content = Contents}.
+
 %% @doc Convert a list of object {MetaData,Value} pairs to protocol
 %% buffers messages.
 -spec encode_contents(contents()) -> [#rpbcontent{}].
+encode_contents(<<SibCount:32/integer, SibsBin/binary>>) ->
+    encode_contents(SibCount, SibsBin, []);
 encode_contents(List) ->
     [ encode_content(C) || C <- List ].
 
+decode_maybe_binary(<<1, Bin/binary>>) ->
+    Bin;
+decode_maybe_binary(<<0, Bin/binary>>) ->
+    binary_to_term(Bin).
+
+encode_contents(0, _, Acc) ->
+    %% TODO: If binary not empty, we have corrupted data.
+    %% We need to handle that case.
+    lists:reverse(Acc);
+encode_contents(N, <<ValLen:32/integer,
+                     ValBinWrapped:ValLen/binary,
+                     MetaLen:32/integer,
+                     MetaBin:MetaLen/binary,
+                     Rest/binary>>,
+               Acc) ->
+    ValBin = decode_maybe_binary(ValBinWrapped),
+    <<LMMega:32/integer, LMSecs:32/integer,
+      LMMicro:32/integer, VTagLen:8/integer, VTagIn:VTagLen/binary,
+      DeleteIn:8/integer, MetaRestBin/binary>> = MetaBin,
+
+    {LastMod, LastModUSecs} = case {LMMega, LMSecs, LMMicro} of
+                                  {0, 0, 0} ->
+                                      {undefined, undefined};
+                                  _ ->
+                                      {1000000*LMMega+LMSecs, LMMicro}
+                              end,
+    VTag = case VTagIn of <<"e">> -> undefined; _ -> VTagIn end,
+    Delete = case DeleteIn of 1 -> true; _ -> false end,
+    Resp = #rpbcontent{
+              value = ValBin, deleted = Delete,
+              last_mod = LastMod, last_mod_usecs = LastModUSecs,
+              vtag = VTag},
+    Resp1 = encode_content_meta(MetaRestBin, Resp),
+    encode_contents(N-1, Rest, [Resp1 | Acc]).
+
+encode_content_meta(<<_:32/integer, 1, "content-type", Len:32/integer,
+                      ValWrapped:Len/binary, Rest/binary>>, PbContent) ->
+    Val = decode_maybe_binary(ValWrapped),
+    encode_content_meta(Rest, PbContent#rpbcontent{content_type = Val});
+encode_content_meta(<<_:32/integer, 1, "charset", Len:32/integer,
+                      ValWrapped:Len/binary, Rest/binary>>, PbContent) ->
+    Val = decode_maybe_binary(ValWrapped),
+    encode_content_meta(Rest, PbContent#rpbcontent{charset = Val});
+encode_content_meta(<<_:32/integer, 1, "content-encoding", Len:32/integer,
+                      ValWrapped:Len/binary, Rest/binary>>, PbContent) ->
+    Val = decode_maybe_binary(ValWrapped),
+    encode_content_meta(Rest, PbContent#rpbcontent{content_encoding = Val});
+encode_content_meta(<<_:32/integer, 1, "Links", Len:32/integer,
+                      ValWrapped:Len/binary, Rest/binary>>, PbContent) ->
+    Links = [encode_link(E) || E <- decode_maybe_binary(ValWrapped)],
+    encode_content_meta(Rest, PbContent#rpbcontent{ links = Links});
+encode_content_meta(<<_:32/integer, 1, "X-Riak-Meta", Len:32/integer,
+                      ValWrapped:Len/binary, Rest/binary>>, PbContent) ->
+    UserMeta = [encode_pair(E) || E <- decode_maybe_binary(ValWrapped)],
+    encode_content_meta(Rest, PbContent#rpbcontent{ usermeta = UserMeta});
+encode_content_meta(<<_:32/integer, 1, "index", Len:32/integer,
+                      ValWrapped:Len/binary, Rest/binary>>, PbContent) ->
+    Indexes = [encode_index_pair(E) || E <- decode_maybe_binary(ValWrapped)],
+    encode_content_meta(Rest, PbContent#rpbcontent{ indexes = Indexes});
+encode_content_meta(<<>>, PbContent) ->
+    PbContent.
+                     
 %% @doc Convert a metadata/value pair into an #rpbcontent{} record
 -spec encode_content({metadata(), value()}) -> #rpbcontent{}.
 encode_content({MetadataIn, ValueIn}=C) ->
