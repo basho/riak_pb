@@ -208,6 +208,8 @@ message RpbCSBucketReq {
     optional uint32 max_results = 7;
     optional uint32 timeout = 8;
     optional bytes type = 9;         // Bucket type, if not set we assume the 'default' type
+    // parallel extraction extension
+    optional bytes cover_context = 10; // chopped up coverage plan per-req
 }
 
 // return for CS bucket fold
