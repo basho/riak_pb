@@ -188,7 +188,8 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
                                     repl=Repl,
                                     search_index=Index,
                                     datatype=Datatype,
-                                    consistent=Consistent
+                                    consistent=Consistent,
+                                    write_once=WriteOnce
                                    }) ->
     %% Extract numerical properties
     [ {P,V} || {P,V} <- [ {n_val, N}, {old_vclock, Old}, {young_vclock, Young},
@@ -198,7 +199,8 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
     [ {BProp, decode_bool(Bool)} ||
        {BProp, Bool} <- [{allow_mult, AM}, {last_write_wins, LWW},
                          {basic_quorum, BQ}, {notfound_ok, NFOK},
-                         {search, Search}, {consistent, Consistent}],
+                         {search, Search}, {consistent, Consistent},
+                         {write_once, WriteOnce}],
         Bool /= undefined ] ++
 
     %% Extract commit hooks
@@ -290,6 +292,8 @@ encode_bucket_props([{datatype, D}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{datatype = to_binary(D)});
 encode_bucket_props([{consistent, S}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{consistent = encode_bool(S)});
+encode_bucket_props([{write_once, S}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{write_once = encode_bool(S)});
 encode_bucket_props([_Ignore|Rest], Pb) ->
     %% Ignore any properties not explicitly part of the PB message
     encode_bucket_props(Rest, Pb).
