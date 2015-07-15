@@ -300,14 +300,27 @@ message TsQueryReq {
   optional TsInterpolation query = 1;
 }
 
-message TsInterpolation {
-  required bytes base = 1;
-  repeated RpbPair interpolations = 2;
-}
-
 message TsQueryResp {
   repeated TsColumnDescription columns = 1;
   repeated TsRow rows = 2;
+}
+
+message TsPutReq {
+  required bytes table = 1;
+
+  // optional: omitting it should use table order
+  repeated TsColumnDescription columns = 2;
+
+  repeated TsRow rows = 3;
+}
+
+message TsPutResp {
+
+}
+
+message TsInterpolation {
+  required bytes base = 1;
+  repeated RpbPair interpolations = 2;
 }
 
 enum TsColumnType {
