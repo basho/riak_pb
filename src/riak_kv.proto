@@ -184,6 +184,7 @@ message RpbIndexReq {
     optional bool pagination_sort = 14;
     // parallel extraction extension
     optional bytes cover_context = 15; // chopped up coverage plan per-req
+    optional bool return_body = 16; // Return values with keys, only works with $bucket/$key index queries
 
 }
 
