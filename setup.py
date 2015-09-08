@@ -8,8 +8,8 @@ install_requires = ["six >= 1.8.0"]
 requires = ["six(>=1.8.0)"]
 if platform.python_version() < '3.0':
     name = 'riak_pb'
-    requires.append('protobuf(>=2.4.1,<2.7.0)')
-    install_requires.append('protobuf >=2.4.1, <2.7.0')
+    requires.append('protobuf(>=2.4.1,<2.6.0)')
+    install_requires.append('protobuf >=2.4.1, <2.6.0')
 else:
     name = 'python3_riak_pb'
     requires.append('python3_protobuf(>=2.4.1,<2.6.0)')
