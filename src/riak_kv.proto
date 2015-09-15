@@ -320,7 +320,12 @@ message TsPutResp {
 
 message TsInterpolation {
   required bytes base = 1;
-  repeated RpbPair interpolations = 2;
+  repeated TsKeyCell interpolations = 2;
+}
+
+message TsKeyCell {
+  required bytes key = 1;
+  required TsCell value = 2;
 }
 
 enum TsColumnType {
