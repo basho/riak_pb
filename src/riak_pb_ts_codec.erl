@@ -37,6 +37,9 @@
          decode_rows/1,
          encode_field_type/1]).
 
+-type tsrow() :: #tsrow{}.
+-export_type([tsrow/0]).
+
 -define(SINT64_MIN, -16#8000000000000000).
 -define(SINT64_MAX,  16#7FFFFFFFFFFFFFFF).
 
@@ -118,13 +121,11 @@ cell_for(Measure) when is_list(Measure) andalso length(Measure) > 0 andalso
 cell_for(Measure) when is_list(Measure) ->
     #tscell{set_value = Measure}.
 
-
-
--spec decode_rows([#tsrow{}]) -> list(tuple()).
+-spec decode_rows([#tsrow{}]) -> [tsrow()].
 decode_rows(Rows) ->
     decode_row(Rows, []).
 
--spec decode_row([#tsrow{}], list(tuple())) -> list(tuple()).
+-spec decode_row([#tsrow{}], list(tuple())) -> [tsrow()].
 decode_row([], Acc) ->
     lists:reverse(Acc);
 decode_row([#tsrow{cells = Row} | T], Acc) ->
