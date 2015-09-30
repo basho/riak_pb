@@ -35,6 +35,7 @@
 34,RpbGetBucketKeyPreflistResp,riak_kv
 40,RpbCSBucketReq,riak_kv
 41,RpbCSBucketResp,riak_kv
+42,RpbIndexBodyResp,riak_kv
 50,RpbCounterUpdateReq,riak_kv
 51,RpbCounterUpdateResp,riak_kv
 52,RpbCounterGetReq,riak_kv

@@ -196,6 +196,13 @@ message RpbIndexResp {
     optional bool done = 4;
 }
 
+// Stolen from CS bucket response, to be used when return_body=true
+message RpbIndexBodyResp {
+    repeated RpbIndexObject objects = 1;
+    optional bytes continuation = 2;
+    optional bool done = 3;
+}
+
 // added solely for riak_cs currently
 // for folding over a bucket and returning
 // objects.
