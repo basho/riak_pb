@@ -1,4 +1,4 @@
-# Copyright 2014 Basho Technologies, Inc.
+# Copyright 2015 Basho Technologies, Inc.
 #
 # This file is provided to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file
@@ -13,6 +13,12 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+#
+# NOTE: TO RUN THIS SUCCESSFULLY, YOU NEED TO HAVE
+#       protobuf or python3_protobuf LOCALLY INSTALLED
+#
+# TO DEBUG: Set DISTUTILS_DEBUG=1 in the environment
+#
 
 """
 distutils commands for generating protocol message-code mappings.
@@ -23,6 +29,7 @@ __all__ = ['build_messages', 'clean_messages']
 import re
 import csv
 import os
+import sys
 from os.path import isfile
 from distutils import log
 from distutils.core import Command
@@ -108,6 +115,8 @@ class MessageCodeMapping(ComparableMixin):
                       self.message, self.module_name)
         except ImportError:
             log.debug("Could not import module '{0}'", self.module_name)
+        except:
+            log.debug("Unexpected error: {0}", sys.exc_info()[0])
         return None
 
 
