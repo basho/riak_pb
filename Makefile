@@ -32,11 +32,11 @@ compile: erl_compile # Hack for tools.mk
 python_compile:
 	@echo "==> Python (compile)"
 	@protoc -Isrc --python_out=riak_pb src/*.proto
-	@./setup.py build_messages build --build-base=python
+	@python2.7 ./setup.py build_messages build --build-base=python
 
 python_clean:
 	@echo "==> Python (clean)"
-	@./setup.py clean --build-base=python clean_messages
+	@python2.7 ./setup.py clean --build-base=python clean_messages
 	@rm -rf *.pyc riak_pb/*_pb2.py riak_pb/*.pyc riak_pb.egg-info python
 
 python_release: python_clean
@@ -61,7 +61,7 @@ endif
 
 python_install: python_compile
 	@echo "==> Python (install)"
-	@./setup.py build_messages build --build-base=python install
+	@python2.7 ./setup.py build_messages build --build-base=python install
 
 # Python 3.x specific build steps
 python3_compile:
