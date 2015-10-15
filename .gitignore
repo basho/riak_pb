@@ -16,16 +16,6 @@ dialyzer_unhandled_warnings
 dialyzer_warnings
 .rebar/*
 
-# Python
-riak_pb.egg-info
-riak_pb/*_pb2.py
-riak_pb/messages.py
-build
-*.pyc
-dist/*
-python*/
-.python-version
-
 # Java
 target/*
 
