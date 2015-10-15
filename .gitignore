@@ -10,6 +10,7 @@ doc/*
 .qc
 .eqc-info
 current_counterexample.eqc
+src/riak_pb_messages.erl
 
 # Python
 riak_pb.egg-info
