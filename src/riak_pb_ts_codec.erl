@@ -229,5 +229,4 @@ decode_cells([#tscell{binary_value    = undefined,
                       map_value       = undefined,
                       float_value     = undefined,
                       double_value    = Double} | T], Acc) ->
-    decode_cells(T, [Double | Acc]);
-.
+    decode_cells(T, [Double | Acc]).
