@@ -341,6 +341,18 @@ message TsQueryResp {
   repeated TsRow rows = 2;
 }
 
+
+message TsGetReq {
+  required bytes table = 1;
+  repeated TsCell key = 2;
+  optional uint32 timeout = 3;
+}
+
+message TsGetResp {
+  repeated TsRow rows = 1;  // 0 or 1 rows, that is
+}
+
+
 message TsPutReq {
   required bytes table = 1;
 
