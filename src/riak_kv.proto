@@ -351,4 +351,6 @@ message TsCell {
   optional bool boolean_value = 5;
   repeated bytes set_value = 6;
   optional bytes map_value = 7;
+  optional float float_value = 8;
+  optional double double_value = 9;
 }
