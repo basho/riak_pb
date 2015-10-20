@@ -94,7 +94,7 @@ row_for([], SerializedCells) ->
     #tsrow{cells = lists:reverse(SerializedCells)};
 row_for([Datum|RemainingCells], SerializedCells) ->
     row_for(RemainingCells,
-            [cell_for(Datum) | SerializedCells]).
+            lists:append(SerializedCells, [cell_for(Datum)])).
 
 -spec cell_for(ldbvalue()) -> #tscell{}.
 cell_for(Measure) when is_binary(Measure) ->
