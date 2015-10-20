@@ -182,6 +182,10 @@ message RpbIndexReq {
     optional bytes term_regex = 13;
     // Whether to use pagination sort for non-paginated queries
     optional bool pagination_sort = 14;
+    // parallel extraction extension
+    optional bytes cover_context = 15; // chopped up coverage plan per-req
+    optional bool return_body = 16; // Return values with keys, only works with $bucket/$key index queries
+
 }
 
 // Secondary Index query response
@@ -190,6 +194,13 @@ message RpbIndexResp {
     repeated RpbPair results = 2;
     optional bytes continuation = 3;
     optional bool done = 4;
+}
+
+// Stolen from CS bucket response, to be used when return_body=true
+message RpbIndexBodyResp {
+    repeated RpbIndexObject objects = 1;
+    optional bytes continuation = 2;
+    optional bool done = 3;
 }
 
 // added solely for riak_cs currently
@@ -205,6 +216,8 @@ message RpbCSBucketReq {
     optional uint32 max_results = 7;
     optional uint32 timeout = 8;
     optional bytes type = 9;         // Bucket type, if not set we assume the 'default' type
+    // parallel extraction extension
+    optional bytes cover_context = 10; // chopped up coverage plan per-req
 }
 
 // return for CS bucket fold
@@ -290,6 +303,29 @@ message RpbBucketKeyPreflistItem {
     required int64 partition = 1;
     required bytes node = 2;
     required bool  primary = 3;
+}
+
+
+// Request a segmented coverage plan for the specified bucket
+message RpbCoverageReq {
+    optional bytes type = 1;              // Bucket type, if not set we assume the 'default' type
+    required bytes bucket = 2;
+    optional uint32 min_partitions = 3;   // If undefined, we build a normal coverage plan. If <ring_size, we build a coverage plan with exactly ring_size entries, anything larger will have a power of 2 entries covering keyspaces smaller than a partition
+    optional bytes replace_cover = 4;     // For failure recovery
+    repeated bytes unavailable_cover = 5; // Other coverage contexts that have failed to assist Riak in deciding what nodes to avoid
+}
+
+// Segmented coverage plan response
+message RpbCoverageResp {
+   repeated RpbCoverageEntry entries = 1;
+}
+
+// Segment of a coverage plan
+message RpbCoverageEntry {
+    required bytes ip = 1;
+    required uint32 port = 2;
+    optional bytes keyspace_desc = 3; // Some human readable description of the keyspace covered
+    required bytes cover_context = 4; // Opaque context to pass into 2I query.
 }
 
 // Time Series
