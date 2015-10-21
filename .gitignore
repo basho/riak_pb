@@ -23,6 +23,7 @@ riak_pb/messages.py
 build
 *.pyc
 dist/*
+python*/
 
 # Java
 target/*

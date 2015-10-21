@@ -131,6 +131,16 @@ decode_row([], Acc) ->
 decode_row([#tsrow{cells = Row} | T], Acc) ->
     decode_row(T, [decode_cells(Row, []) | Acc]).
 
+-spec decode_numeric(binary()) -> float().
+decode_numeric(Num) ->
+    NumList = binary_to_list(Num),
+    case string:chr(NumList, $.) of
+        0 ->
+            list_to_float(string:concat(NumList, ".0"));
+        _ ->
+            list_to_float(NumList)
+    end.
+
 -spec decode_cells([#tscell{}], list(ldbvalue())) -> tuple().
 decode_cells([], Acc) ->
     list_to_tuple(lists:reverse(Acc));
@@ -157,7 +167,7 @@ decode_cells([#tscell{binary_value    = undefined,
                       boolean_value   = undefined,
                       set_value       = [],
                       map_value       = undefined} | T], Acc) ->
-    decode_cells(T, [list_to_float(binary_to_list(Num)) | Acc]);
+    decode_cells(T, [decode_numeric(Num) | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = undefined,
                       numeric_value   = undefined,
