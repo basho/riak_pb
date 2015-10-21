@@ -119,7 +119,9 @@ cell_for(Measure) when is_list(Measure) andalso length(Measure) > 0 andalso
                        is_tuple(hd(Measure)) andalso size(hd(Measure)) == 2 ->
     #tscell{map_value = Measure};
 cell_for(Measure) when is_list(Measure) ->
-    #tscell{set_value = Measure}.
+    #tscell{set_value = Measure};
+cell_for(undefined) ->
+    #tscell{}.
 
 -spec decode_rows([#tsrow{}]) -> [tsrow()].
 decode_rows(Rows) ->
@@ -180,7 +182,8 @@ decode_cells([#tscell{binary_value    = undefined,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
                       set_value       = Set,
-                      map_value       = undefined} | T], Acc) ->
+                      map_value       = undefined} | T], Acc)
+  when is_list(Set) ->
     decode_cells(T, [Set | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = undefined,
@@ -188,5 +191,14 @@ decode_cells([#tscell{binary_value    = undefined,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
                       set_value       = [],
-                      map_value       = Map} | T], Acc) ->
-    decode_cells(T, [Map | Acc]).
+                      map_value       = Map} | T], Acc)
+  when is_binary(Map) ->
+    decode_cells(T, [Map | Acc]);
+decode_cells([#tscell{binary_value    = undefined,
+                      integer_value    = undefined,
+                      numeric_value    = undefined,
+                      timestamp_value  = undefined,
+                      boolean_value    = undefined,
+                      set_value        = [],
+                      map_value        = undefined} | T], Acc) ->
+    decode_cells(T, [undefined | Acc]).
