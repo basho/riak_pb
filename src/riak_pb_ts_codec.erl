@@ -131,7 +131,7 @@ decode_row([], Acc) ->
 decode_row([#tsrow{cells = Row} | T], Acc) ->
     decode_row(T, [decode_cells(Row, []) | Acc]).
 
--spec decode_numeric(list()) -> float().
+-spec decode_numeric(binary()) -> float().
 decode_numeric(Num) ->
     NumList = binary_to_list(Num),
     case string:chr(NumList, $.) of
