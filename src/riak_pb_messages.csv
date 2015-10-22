@@ -57,6 +57,8 @@
 91,TsQueryResp,riak_kv
 92,TsPutReq,riak_kv
 93,TsPutResp,riak_kv
+94,TsDelReq,riak_kv
+95,TsDelResp,riak_kv
 253,RpbAuthReq,riak
 254,RpbAuthResp,riak
 255,RpbStartTls,riak
