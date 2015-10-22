@@ -56,7 +56,7 @@ encode_field_type(binary) ->
 encode_field_type(integer) ->
     'INTEGER';
 encode_field_type(float) ->
-    'NUMERIC';
+    'FLOAT';
 encode_field_type(timestamp) ->
     'TIMESTAMP';
 encode_field_type(boolean) ->
