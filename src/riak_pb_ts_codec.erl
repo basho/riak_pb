@@ -177,7 +177,8 @@ decode_cells([#tscell{binary_value    = Bin,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
                       set_value       = [],
-                      map_value       = undefined} | T], Acc) ->
+                      map_value       = undefined} | T], Acc)
+  when is_binary(Bin) ->
     decode_cells(T, [Bin | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = Int,
@@ -185,7 +186,8 @@ decode_cells([#tscell{binary_value    = undefined,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
                       set_value       = [],
-                      map_value       = undefined} | T], Acc) ->
+                      map_value       = undefined} | T], Acc)
+  when is_integer(Int) ->
     decode_cells(T, [Int | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = undefined,
@@ -193,7 +195,8 @@ decode_cells([#tscell{binary_value    = undefined,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
                       set_value       = [],
-                      map_value       = undefined} | T], Acc) ->
+                      map_value       = undefined} | T], Acc)
+  when is_binary(Num)->
     decode_cells(T, [decode_numeric(Num) | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = undefined,
@@ -201,16 +204,25 @@ decode_cells([#tscell{binary_value    = undefined,
                       timestamp_value = Timestamp,
                       boolean_value   = undefined,
                       set_value       = [],
-                      map_value       = undefined} | T], Acc) ->
+                      map_value       = undefined} | T], Acc)
+  when is_integer(Timestamp)->
     decode_cells(T, [Timestamp | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = undefined,
                       numeric_value   = undefined,
                       timestamp_value = undefined,
-                      boolean_value   = Bool,
+                      boolean_value   = true,
                       set_value       = [],
                       map_value       = undefined} | T], Acc) ->
-    decode_cells(T, [Bool | Acc]);
+    decode_cells(T, [true | Acc]);
+decode_cells([#tscell{binary_value    = undefined,
+                      integer_value   = undefined,
+                      numeric_value   = undefined,
+                      timestamp_value = undefined,
+                      boolean_value   = false,
+                      set_value       = [],
+                      map_value       = undefined} | T], Acc) ->
+    decode_cells(T, [false | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = undefined,
                       numeric_value   = undefined,
@@ -236,4 +248,4 @@ decode_cells([#tscell{binary_value    = undefined,
                       boolean_value    = undefined,
                       set_value        = [],
                       map_value        = undefined} | T], Acc) ->
-    decode_cells(T, [undefined | Acc]).
+    decode_cells(T, [[] | Acc]).
