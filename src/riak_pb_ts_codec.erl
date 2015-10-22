@@ -34,8 +34,12 @@
 -export([encode_columns/1,
          decode_columns/1,
          encode_rows/1,
+         encode_cells/1,
          decode_rows/1,
-         encode_field_type/1]).
+         decode_row/1,
+         decode_cells/1,
+         encode_field_type/1,
+         encode_tsdelreq/3]).
 
 -type tsrow() :: #tsrow{}.
 -export_type([tsrow/0]).
@@ -79,6 +83,29 @@ decode_columns(Columns) ->
 %% @ignore copied from riakc_ts_put_operator; inverse of make_data
 encode_rows(Measurements) ->
     rows_for(Measurements, []).
+
+encode_cells(Cells) ->
+    lists:map(fun cell_for/1, Cells).
+
+
+decode_cells(Cells) ->
+    decode_cells(Cells, []).
+
+-spec decode_rows([#tsrow{}]) -> [tsrow()].
+decode_rows(Rows) ->
+    decode_row(Rows, []).
+
+decode_row(Row) ->
+    decode_row(Row, []).
+
+encode_tsdelreq(Bucket, Key, Options) ->
+    #tsdelreq{table   = Bucket,
+              key     = encode_cells(Key),
+              vclock  = proplists:get_value(vclock, Options),
+              timeout = proplists:get_value(timeout, Options)}.
+
+%% ---------------------------------------
+%% local functions
 
 rows_for([], SerializedMeasurements) ->
     SerializedMeasurements;
@@ -127,19 +154,27 @@ cell_for(Measure) when is_list(Measure) andalso length(Measure) > 0 andalso
 cell_for(Measure) when is_list(Measure) ->
     #tscell{set_value = Measure}.
 
--spec decode_rows([#tsrow{}]) -> [tsrow()].
-decode_rows(Rows) ->
-    decode_row(Rows, []).
 
 -spec decode_row([#tsrow{}], list(tuple())) -> [tsrow()].
 decode_row([], Acc) ->
     lists:reverse(Acc);
 decode_row([#tsrow{cells = Row} | T], Acc) ->
-    decode_row(T, [decode_cells(Row, []) | Acc]).
+    decode_row(T, [list_to_tuple(decode_cells(Row, [])) | Acc]).
 
--spec decode_cells([#tscell{}], list(ldbvalue())) -> tuple().
+-spec decode_numeric(binary()) -> float().
+decode_numeric(Num) ->
+    NumList = binary_to_list(Num),
+    case string:chr(NumList, $.) of
+        0 ->
+            list_to_float(string:concat(NumList, ".0"));
+        _ ->
+            list_to_float(NumList)
+    end.
+
+-spec decode_cells([#tscell{numeric_value :: undefined|binary()}],
+                   list(ldbvalue())) -> list(ldbvalue()).
 decode_cells([], Acc) ->
-    list_to_tuple(lists:reverse(Acc));
+    lists:reverse(Acc);
 decode_cells([#tscell{binary_value    = Bin,
                       integer_value   = undefined,
                       numeric_value   = undefined,
@@ -169,7 +204,7 @@ decode_cells([#tscell{binary_value    = undefined,
                       map_value       = undefined,
                       float_value     = undefined,
                       double_value    = undefined} | T], Acc) ->
-    decode_cells(T, [list_to_float(binary_to_list(Num)) | Acc]);
+    decode_cells(T, [decode_numeric(Num) | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = undefined,
                       numeric_value   = undefined,
