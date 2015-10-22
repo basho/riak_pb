@@ -240,7 +240,7 @@ decode_cells([#tscell{binary_value    = undefined,
                       map_value       = undefined,
                       float_value     = undefined,
                       double_value    = undefined} | T], Acc) ->
-    decode_cells(T, [Bool | Acc]);
+    decode_cells(T, [false | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = undefined,
                       numeric_value   = undefined,
@@ -284,4 +284,14 @@ decode_cells([#tscell{binary_value    = undefined,
                       float_value     = undefined,
                       double_value    = Double} | T], Acc)
   when is_float(Double) ->
-    decode_cells(T, [Double | Acc]).
+    decode_cells(T, [Double | Acc]);
+decode_cells([#tscell{binary_value    = undefined,
+                      integer_value   = undefined,
+                      numeric_value   = undefined,
+                      timestamp_value = undefined,
+                      boolean_value   = undefined,
+                      set_value       = [],
+                      map_value       = undefined,
+                      float_value     = undefined,
+                      double_value    = undefined} | T], Acc) ->
+    decode_cells(T, [[] | Acc]).
