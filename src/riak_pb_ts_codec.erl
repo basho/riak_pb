@@ -230,7 +230,7 @@ decode_cells([#tscell{binary_value    = undefined,
                       boolean_value   = undefined,
                       set_value       = Set,
                       map_value       = undefined} | T], Acc)
-  when is_list(Set) ->
+  when length(Set) > 0 ->
     decode_cells(T, [Set | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = undefined,
