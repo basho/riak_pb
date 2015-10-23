@@ -39,7 +39,8 @@
          decode_row/1,
          decode_cells/1,
          encode_field_type/1,
-         encode_tsdelreq/3]).
+         encode_tsdelreq/3,
+         encode_tsgetreq/3]).
 
 -type tsrow() :: #tsrow{}.
 -export_type([tsrow/0]).
@@ -102,6 +103,10 @@ encode_tsdelreq(Bucket, Key, Options) ->
     #tsdelreq{table   = Bucket,
               key     = encode_cells(Key),
               vclock  = proplists:get_value(vclock, Options),
+              timeout = proplists:get_value(timeout, Options)}.
+encode_tsgetreq(Bucket, Key, Options) ->
+    #tsgetreq{table   = Bucket,
+              key     = encode_cells(Key),
               timeout = proplists:get_value(timeout, Options)}.
 
 %% ---------------------------------------
