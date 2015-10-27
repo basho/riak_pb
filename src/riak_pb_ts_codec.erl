@@ -136,14 +136,15 @@ cell_for(Measure) when is_integer(Measure) ->
 cell_for(Measure) when is_float(Measure) ->
     #tscell{double_value = Measure};
 
-cell_for({float, Measure}) ->
-    #tscell{double_value = Measure};
-cell_for({numeric, Measure}) when is_float(Measure) ->
-    #tscell{numeric_value = Measure};
-cell_for({numeric, Measure}) when is_integer(Measure) ->
-    #tscell{numeric_value = Measure};
-cell_for({time, Measure}) ->
-    #tscell{timestamp_value = Measure};
+%% cell_for({float, Measure}) ->
+%%     #tscell{double_value = Measure};
+%% cell_for({numeric, Measure}) when is_float(Measure) ->
+%%     #tscell{double_value = Measure};
+%% cell_for({numeric, Measure}) when ?IS_BIGNUM(Measure) ->
+%%     #tscell{numeric_value = list_to_binary(integer_to_list(Measure))};
+%% cell_for({time, Measure}) ->
+%%     #tscell{timestamp_value = Measure};
+
 cell_for(true) ->
     #tscell{boolean_value = true};
 cell_for(false) ->
