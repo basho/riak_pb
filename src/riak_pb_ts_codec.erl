@@ -36,7 +36,6 @@
          encode_rows/1,
          encode_cells/1,
          decode_rows/1,
-         decode_row/1,
          decode_cells/1,
          encode_field_type/1,
          encode_tsdelreq/3,
@@ -94,10 +93,7 @@ decode_cells(Cells) ->
 
 -spec decode_rows([#tsrow{}]) -> [tsrow()].
 decode_rows(Rows) ->
-    decode_row(Rows, []).
-
-decode_row(Row) ->
-    decode_row(Row, []).
+    decode_rows(Rows, []).
 
 encode_tsdelreq(Bucket, Key, Options) ->
     #tsdelreq{table   = Bucket,
@@ -162,11 +158,11 @@ cell_for(undefined) ->
     #tscell{}.
 
 
--spec decode_row([#tsrow{}], list(tuple())) -> [tsrow()].
-decode_row([], Acc) ->
+-spec decode_rows([#tsrow{}], list(tuple())) -> [tsrow()].
+decode_rows([], Acc) ->
     lists:reverse(Acc);
-decode_row([#tsrow{cells = Row} | T], Acc) ->
-    decode_row(T, [list_to_tuple(decode_cells(Row, [])) | Acc]).
+decode_rows([#tsrow{cells = Row} | T], Acc) ->
+    decode_rows(T, [list_to_tuple(decode_cells(Row, [])) | Acc]).
 
 -spec decode_numeric(binary()) -> float().
 decode_numeric(Num) ->
