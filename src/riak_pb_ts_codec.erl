@@ -170,7 +170,10 @@ decode_numeric(Num) ->
     NumList = binary_to_list(Num),
     case string:chr(NumList, $.) of
         0 ->
-            list_to_float(string:concat(NumList, ".0"));
+            try list_to_integer(NumList)
+            catch error:badarg ->
+                    list_to_float(string:concat(NumList, ".0"))
+            end;
         _ ->
             list_to_float(NumList)
     end.
