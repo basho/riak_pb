@@ -349,7 +349,8 @@ message TsGetReq {
 }
 
 message TsGetResp {
-  repeated TsRow rows = 1;  // 0 or 1 rows, that is
+  repeated TsColumnDescription columns = 1;
+  repeated TsRow rows = 2;  // 0 or 1 rows, that is
 }
 
 
