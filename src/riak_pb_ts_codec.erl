@@ -47,6 +47,8 @@
 -define(SINT64_MIN, -16#8000000000000000).
 -define(SINT64_MAX,  16#7FFFFFFFFFFFFFFF).
 
+-define(IS_BIGNUM(X), (is_integer(X) andalso (?SINT64_MIN < X orelse X < ?SINT64_MAX))).
+
 %% types existing between us and eleveldb
 -type ldbvalue() :: binary() | number() | boolean() | list().
 %% types of #tscell.xxx_value fields, constrained by what protobuf messages accept
@@ -127,20 +129,19 @@ row_for([Datum|RemainingCells], SerializedCells) ->
 -spec cell_for(ldbvalue()) -> #tscell{}.
 cell_for(Measure) when is_binary(Measure) ->
     #tscell{binary_value = Measure};
-cell_for(Measure) when is_integer(Measure),
-                       (?SINT64_MIN =< Measure),
-                       (Measure =< ?SINT64_MAX)  ->
-    #tscell{integer_value = Measure};
+cell_for(Measure) when ?IS_BIGNUM(Measure)  ->
+    #tscell{numeric_value = list_to_binary(integer_to_list(Measure))};
 cell_for(Measure) when is_integer(Measure) ->
-    #tscell{numeric_value = integer_to_list(Measure)};
+    #tscell{integer_value = Measure};
 cell_for(Measure) when is_float(Measure) ->
     #tscell{double_value = Measure};
+
 cell_for({float, Measure}) ->
-    #tscell{float_value = Measure};
+    #tscell{double_value = Measure};
 cell_for({numeric, Measure}) when is_float(Measure) ->
-    #tscell{numeric_value = float_to_list(Measure)};
+    #tscell{numeric_value = Measure};
 cell_for({numeric, Measure}) when is_integer(Measure) ->
-    #tscell{numeric_value = integer_to_list(Measure)};
+    #tscell{numeric_value = Measure};
 cell_for({time, Measure}) ->
     #tscell{timestamp_value = Measure};
 cell_for(true) ->
