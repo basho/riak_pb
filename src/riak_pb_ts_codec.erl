@@ -83,11 +83,10 @@ decode_columns(Columns) ->
 -spec encode_rows(list(list({binary(), ldbvalue()}))) -> [#tsrow{}].
 %% @ignore copied from riakc_ts_put_operator; inverse of make_data
 encode_rows(Measurements) ->
-    rows_for(Measurements, []).
+    [ row_for(MeasureRow) || MeasureRow <- Measurements ].
 
 encode_cells(Cells) ->
     lists:map(fun cell_for/1, Cells).
-
 
 decode_cells(Cells) ->
     decode_cells(Cells, []).
@@ -112,21 +111,10 @@ encode_tsgetreq(Bucket, Key, Options) ->
 %% ---------------------------------------
 %% local functions
 
-rows_for([], SerializedMeasurements) ->
-    SerializedMeasurements;
-rows_for([MeasureRow|RemainingMeasures], SerializedMeasurements) ->
-    SerializedRow = row_for(MeasureRow),
-    rows_for(RemainingMeasures, [SerializedRow | SerializedMeasurements]).
-
 -spec row_for(list(ldbvalue())) -> #tsrow{}.
 row_for(MeasureRow) ->
-    row_for(MeasureRow, []).
-
-row_for([], SerializedCells) ->
-    #tsrow{cells = lists:reverse(SerializedCells)};
-row_for([Datum|RemainingCells], SerializedCells) ->
-    row_for(RemainingCells,
-            [cell_for(Datum) | SerializedCells]).
+    SerializedCells = [ cell_for(Datum) || Datum <- MeasureRow ],
+    #tsrow{cells = SerializedCells}.
 
 -spec cell_for(ldbvalue()) -> #tscell{}.
 cell_for(Measure) when is_binary(Measure) ->
