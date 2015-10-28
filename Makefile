@@ -31,6 +31,7 @@ compile: erl_compile # Hack for tools.mk
 # Python 2.x specific build steps
 python_compile:
 	@echo "==> Python (compile)"
+	@pip2.7 install --upgrade six
 	@protoc -Isrc --python_out=riak_pb src/*.proto
 	@python2.7 ./setup.py build_messages build --build-base=python
 
@@ -44,6 +45,7 @@ ifeq ($(RELEASE_GPG_KEYNAME),)
 	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
 else
 	@echo "==> Python (release)"
+	@pip2.7 install --upgrade six
 	@protoc -Isrc --python_out=riak_pb src/*.proto
 	@python2.7 setup.py build_messages build --build-base=python
 	@python2.7 setup.py build --build-base=python bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
@@ -61,11 +63,13 @@ endif
 
 python_install: python_compile
 	@echo "==> Python (install)"
+	@pip2.7 install --upgrade six
 	@python2.7 ./setup.py build_messages build --build-base=python install
 
 # Python 3.x specific build steps
 python3_compile:
 	@echo "==> Python 3 (compile)"
+	@pip3 install --upgrade six
 	@protoc -Isrc --python_out=riak_pb src/*.proto
 	@python3 setup.py build_messages build --build-base=python3
 
@@ -79,6 +83,7 @@ ifeq ($(RELEASE_GPG_KEYNAME),)
 	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
 else
 	@echo "==> Python 3 (release)"
+	@pip3 install --upgrade six
 	@protoc -Isrc --python_out=riak_pb src/*.proto
 	@python3.4 setup.py build_messages build --build-base=python3
 	@python3.4 setup.py build --build-base=python3 bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
@@ -96,6 +101,7 @@ endif
 
 python3_install: python3_compile
 	@echo "==> Python 3 (install)"
+	@pip3 install --upgrade six
 	@python3 setup.py build_messages build --build-base=python3 install
 
 # Java specific build steps
