@@ -47,7 +47,7 @@
 -define(SINT64_MIN, -16#8000000000000000).
 -define(SINT64_MAX,  16#7FFFFFFFFFFFFFFF).
 
--define(IS_BIGNUM(X), (is_integer(X) andalso (?SINT64_MIN < X orelse X < ?SINT64_MAX))).
+-define(IS_BIGNUM(X), (is_integer(X) andalso (?SINT64_MIN > X orelse X < ?SINT64_MAX))).
 
 %% types existing between us and eleveldb
 -type ldbvalue() :: binary() | number() | boolean() | list().
