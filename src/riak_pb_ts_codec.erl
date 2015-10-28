@@ -36,7 +36,6 @@
          encode_rows/1,
          encode_cells/1,
          decode_rows/1,
-         decode_row/1,
          decode_cells/1,
          encode_field_type/1,
          encode_tsdelreq/3,
@@ -79,25 +78,20 @@ encode_columns(Columns) ->
 decode_columns(Columns) ->
     [C || #tscolumndescription{name = C} <- Columns].
 
-
 -spec encode_rows(list(list({binary(), ldbvalue()}))) -> [#tsrow{}].
 %% @ignore copied from riakc_ts_put_operator; inverse of make_data
 encode_rows(Measurements) ->
-    rows_for(Measurements, []).
+    [ row_for(MeasureRow) || MeasureRow <- Measurements ].
 
 encode_cells(Cells) ->
-    lists:map(fun cell_for/1, Cells).
-
+    [ cell_for(Cell) || Cell <- Cells ].
 
 decode_cells(Cells) ->
     decode_cells(Cells, []).
 
 -spec decode_rows([#tsrow{}]) -> [tsrow()].
 decode_rows(Rows) ->
-    decode_row(Rows, []).
-
-decode_row(Row) ->
-    decode_row(Row, []).
+    [ list_to_tuple(decode_cells(Row, [])) || #tsrow{cells = Row} <- Rows ].
 
 encode_tsdelreq(Bucket, Key, Options) ->
     #tsdelreq{table   = Bucket,
@@ -112,21 +106,10 @@ encode_tsgetreq(Bucket, Key, Options) ->
 %% ---------------------------------------
 %% local functions
 
-rows_for([], SerializedMeasurements) ->
-    SerializedMeasurements;
-rows_for([MeasureRow|RemainingMeasures], SerializedMeasurements) ->
-    SerializedRow = row_for(MeasureRow),
-    rows_for(RemainingMeasures, [SerializedRow | SerializedMeasurements]).
-
 -spec row_for(list(ldbvalue())) -> #tsrow{}.
 row_for(MeasureRow) ->
-    row_for(MeasureRow, []).
-
-row_for([], SerializedCells) ->
-    #tsrow{cells = lists:reverse(SerializedCells)};
-row_for([Datum|RemainingCells], SerializedCells) ->
-    row_for(RemainingCells,
-            [cell_for(Datum) | SerializedCells]).
+    SerializedCells = [ cell_for(Datum) || Datum <- MeasureRow ],
+    #tsrow{cells = SerializedCells}.
 
 -spec cell_for(ldbvalue()) -> #tscell{}.
 cell_for(Measure) when is_binary(Measure) ->
@@ -160,13 +143,6 @@ cell_for(Measure) when is_list(Measure) ->
     #tscell{set_value = Measure};
 cell_for(undefined) ->
     #tscell{}.
-
-
--spec decode_row([#tsrow{}], list(tuple())) -> [tsrow()].
-decode_row([], Acc) ->
-    lists:reverse(Acc);
-decode_row([#tsrow{cells = Row} | T], Acc) ->
-    decode_row(T, [list_to_tuple(decode_cells(Row, [])) | Acc]).
 
 -spec decode_numeric(binary()) -> float().
 decode_numeric(Num) ->
