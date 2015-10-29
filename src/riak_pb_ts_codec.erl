@@ -127,12 +127,6 @@ encode_cell(undefined) ->
     #tscell{}.
 
 
--spec decode_rows([#tsrow{}], list(tuple())) -> list(tuple()).
-decode_rows([], Acc) ->
-    lists:reverse(Acc);
-decode_rows([#tsrow{cells = Row} | T], Acc) ->
-    decode_rows(T, [list_to_tuple(decode_cells(Row, [])) | Acc]).
-
 -spec decode_cells([#tscell{}], list(ldbvalue())) -> list(ldbvalue()).
 decode_cells([], Acc) ->
     lists:reverse(Acc);
