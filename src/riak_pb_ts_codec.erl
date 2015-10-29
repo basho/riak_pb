@@ -44,11 +44,6 @@
 -type tsrow() :: #tsrow{}.
 -export_type([tsrow/0]).
 
--define(SINT64_MIN, -16#8000000000000000).
--define(SINT64_MAX,  16#7FFFFFFFFFFFFFFF).
-
--define(IS_BIGNUM(X), (is_integer(X) andalso (?SINT64_MIN > X orelse X < ?SINT64_MAX))).
-
 %% types existing between us and eleveldb
 -type ldbvalue() :: binary() | number() | boolean() | list().
 %% types of #tscell.xxx_value fields, constrained by what protobuf messages accept
@@ -59,18 +54,14 @@
 -spec encode_field_type(atom()) -> atom().
 encode_field_type(binary) ->
     'BINARY';
-encode_field_type(integer) ->
-    'INTEGER';
-encode_field_type(float) ->
-    'FLOAT';
+encode_field_type(sint64) ->
+    'SINT64';
+encode_field_type(float64) ->
+    'FLOAT64';
 encode_field_type(timestamp) ->
     'TIMESTAMP';
 encode_field_type(boolean) ->
-    'BOOLEAN';
-encode_field_type(set) ->
-    'SET';
-encode_field_type(map) ->
-    'MAP'.
+    'BOOLEAN'.
 
 
 %% TODO: actually support column specifiers
@@ -84,18 +75,21 @@ decode_columns(Columns) ->
 -spec encode_rows(list(list({binary(), ldbvalue()}))) -> [#tsrow{}].
 %% @ignore copied from riakc_ts_put_operator; inverse of make_data
 encode_rows(Measurements) ->
-    rows_for(Measurements, []).
+    lists:map(fun encode_row/1, Measurements).
 
+-spec encode_cells(list({binary(), ldbvalue()})) -> [#tscell{}].
 encode_cells(Cells) ->
-    lists:map(fun cell_for/1, Cells).
+    lists:map(fun encode_cell/1, Cells).
 
 
+-spec decode_rows([#tsrow{}]) -> list(tuple()).
+decode_rows(Rows) ->
+    decode_rows(Rows, []).
+
+-spec decode_cells([#tscell{}]) -> list(ldbvalue()).
 decode_cells(Cells) ->
     decode_cells(Cells, []).
 
--spec decode_rows([#tsrow{}]) -> [tsrow()].
-decode_rows(Rows) ->
-    decode_rows(Rows, []).
 
 encode_tsdelreq(Bucket, Key, Options) ->
     #tsdelreq{table   = Bucket,
@@ -110,194 +104,77 @@ encode_tsgetreq(Bucket, Key, Options) ->
 %% ---------------------------------------
 %% local functions
 
-rows_for([], SerializedMeasurements) ->
-    SerializedMeasurements;
-rows_for([MeasureRow|RemainingMeasures], SerializedMeasurements) ->
-    SerializedRow = row_for(MeasureRow),
-    rows_for(RemainingMeasures, [SerializedRow | SerializedMeasurements]).
+-spec encode_row(list(ldbvalue())) -> #tsrow{}.
+encode_row(MeasureRow) ->
+    #tsrow{cells = lists:map(fun encode_cell/1, MeasureRow)}.
 
--spec row_for(list(ldbvalue())) -> #tsrow{}.
-row_for(MeasureRow) ->
-    row_for(MeasureRow, []).
+-spec encode_cell(ldbvalue()) -> #tscell{}.
+encode_cell(V) when is_binary(V) ->
+    #tscell{binary_value = V};
+encode_cell(V) when is_integer(V) ->
+    #tscell{integer_value = V};
+encode_cell(V) when is_float(V) ->
+    #tscell{double_value = V};
+encode_cell(V) when is_boolean(V) ->
+    #tscell{boolean_value = V};
 
-row_for([], SerializedCells) ->
-    #tsrow{cells = lists:reverse(SerializedCells)};
-row_for([Datum|RemainingCells], SerializedCells) ->
-    row_for(RemainingCells,
-            [cell_for(Datum) | SerializedCells]).
-
--spec cell_for(ldbvalue()) -> #tscell{}.
-cell_for(Measure) when is_binary(Measure) ->
-    #tscell{binary_value = Measure};
-cell_for(Measure) when ?IS_BIGNUM(Measure)  ->
-    #tscell{numeric_value = integer_to_binary(Measure)};
-cell_for(Measure) when is_integer(Measure) ->
-    #tscell{integer_value = Measure};
-cell_for(Measure) when is_float(Measure) ->
-    #tscell{double_value = Measure};
-
-cell_for({numeric, Measure}) when is_float(Measure) ->
-    #tscell{numeric_value = float_to_binary(Measure)};
-cell_for({numeric, Measure}) when is_integer(Measure) ->
-    #tscell{numeric_value = integer_to_binary(Measure)};
-cell_for({float, Measure}) ->
-    #tscell{double_value = Measure};
-cell_for({time, Measure}) ->
-    #tscell{timestamp_value = Measure};
-
-cell_for(true) ->
-    #tscell{boolean_value = true};
-cell_for(false) ->
-    #tscell{boolean_value = false};
-%% and what about map and set?
-%% TODO: is map a proplist?
-cell_for(Measure) when is_list(Measure) andalso length(Measure) > 0 andalso
-                       is_tuple(hd(Measure)) andalso size(hd(Measure)) == 2 ->
-    #tscell{map_value = Measure};
-cell_for(Measure) when is_list(Measure) ->
-    #tscell{set_value = Measure};
-cell_for(undefined) ->
+%% clients can be specific in order to disambiguate between time and
+%% plain integer
+encode_cell({time, V}) ->
+    #tscell{timestamp_value = V};
+encode_cell(undefined) ->
     #tscell{}.
 
 
--spec decode_rows([#tsrow{}], list(tuple())) -> [tsrow()].
+-spec decode_rows([#tsrow{}], list(tuple())) -> list(tuple()).
 decode_rows([], Acc) ->
     lists:reverse(Acc);
 decode_rows([#tsrow{cells = Row} | T], Acc) ->
     decode_rows(T, [list_to_tuple(decode_cells(Row, [])) | Acc]).
 
--spec decode_numeric(binary()) -> float().
-decode_numeric(Num) ->
-    NumList = binary_to_list(Num),
-    case string:chr(NumList, $.) of
-        0 ->
-            try list_to_integer(NumList)
-            catch error:badarg ->
-                    list_to_float(string:concat(NumList, ".0"))
-            end;
-        _ ->
-            list_to_float(NumList)
-    end.
-
--spec decode_cells([#tscell{numeric_value :: undefined|binary()}],
-                   list(ldbvalue())) -> list(ldbvalue()).
+-spec decode_cells([#tscell{}], list(ldbvalue())) -> list(ldbvalue()).
 decode_cells([], Acc) ->
     lists:reverse(Acc);
 decode_cells([#tscell{binary_value    = Bin,
                       integer_value   = undefined,
-                      numeric_value   = undefined,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
-                      set_value       = [],
-                      map_value       = undefined,
-                      float_value     = undefined,
                       double_value    = undefined} | T], Acc)
   when is_binary(Bin) ->
     decode_cells(T, [Bin | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = Int,
-                      numeric_value   = undefined,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
-                      set_value       = [],
-                      map_value       = undefined,
-                      float_value     = undefined,
                       double_value    = undefined} | T], Acc)
   when is_integer(Int) ->
     decode_cells(T, [Int | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = undefined,
-                      numeric_value   = Num,
-                      timestamp_value = undefined,
-                      boolean_value   = undefined,
-                      set_value       = [],
-                      map_value       = undefined,
-                      float_value     = undefined,
-                      double_value    = undefined} | T], Acc)
- when is_binary(Num) ->
-    decode_cells(T, [decode_numeric(Num) | Acc]);
-decode_cells([#tscell{binary_value    = undefined,
-                      integer_value   = undefined,
-                      numeric_value   = undefined,
                       timestamp_value = Timestamp,
                       boolean_value   = undefined,
-                      set_value       = [],
-                      map_value       = undefined,
-                      float_value     = undefined,
                       double_value    = undefined} | T], Acc)
   when is_integer(Timestamp) ->
     decode_cells(T, [Timestamp | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = undefined,
-                      numeric_value   = undefined,
                       timestamp_value = undefined,
-                      boolean_value   = true,
-                      set_value       = [],
-                      map_value       = undefined,
-                      float_value     = undefined,
-                      double_value    = undefined} | T], Acc) ->
-    decode_cells(T, [true | Acc]);
-decode_cells([#tscell{binary_value    = undefined,
-                      integer_value   = undefined,
-                      numeric_value   = undefined,
-                      timestamp_value = undefined,
-                      boolean_value   = false,
-                      set_value       = [],
-                      map_value       = undefined,
-                      float_value     = undefined,
-                      double_value    = undefined} | T], Acc) ->
-    decode_cells(T, [false | Acc]);
-decode_cells([#tscell{binary_value    = undefined,
-                      integer_value   = undefined,
-                      numeric_value   = undefined,
-                      timestamp_value = undefined,
-                      boolean_value   = undefined,
-                      set_value       = Set,
-                      map_value       = undefined,
-                      float_value     = undefined,
+                      boolean_value   = Bool,
                       double_value    = undefined} | T], Acc)
- when length(Set) > 0 ->
-    decode_cells(T, [Set | Acc]);
+  when is_boolean(Bool) ->
+    decode_cells(T, [Bool | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = undefined,
-                      numeric_value   = undefined,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
-                      set_value       = [],
-                      map_value       = Map,
-                      float_value     = undefined,
-                      double_value    = undefined} | T], Acc)
- when is_binary(Map) ->
-    decode_cells(T, [Map | Acc]);
-decode_cells([#tscell{binary_value    = undefined,
-                      integer_value   = undefined,
-                      numeric_value   = undefined,
-                      timestamp_value = undefined,
-                      boolean_value   = undefined,
-                      set_value       = [],
-                      map_value       = undefined,
-                      float_value     = Float,
-                      double_value    = undefined} | T], Acc)
-  when is_float(Float) ->
-    decode_cells(T, [Float | Acc]);
-decode_cells([#tscell{binary_value    = undefined,
-                      integer_value   = undefined,
-                      numeric_value   = undefined,
-                      timestamp_value = undefined,
-                      boolean_value   = undefined,
-                      set_value       = [],
-                      map_value       = undefined,
-                      float_value     = undefined,
                       double_value    = Double} | T], Acc)
   when is_float(Double) ->
     decode_cells(T, [Double | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
                       integer_value   = undefined,
-                      numeric_value   = undefined,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
-                      set_value       = [],
-                      map_value       = undefined,
-                      float_value     = undefined,
                       double_value    = undefined} | T], Acc) ->
+    %% all fields undefined: what are the circumstances where it is
+    %% possible/permitted?
     decode_cells(T, [[] | Acc]).
