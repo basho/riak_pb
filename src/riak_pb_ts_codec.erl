@@ -54,10 +54,10 @@
 -spec encode_field_type(atom()) -> atom().
 encode_field_type(binary) ->
     'BINARY';
-encode_field_type(sint64) ->
+encode_field_type(integer) ->
     'SINT64';
-encode_field_type(float64) ->
-    'FLOAT64';
+encode_field_type(float) ->
+    'DOUBLE';
 encode_field_type(timestamp) ->
     'TIMESTAMP';
 encode_field_type(boolean) ->
@@ -75,16 +75,17 @@ decode_columns(Columns) ->
 -spec encode_rows(list(list({binary(), ldbvalue()}))) -> [#tsrow{}].
 %% @ignore copied from riakc_ts_put_operator; inverse of make_data
 encode_rows(Measurements) ->
-    lists:map(fun encode_row/1, Measurements).
+    [encode_row(M) || M <- Measurements].
 
 -spec encode_cells(list({binary(), ldbvalue()})) -> [#tscell{}].
 encode_cells(Cells) ->
-    lists:map(fun encode_cell/1, Cells).
+    [encode_cell(C) || C <- Cells].
 
 
 -spec decode_rows([#tsrow{}]) -> list(tuple()).
 decode_rows(Rows) ->
-    decode_rows(Rows, []).
+    [list_to_tuple(decode_cells(Cells)) || #tsrow{cells = Cells} <- Rows].
+
 
 -spec decode_cells([#tscell{}]) -> list(ldbvalue()).
 decode_cells(Cells) ->
@@ -105,8 +106,8 @@ encode_tsgetreq(Bucket, Key, Options) ->
 %% local functions
 
 -spec encode_row(list(ldbvalue())) -> #tsrow{}.
-encode_row(MeasureRow) ->
-    #tsrow{cells = lists:map(fun encode_cell/1, MeasureRow)}.
+encode_row(Cells) ->
+    #tsrow{cells = [encode_cell(C) || C <- Cells]}.
 
 -spec encode_cell(ldbvalue()) -> #tscell{}.
 encode_cell(V) when is_binary(V) ->
