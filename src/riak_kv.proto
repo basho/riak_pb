@@ -385,18 +385,15 @@ message TsInterpolation {
 
 enum TsColumnType {
   BINARY = 0;
-  INTEGER = 1;
-  FLOAT = 2;
+  SINT64 = 1;
+  DOUBLE = 2;
   TIMESTAMP = 3;
   BOOLEAN = 4;
-  SET = 5;
-  MAP = 6;
 }
 
 message TsColumnDescription {
   required bytes name = 1;
   required TsColumnType type = 2;
-  repeated TsColumnType complex_type = 3;
 }
 
 message TsRow {
@@ -406,11 +403,7 @@ message TsRow {
 message TsCell {
   optional bytes binary_value = 1;
   optional sint64 integer_value = 2;
-  optional bytes numeric_value = 3;
-  optional sint64 timestamp_value = 4;
-  optional bool boolean_value = 5;
-  repeated bytes set_value = 6;
-  optional bytes map_value = 7;
-  optional float float_value = 8;
-  optional double double_value = 9;
+  optional sint64 timestamp_value = 3;
+  optional bool boolean_value = 4;
+  optional double double_value = 5;
 }
