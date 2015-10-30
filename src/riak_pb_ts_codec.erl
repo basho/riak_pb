@@ -113,7 +113,7 @@ encode_row(Cells) ->
 encode_cell(V) when is_binary(V) ->
     #tscell{binary_value = V};
 encode_cell(V) when is_integer(V) ->
-    #tscell{integer_value = V};
+    #tscell{sint64_value = V};
 encode_cell(V) when is_float(V) ->
     #tscell{double_value = V};
 encode_cell(V) when is_boolean(V) ->
@@ -131,42 +131,42 @@ encode_cell(undefined) ->
 decode_cells([], Acc) ->
     lists:reverse(Acc);
 decode_cells([#tscell{binary_value    = Bin,
-                      integer_value   = undefined,
+                      sint64_value    = undefined,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
                       double_value    = undefined} | T], Acc)
   when is_binary(Bin) ->
     decode_cells(T, [Bin | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
-                      integer_value   = Int,
+                      sint64_value    = Int,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
                       double_value    = undefined} | T], Acc)
   when is_integer(Int) ->
     decode_cells(T, [Int | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
-                      integer_value   = undefined,
+                      sint64_value    = undefined,
                       timestamp_value = Timestamp,
                       boolean_value   = undefined,
                       double_value    = undefined} | T], Acc)
   when is_integer(Timestamp) ->
     decode_cells(T, [Timestamp | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
-                      integer_value   = undefined,
+                      sint64_value    = undefined,
                       timestamp_value = undefined,
                       boolean_value   = Bool,
                       double_value    = undefined} | T], Acc)
   when is_boolean(Bool) ->
     decode_cells(T, [Bool | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
-                      integer_value   = undefined,
+                      sint64_value    = undefined,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
                       double_value    = Double} | T], Acc)
   when is_float(Double) ->
     decode_cells(T, [Double | Acc]);
 decode_cells([#tscell{binary_value    = undefined,
-                      integer_value   = undefined,
+                      sint64_value    = undefined,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
                       double_value    = undefined} | T], Acc) ->
