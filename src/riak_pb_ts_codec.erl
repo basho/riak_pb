@@ -124,6 +124,8 @@ encode_cell(V) when is_boolean(V) ->
 encode_cell({time, V}) ->
     #tscell{timestamp_value = V};
 encode_cell(undefined) ->
+    #tscell{};
+encode_cell([]) -> %% NULL Cell
     #tscell{}.
 
 
@@ -170,6 +172,5 @@ decode_cells([#tscell{binary_value    = undefined,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
                       double_value    = undefined} | T], Acc) ->
-    %% all fields undefined: what are the circumstances where it is
-    %% possible/permitted?
+    %% NULL Cell
     decode_cells(T, [[] | Acc]).
