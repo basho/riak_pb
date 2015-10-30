@@ -124,6 +124,10 @@ encode_cell(V) when is_boolean(V) ->
 encode_cell({time, V}) ->
     #tscell{timestamp_value = V};
 encode_cell(undefined) ->
+    #tscell{};
+%% NULL Cell
+%% TODO: represent null cells by something other than an empty list. emptyTsCell atom maybe?
+encode_cell([]) ->
     #tscell{}.
 
 
@@ -170,6 +174,6 @@ decode_cells([#tscell{binary_value    = undefined,
                       timestamp_value = undefined,
                       boolean_value   = undefined,
                       double_value    = undefined} | T], Acc) ->
-    %% all fields undefined: what are the circumstances where it is
-    %% possible/permitted?
+    %% NULL Cell.
+    %% TODO: represent null cells by something other than an empty list. emptyTsCell atom maybe?
     decode_cells(T, [[] | Acc]).
