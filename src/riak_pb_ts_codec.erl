@@ -52,11 +52,11 @@
 
 
 -spec encode_field_type(atom()) -> atom().
-encode_field_type(binary) ->
+encode_field_type(varchar) ->
     'BINARY';
-encode_field_type(integer) ->
+encode_field_type(sint64) ->
     'SINT64';
-encode_field_type(float) ->
+encode_field_type(double) ->
     'DOUBLE';
 encode_field_type(timestamp) ->
     'TIMESTAMP';
