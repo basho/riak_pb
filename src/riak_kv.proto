@@ -385,7 +385,7 @@ message TsInterpolation {
 }
 
 enum TsColumnType {
-  BINARY = 0;
+  VARCHAR = 0;
   SINT64 = 1;
   DOUBLE = 2;
   TIMESTAMP = 3;
@@ -402,7 +402,7 @@ message TsRow {
 }
 
 message TsCell {
-  optional bytes binary_value = 1;
+  optional bytes varchar_value = 1;
   optional sint64 sint64_value = 2;
   optional sint64 timestamp_value = 3;
   optional bool boolean_value = 4;
