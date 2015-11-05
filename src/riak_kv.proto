@@ -338,7 +338,7 @@ message TsQueryReq {
 
 message TsQueryResp {
   repeated TsColumnDescription columns = 1;
-  repeated TsRow rows = 2;
+  repeated TsRow rows = 2;  // 0 to n rows
 }
 
 
@@ -350,7 +350,7 @@ message TsGetReq {
 
 message TsGetResp {
   repeated TsColumnDescription columns = 1;
-  repeated TsRow rows = 2;  // 0 or 1 rows, that is
+  repeated TsRow rows = 2;  // 0 or 1 rows
 }
 
 
@@ -370,7 +370,6 @@ message TsPutResp {
 message TsDelReq {
   required bytes table = 1;
   repeated TsCell key = 2;
-  // optional uint64 radius = 3;
   optional bytes vclock = 3;
   optional uint32 timeout = 4;
 }
@@ -385,7 +384,7 @@ message TsInterpolation {
 }
 
 enum TsColumnType {
-  BINARY = 0;
+  VARCHAR = 0;
   SINT64 = 1;
   DOUBLE = 2;
   TIMESTAMP = 3;
@@ -402,7 +401,7 @@ message TsRow {
 }
 
 message TsCell {
-  optional bytes binary_value = 1;
+  optional bytes varchar_value = 1;
   optional sint64 sint64_value = 2;
   optional sint64 timestamp_value = 3;
   optional bool boolean_value = 4;
