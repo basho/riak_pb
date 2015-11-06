@@ -2,7 +2,7 @@
 **
 ** riak_kv.proto: Protocol buffers for riak KV
 **
-** Copyright (c) 2007-2010 Basho Technologies, Inc.  All Rights Reserved.
+** Copyright (c) 2007-2015 Basho Technologies, Inc.  All Rights Reserved.
 **
 ** This file is provided to you under the Apache License,
 ** Version 2.0 (the "License"); you may not use this file
@@ -326,84 +326,4 @@ message RpbCoverageEntry {
     required uint32 port = 2;
     optional bytes keyspace_desc = 3; // Some human readable description of the keyspace covered
     required bytes cover_context = 4; // Opaque context to pass into 2I query.
-}
-
-// Time Series
-
-// Dispatch a query to Riak
-message TsQueryReq {
-  // left optional to support parameterized queries in the future
-  optional TsInterpolation query = 1;
-}
-
-message TsQueryResp {
-  repeated TsColumnDescription columns = 1;
-  repeated TsRow rows = 2;  // 0 to n rows
-}
-
-
-message TsGetReq {
-  required bytes table = 1;
-  repeated TsCell key = 2;
-  optional uint32 timeout = 3;
-}
-
-message TsGetResp {
-  repeated TsColumnDescription columns = 1;
-  repeated TsRow rows = 2;  // 0 or 1 rows
-}
-
-
-message TsPutReq {
-  required bytes table = 1;
-
-  // optional: omitting it should use table order
-  repeated TsColumnDescription columns = 2;
-
-  repeated TsRow rows = 3;
-}
-
-message TsPutResp {
-
-}
-
-message TsDelReq {
-  required bytes table = 1;
-  repeated TsCell key = 2;
-  optional bytes vclock = 3;
-  optional uint32 timeout = 4;
-}
-
-message TsDelResp {
-
-}
-
-message TsInterpolation {
-  required bytes base = 1;
-  repeated RpbPair interpolations = 2;
-}
-
-enum TsColumnType {
-  VARCHAR = 0;
-  SINT64 = 1;
-  DOUBLE = 2;
-  TIMESTAMP = 3;
-  BOOLEAN = 4;
-}
-
-message TsColumnDescription {
-  required bytes name = 1;
-  required TsColumnType type = 2;
-}
-
-message TsRow {
-  repeated TsCell cells = 1;
-}
-
-message TsCell {
-  optional bytes varchar_value = 1;
-  optional sint64 sint64_value = 2;
-  optional sint64 timestamp_value = 3;
-  optional bool boolean_value = 4;
-  optional double double_value = 5;
 }
