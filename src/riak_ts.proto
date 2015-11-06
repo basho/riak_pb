@@ -27,7 +27,7 @@
 
 // Java package specifiers
 option java_package = "com.basho.riak.protobuf";
-option java_outer_classname = "RiakKvPB";
+option java_outer_classname = "RiakTsPB";
 
 import "riak.proto"; // for RpbPair
 
