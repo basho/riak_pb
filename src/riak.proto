@@ -87,8 +87,16 @@ message RpbSetBucketTypeReq {
     required RpbBucketProps props = 2;
 }
 
-// Set bucket properties response - no message defined, just send
-// RpbSetBucketResp
+// Create bucket type request
+message RpbCreateBucketTypeReq {
+    required bytes type = 1;
+    optional RpbBucketProps props = 2;
+}
+
+// Activate bucket type request
+message RpbActivateBucketTypeReq {
+    required bytes type = 1;
+}
 
 // Module-Function pairs for commit hooks and other bucket properties
 // that take functions
