@@ -33,7 +33,7 @@
 
 -export([encode_columns/1,
          decode_columns/1,
-         encode_rows/1,
+         encode_rows/2,
          encode_cells/1,
          decode_rows/1,
          decode_cells/1,
@@ -72,15 +72,14 @@ decode_columns(Columns) ->
     [C || #tscolumndescription{name = C} <- Columns].
 
 
--spec encode_rows(list(list({binary(), ldbvalue()}))) -> [#tsrow{}].
+-spec encode_rows(list(atom()), list(list({binary(), ldbvalue()}))) -> [#tsrow{}].
 %% @ignore copied from riakc_ts_put_operator; inverse of make_data
-encode_rows(Measurements) ->
-    [encode_row(M) || M <- Measurements].
+encode_rows(ColumnTypes, Rows) ->
+    [encode_row(ColumnTypes, Row) || Row <- Rows].
 
 -spec encode_cells(list({binary(), ldbvalue()})) -> [#tscell{}].
 encode_cells(Cells) ->
     [encode_cell(C) || C <- Cells].
-
 
 -spec decode_rows([#tsrow{}]) -> list(tuple()).
 decode_rows(Rows) ->
@@ -105,31 +104,27 @@ encode_tsgetreq(Bucket, Key, Options) ->
 %% ---------------------------------------
 %% local functions
 
--spec encode_row(list(ldbvalue())) -> #tsrow{}.
-encode_row(Cells) ->
-    #tsrow{cells = [encode_cell(C) || C <- Cells]}.
+-spec encode_row(list(atom()), list(ldbvalue())) -> #tsrow{}.
+encode_row(ColumnTypes, RowCells) ->
+    #tsrow{cells = [encode_cell(ColumnTypeCell) || ColumnTypeCell <- lists:zip(ColumnTypes, RowCells)]}.
 
--spec encode_cell(ldbvalue()) -> #tscell{}.
-encode_cell(V) when is_binary(V) ->
-    #tscell{varchar_value = V};
-encode_cell(V) when is_integer(V) ->
-    #tscell{sint64_value = V};
-encode_cell(V) when is_float(V) ->
-    #tscell{double_value = V};
-encode_cell(V) when is_boolean(V) ->
-    #tscell{boolean_value = V};
-
-%% clients can be specific in order to disambiguate between time and
-%% plain integer
-encode_cell({time, V}) ->
-    #tscell{timestamp_value = V};
-encode_cell(undefined) ->
-    #tscell{};
+-spec encode_cell({atom(), ldbvalue()}) -> #tscell{}.
+encode_cell({varchar, V}) when is_binary(V) ->
+  #tscell{varchar_value = V};
+encode_cell({sint64, V}) when is_integer(V) ->
+  #tscell{sint64_value = V};
+encode_cell({double, V}) when is_float(V) ->
+  #tscell{double_value = V};
+encode_cell({timestamp, V}) when is_integer(V) ->
+  #tscell{timestamp_value = V};
+encode_cell({boolean, V}) when is_boolean(V) ->
+  #tscell{boolean_value = V};
+encode_cell({_ColumnType, undefined}) ->
+  #tscell{};
 %% NULL Cell
 %% TODO: represent null cells by something other than an empty list. emptyTsCell atom maybe?
-encode_cell([]) ->
-    #tscell{}.
-
+encode_cell({_ColumnType, []}) ->
+  #tscell{}.
 
 -spec decode_cells([#tscell{}], list(ldbvalue())) -> list(ldbvalue()).
 decode_cells([], Acc) ->
