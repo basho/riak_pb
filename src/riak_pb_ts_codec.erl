@@ -31,21 +31,17 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--export([encode_columns/1,
-         decode_columns/1,
-         encode_rows/2,
-         encode_cells/1,
+-export([encode_rows/2,
          decode_rows/1,
          decode_cells/1,
-         encode_field_type/1,
-         encode_tsdelreq/3,
-         encode_tsgetreq/3]).
+         encode_field_type/1]).
 
 -type tsrow() :: #tsrow{}.
 -export_type([tsrow/0]).
 
 %% types existing between us and eleveldb
 -type ldbvalue() :: binary() | number() | boolean() | list().
+
 %% types of #tscell.xxx_value fields, constrained by what protobuf messages accept
 %% -type pbvalue() :: binary() | integer() | boolean().
 -export_type([ldbvalue/0]).
@@ -63,23 +59,10 @@ encode_field_type(timestamp) ->
 encode_field_type(boolean) ->
     'BOOLEAN'.
 
-
-%% TODO: actually support column specifiers
-encode_columns(Columns) ->
-    [#tscolumndescription{name = C} || C <- Columns].
-
-decode_columns(Columns) ->
-    [C || #tscolumndescription{name = C} <- Columns].
-
-
 -spec encode_rows(list(atom()), list(list({binary(), ldbvalue()}))) -> [#tsrow{}].
-%% @ignore copied from riakc_ts_put_operator; inverse of make_data
 encode_rows(ColumnTypes, Rows) ->
     [encode_row(ColumnTypes, Row) || Row <- Rows].
 
--spec encode_cells(list({binary(), ldbvalue()})) -> [#tscell{}].
-encode_cells(Cells) ->
-    [encode_cell(C) || C <- Cells].
 
 -spec decode_rows([#tsrow{}]) -> list(tuple()).
 decode_rows(Rows) ->
@@ -90,16 +73,6 @@ decode_rows(Rows) ->
 decode_cells(Cells) ->
     decode_cells(Cells, []).
 
-
-encode_tsdelreq(Bucket, Key, Options) ->
-    #tsdelreq{table   = Bucket,
-              key     = encode_cells(Key),
-              vclock  = proplists:get_value(vclock, Options),
-              timeout = proplists:get_value(timeout, Options)}.
-encode_tsgetreq(Bucket, Key, Options) ->
-    #tsgetreq{table   = Bucket,
-              key     = encode_cells(Key),
-              timeout = proplists:get_value(timeout, Options)}.
 
 %% ---------------------------------------
 %% local functions
