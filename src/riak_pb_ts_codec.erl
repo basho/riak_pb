@@ -44,7 +44,11 @@
 %% -type pbvalue() :: binary() | integer() | boolean().
 -export_type([ldbvalue/0]).
 
+%% Possible column type values supported and returned from the timeseries DDL.
 -type tscolumntype() :: varchar | sint64 | timestamp | boolean | double.
+%% Possible column type values that protocol buffers supports for enumeration purposes.
+-type tscolumntypePB() :: 'VARCHAR' | 'SINT64' | 'TIMESTAMP' | 'BOOLEAN' | 'DOUBLE'.
+-export_type([tscolumntype/0, tscolumntypePB/0]).
 
 %% @doc Convert time series field type atoms returned from the DDL modules
 %% into Protobuf compatible upper case atoms.
