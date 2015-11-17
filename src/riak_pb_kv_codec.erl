@@ -177,7 +177,7 @@ decode_content_meta(indexes, PbIndexes, _Pb) ->
 decode_content_meta(deleted, DeletedVal, _Pb) ->
     [{?MD_DELETED, DeletedVal}];
 decode_content_meta(ttl, TTLVal, _Pb) ->
-    [{?MD_DELETED, TTLVal}].
+    [{?MD_TTL, TTLVal}].
 
 %% @doc Convert an rpccontent pb message to an erlang {MetaData,Value} tuple
 -spec decode_content(PBContent::tuple()) -> {metadata(), binary()}.

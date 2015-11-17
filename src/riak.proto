@@ -157,6 +157,7 @@ message RpbBucketProps {
 
     // KV fast path
     optional bool write_once = 28;
+    optional uint32 ttl = 29;
 }
 
 // Authentication request
