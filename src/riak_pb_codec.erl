@@ -294,6 +294,8 @@ encode_bucket_props([{consistent, S}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{consistent = encode_bool(S)});
 encode_bucket_props([{write_once, S}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{write_once = encode_bool(S)});
+encode_bucket_props([{ttl, Num}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{ttl = Num});
 encode_bucket_props([_Ignore|Rest], Pb) ->
     %% Ignore any properties not explicitly part of the PB message
     encode_bucket_props(Rest, Pb).
