@@ -109,3 +109,13 @@ message TsCell {
   optional bool boolean_value = 4;
   optional double double_value = 5;
 }
+
+message TsListKeysReq {
+  required bytes table = 1;
+  optional uint32 timeout = 2;
+}
+
+message TsListKeysResp {
+  repeated TsRow keys = 1;
+  optional bool done = 2;
+}

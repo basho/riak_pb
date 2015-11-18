@@ -32,7 +32,6 @@
          decode_cells/1,
          encode_field_type/1]).
 
--compile(export_all).
 
 -type tsrow() :: #tsrow{}.
 -export_type([tsrow/0]).
