@@ -189,11 +189,12 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
                                     search_index=Index,
                                     datatype=Datatype,
                                     consistent=Consistent,
-                                    write_once=WriteOnce
+                                    write_once=WriteOnce,
+                                    ttl=TTL
                                    }) ->
     %% Extract numerical properties
     [ {P,V} || {P,V} <- [ {n_val, N}, {old_vclock, Old}, {young_vclock, Young},
-                          {big_vclock, Big}, {small_vclock, Small} ],
+                          {big_vclock, Big}, {small_vclock, Small}, {ttl, TTL}],
                V /= undefined ] ++
     %% Extract booleans
     [ {BProp, decode_bool(Bool)} ||
