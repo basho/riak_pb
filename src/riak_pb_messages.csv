@@ -61,6 +61,8 @@
 95,TsDelResp,riak_ts
 96,TsGetReq,riak_ts
 97,TsGetResp,riak_ts
+98,TsListKeysReq,riak_ts
+99,TsListKeysResp,riak_ts
 253,RpbAuthReq,riak
 254,RpbAuthResp,riak
 255,RpbStartTls,riak
