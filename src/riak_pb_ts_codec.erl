@@ -27,29 +27,31 @@
 
 -include("riak_ts_pb.hrl").
 
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
--endif.
-
--export([encode_columns/1,
-         decode_columns/1,
-         encode_rows/1,
-         encode_cells/1,
+-export([encode_rows/2,
          decode_rows/1,
          decode_cells/1,
          encode_field_type/1]).
+
 
 -type tsrow() :: #tsrow{}.
 -export_type([tsrow/0]).
 
 %% types existing between us and eleveldb
 -type ldbvalue() :: binary() | number() | boolean() | list().
+
 %% types of #tscell.xxx_value fields, constrained by what protobuf messages accept
 %% -type pbvalue() :: binary() | integer() | boolean().
 -export_type([ldbvalue/0]).
 
+%% Possible column type values supported and returned from the timeseries DDL.
+-type tscolumntype() :: varchar | sint64 | timestamp | boolean | double.
+%% Possible column type values that protocol buffers supports for enumeration purposes.
+-type tscolumntypePB() :: 'VARCHAR' | 'SINT64' | 'TIMESTAMP' | 'BOOLEAN' | 'DOUBLE'.
+-export_type([tscolumntype/0, tscolumntypePB/0]).
 
--spec encode_field_type(atom()) -> atom().
+%% @doc Convert time series field type atoms returned from the DDL modules
+%% into Protobuf compatible upper case atoms.
+-spec encode_field_type(tscolumntype()) -> atom().
 encode_field_type(varchar) ->
     'VARCHAR';
 encode_field_type(sint64) ->
@@ -61,30 +63,24 @@ encode_field_type(timestamp) ->
 encode_field_type(boolean) ->
     'BOOLEAN'.
 
+%% @doc Encode a set of time series rows from an internal format to the #tsrow record format.
+%% Takes a list of column types, and a list of rows.
+%% Each row is represented as a list of ldbvalue().
+%% An error is returned if any of the `Rows` individual row length do not match the length of the `ColumnTypes` list.
+%% @end
+-spec encode_rows(list(tscolumntype()), list(list(ldbvalue()))) -> [#tsrow{}].
+encode_rows(ColumnTypes, Rows) ->
+    [encode_row(ColumnTypes, Row) || Row <- Rows].
 
-%% TODO: actually support column specifiers
-encode_columns(Columns) ->
-    [#tscolumndescription{name = C} || C <- Columns].
-
-decode_columns(Columns) ->
-    [C || #tscolumndescription{name = C} <- Columns].
-
-
--spec encode_rows(list(list({binary(), ldbvalue()}))) -> [#tsrow{}].
-%% @ignore copied from riakc_ts_put_operator; inverse of make_data
-encode_rows(Measurements) ->
-    [encode_row(M) || M <- Measurements].
-
--spec encode_cells(list({binary(), ldbvalue()})) -> [#tscell{}].
-encode_cells(Cells) ->
-    [encode_cell(C) || C <- Cells].
-
-
+%% @doc Decode a list of timeseries #tsrow{} to a list of tuples.
+%% Each row is converted through `decode_cells/1`, and the list
+%% of ldbvalue() is converted to a tuple of ldbvalue().
+%% @end
 -spec decode_rows([#tsrow{}]) -> list(tuple()).
 decode_rows(Rows) ->
     [list_to_tuple(decode_cells(Cells)) || #tsrow{cells = Cells} <- Rows].
 
-
+%% @doc Decode a list of timeseries #tscell{} to a list of ldbvalue().
 -spec decode_cells([#tscell{}]) -> list(ldbvalue()).
 decode_cells(Cells) ->
     decode_cells(Cells, []).
@@ -92,76 +88,173 @@ decode_cells(Cells) ->
 
 %% ---------------------------------------
 %% local functions
+%% ---------------------------------------
 
--spec encode_row(list(ldbvalue())) -> #tsrow{}.
-encode_row(Cells) ->
-    #tsrow{cells = [encode_cell(C) || C <- Cells]}.
+-spec encode_row(list(tscolumntype()), list(ldbvalue())) -> #tsrow{}.
+encode_row(ColumnTypes, RowCells) when length(ColumnTypes) =:= length(RowCells) ->
+    #tsrow{cells = [encode_cell(ColumnTypeCell) || ColumnTypeCell <- lists:zip(ColumnTypes, RowCells)]}.
 
--spec encode_cell(ldbvalue()) -> #tscell{}.
-encode_cell(V) when is_binary(V) ->
+-spec encode_cell({tscolumntype(), ldbvalue()}) -> #tscell{}.
+encode_cell({varchar, V}) when is_binary(V) ->
     #tscell{varchar_value = V};
-encode_cell(V) when is_integer(V) ->
+encode_cell({sint64, V}) when is_integer(V) ->
     #tscell{sint64_value = V};
-encode_cell(V) when is_float(V) ->
+encode_cell({double, V}) when is_float(V) ->
     #tscell{double_value = V};
-encode_cell(V) when is_boolean(V) ->
-    #tscell{boolean_value = V};
-
-%% clients can be specific in order to disambiguate between time and
-%% plain integer
-encode_cell({time, V}) ->
+encode_cell({timestamp, V}) when is_integer(V) ->
     #tscell{timestamp_value = V};
-encode_cell(undefined) ->
+encode_cell({boolean, V}) when is_boolean(V) ->
+    #tscell{boolean_value = V};
+encode_cell({_ColumnType, undefined}) ->
     #tscell{};
 %% NULL Cell
 %% TODO: represent null cells by something other than an empty list. emptyTsCell atom maybe?
-encode_cell([]) ->
+encode_cell({_ColumnType, []}) ->
     #tscell{}.
-
 
 -spec decode_cells([#tscell{}], list(ldbvalue())) -> list(ldbvalue()).
 decode_cells([], Acc) ->
     lists:reverse(Acc);
-decode_cells([#tscell{varchar_value   = Bin,
-                      sint64_value    = undefined,
-                      timestamp_value = undefined,
-                      boolean_value   = undefined,
-                      double_value    = undefined} | T], Acc)
-  when is_binary(Bin) ->
+decode_cells([#tscell{varchar_value = Bin,
+    sint64_value = undefined,
+    timestamp_value = undefined,
+    boolean_value = undefined,
+    double_value = undefined} | T], Acc)
+    when is_binary(Bin) ->
     decode_cells(T, [Bin | Acc]);
-decode_cells([#tscell{varchar_value   = undefined,
-                      sint64_value    = Int,
-                      timestamp_value = undefined,
-                      boolean_value   = undefined,
-                      double_value    = undefined} | T], Acc)
-  when is_integer(Int) ->
+decode_cells([#tscell{varchar_value = undefined,
+    sint64_value = Int,
+    timestamp_value = undefined,
+    boolean_value = undefined,
+    double_value = undefined} | T], Acc)
+    when is_integer(Int) ->
     decode_cells(T, [Int | Acc]);
-decode_cells([#tscell{varchar_value   = undefined,
-                      sint64_value    = undefined,
-                      timestamp_value = Timestamp,
-                      boolean_value   = undefined,
-                      double_value    = undefined} | T], Acc)
-  when is_integer(Timestamp) ->
+decode_cells([#tscell{varchar_value = undefined,
+    sint64_value = undefined,
+    timestamp_value = Timestamp,
+    boolean_value = undefined,
+    double_value = undefined} | T], Acc)
+    when is_integer(Timestamp) ->
     decode_cells(T, [Timestamp | Acc]);
-decode_cells([#tscell{varchar_value   = undefined,
-                      sint64_value    = undefined,
-                      timestamp_value = undefined,
-                      boolean_value   = Bool,
-                      double_value    = undefined} | T], Acc)
-  when is_boolean(Bool) ->
+decode_cells([#tscell{varchar_value = undefined,
+    sint64_value = undefined,
+    timestamp_value = undefined,
+    boolean_value = Bool,
+    double_value = undefined} | T], Acc)
+    when is_boolean(Bool) ->
     decode_cells(T, [Bool | Acc]);
-decode_cells([#tscell{varchar_value   = undefined,
-                      sint64_value    = undefined,
-                      timestamp_value = undefined,
-                      boolean_value   = undefined,
-                      double_value    = Double} | T], Acc)
-  when is_float(Double) ->
+decode_cells([#tscell{varchar_value = undefined,
+    sint64_value = undefined,
+    timestamp_value = undefined,
+    boolean_value = undefined,
+    double_value = Double} | T], Acc)
+    when is_float(Double) ->
     decode_cells(T, [Double | Acc]);
-decode_cells([#tscell{varchar_value   = undefined,
-                      sint64_value    = undefined,
-                      timestamp_value = undefined,
-                      boolean_value   = undefined,
-                      double_value    = undefined} | T], Acc) ->
+decode_cells([#tscell{varchar_value = undefined,
+    sint64_value = undefined,
+    timestamp_value = undefined,
+    boolean_value = undefined,
+    double_value = undefined} | T], Acc) ->
     %% NULL Cell.
     %% TODO: represent null cells by something other than an empty list. emptyTsCell atom maybe?
     decode_cells(T, [[] | Acc]).
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+encode_cells_test() ->
+    %% Correct cells
+    ?assertEqual(#tscell{varchar_value = <<"Foo">>}, encode_cell({varchar, <<"Foo">>})),
+    ?assertEqual(#tscell{sint64_value = 64}, encode_cell({sint64, 64})),
+    ?assertEqual(#tscell{timestamp_value = 64}, encode_cell({timestamp, 64})),
+    ?assertEqual(#tscell{boolean_value = true}, encode_cell({boolean, true})),
+    ?assertEqual(#tscell{double_value = 42.0}, encode_cell({double, 42.0})),
+    ?assertEqual(#tscell{boolean_value = false}, encode_cell({boolean, false})),
+
+    %% Null Cells
+    ?assertEqual(#tscell{}, encode_cell({varchar, []})),
+    ?assertEqual(#tscell{}, encode_cell({sint64, []})),
+    ?assertEqual(#tscell{}, encode_cell({timestamp, []})),
+    ?assertEqual(#tscell{}, encode_cell({boolean, []})),
+    ?assertEqual(#tscell{}, encode_cell({double, []})),
+
+    %% Just plain wrong Cells
+    ?assertError(function_clause, encode_cell({varchar, 42})),
+    ?assertError(function_clause, encode_cell({varchar, true})),
+    ?assertError(function_clause, encode_cell({sint64, <<"42">>})),
+    ?assertError(function_clause, encode_cell({sint64, true})),
+    ?assertError(function_clause, encode_cell({boolean, <<"42">>})),
+    ?assertError(function_clause, encode_cell({boolean, 42})).
+
+encode_row_test() ->
+    ?assertEqual(
+        #tsrow{cells = [
+            #tscell{varchar_value = <<"Foo">>},
+            #tscell{sint64_value = 64},
+            #tscell{timestamp_value = 42},
+            #tscell{boolean_value = false},
+            #tscell{double_value = 42.2},
+            #tscell{}
+        ]},
+        encode_row(
+            [varchar, sint64, timestamp, boolean, double, varchar],
+            [<<"Foo">>, 64, 42, false, 42.2, []]
+        )),
+    ?assertError(function_clause, encode_row([], [<<"Foo">>, 64, 42, false, 42.2, []])),
+    ?assertError(function_clause, encode_row([varchar, sint64, timestamp], [<<"Foo">>, 64, 42, false, 42.2, []])).
+
+encode_rows_test() ->
+    ?assertEqual(
+        [
+            #tsrow{cells = [
+                #tscell{varchar_value = <<"Foo">>},
+                #tscell{sint64_value = 30}
+            ]},
+            #tsrow{cells = [
+                #tscell{varchar_value = <<"Bar">>},
+                #tscell{sint64_value = 40}
+            ]}
+        ],
+        encode_rows([varchar, sint64], [[<<"Foo">>, 30], [<<"Bar">>, 40]])
+    ),
+    ?assertError(function_clause, encode_rows([], [[<<"Foo">>, 30], [<<"Bar">>, 40]])),
+    ?assertError(function_clause, encode_rows([varchar], [[<<"Foo">>, 30], [<<"Bar">>, 40]])).
+
+encode_field_type_test() ->
+    ?assertEqual('VARCHAR', encode_field_type(varchar)),
+    ?assertEqual('SINT64',encode_field_type(sint64)),
+    ?assertEqual('TIMESTAMP',encode_field_type(timestamp)),
+    ?assertEqual('BOOLEAN',encode_field_type(boolean)),
+    ?assertEqual('DOUBLE',encode_field_type(double)).
+
+decode_cell_test() ->
+    ?assertEqual([<<"Foo">>], decode_cells([#tscell{varchar_value = <<"Foo">>}],[])),
+    ?assertEqual([42],      decode_cells([#tscell{sint64_value = 42}],[])),
+    ?assertEqual([64],      decode_cells([#tscell{timestamp_value = 64}],[])),
+    ?assertEqual([false],   decode_cells([#tscell{boolean_value = false}],[])),
+    ?assertEqual([42.2],    decode_cells([#tscell{double_value = 42.2}],[])),
+    ?assertEqual([[]],      decode_cells([#tscell{}],[])),
+    ?assertEqual(
+        [<<"Bar">>, 80, []],
+        decode_cells([#tscell{varchar_value = <<"Bar">>}, #tscell{sint64_value = 80}, #tscell{}],[])),
+    ?assertError(
+        function_clause,
+        decode_cells([#tscell{varchar_value = <<"Foo">>, sint64_value = 30}],[])).
+
+decode_cells_test() ->
+    ?assertEqual(
+        [<<"Bar">>, 80, []],
+        decode_cells([#tscell{varchar_value = <<"Bar">>}, #tscell{sint64_value = 80}, #tscell{}])),
+    ?assertError(
+        function_clause,
+        decode_cells([#tscell{varchar_value = <<"Foo">>, sint64_value = 30}])).
+
+decode_rows_test() ->
+    ?assertEqual(
+        [{<<"Bar">>, 80, []}, {<<"Baz">>, 90, false}],
+        decode_rows([
+            #tsrow{cells = [#tscell{varchar_value = <<"Bar">>}, #tscell{sint64_value = 80}, #tscell{}]},
+            #tsrow{cells = [#tscell{varchar_value = <<"Baz">>}, #tscell{sint64_value = 90}, #tscell{boolean_value = false}]}])).
+
+-endif.
+
