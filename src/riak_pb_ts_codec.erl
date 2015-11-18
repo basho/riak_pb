@@ -29,6 +29,7 @@
 
 -export([encode_rows/2,
          decode_rows/1,
+         encode_cells/1,
          decode_cells/1,
          encode_field_type/1,
          encode_tsdelreq/3,
@@ -81,6 +82,10 @@ encode_rows(ColumnTypes, Rows) ->
 -spec decode_rows([#tsrow{}]) -> list(tuple()).
 decode_rows(Rows) ->
     [list_to_tuple(decode_cells(Cells)) || #tsrow{cells = Cells} <- Rows].
+
+-spec encode_cells(list({binary(), ldbvalue()})) -> [#tscell{}].
+encode_cells(Cells) ->
+    [encode_cell(C) || C <- Cells].
 
 %% @doc Decode a list of timeseries #tscell{} to a list of ldbvalue().
 -spec decode_cells([#tscell{}]) -> list(ldbvalue()).
