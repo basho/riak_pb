@@ -83,7 +83,7 @@ encode_rows(ColumnTypes, Rows) ->
 decode_rows(Rows) ->
     [list_to_tuple(decode_cells(Cells)) || #tsrow{cells = Cells} <- Rows].
 
--spec encode_cells(list({binary(), ldbvalue()})) -> [#tscell{}].
+-spec encode_cells(list({tscolumntype(), ldbvalue()})) -> [#tscell{}].
 encode_cells(Cells) ->
     [encode_cell(C) || C <- Cells].
 
