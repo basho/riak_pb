@@ -32,10 +32,9 @@
          encode_rows_non_strict/1,
          decode_rows/1,
          encode_cells/1,
+         encode_cells_non_strict/1,
          decode_cells/1,
-         encode_field_type/1,
-         encode_tsdelreq/3,
-         encode_tsgetreq/3]).
+         encode_field_type/1]).
 
 
 -type tsrow() :: #tsrow{}.
@@ -110,19 +109,6 @@ encode_cells(Cells) ->
 -spec decode_cells([#tscell{}]) -> list(ldbvalue()).
 decode_cells(Cells) ->
     decode_cells(Cells, []).
-
--spec encode_tsdelreq(binary(), list(ldbvalue()), proplists:proplist()) -> #tsdelreq{}.
-encode_tsdelreq(TableName, Key, Options) ->
-    #tsdelreq{table   = TableName,
-              key     = encode_cells_non_strict(Key),
-              vclock  = proplists:get_value(vclock, Options),
-              timeout = proplists:get_value(timeout, Options)}.
-
--spec encode_tsgetreq(binary(), list(ldbvalue()), proplists:proplist()) -> #tsgetreq{}.
-encode_tsgetreq(TableName, Key, Options) ->
-    #tsgetreq{table   = TableName,
-              key     = encode_cells_non_strict(Key),
-              timeout = proplists:get_value(timeout, Options)}.
 
 %% ---------------------------------------
 %% local functions
