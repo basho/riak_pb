@@ -32,6 +32,7 @@
          encode_rows_non_strict/1,
          decode_rows/1,
          encode_cells/1,
+         encode_cells_non_strict/1,
          decode_cells/1,
          encode_field_type/1,
          encode_tsdelreq/3,
