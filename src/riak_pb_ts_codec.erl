@@ -27,7 +27,8 @@
 
 -include("riak_ts_pb.hrl").
 
--export([encode_rows/2,
+-export([encode_columnnames/1,
+         encode_rows/2,
          encode_rows_non_strict/1,
          decode_rows/1,
          encode_cells/1,
@@ -47,11 +48,18 @@
 %% -type pbvalue() :: binary() | integer() | boolean().
 -export_type([ldbvalue/0]).
 
+%% Column names are binary only.
+-type tscolumnname() :: binary().
 %% Possible column type values supported and returned from the timeseries DDL.
 -type tscolumntype() :: varchar | sint64 | timestamp | boolean | double.
 %% Possible column type values that protocol buffers supports for enumeration purposes.
 -type tscolumntypePB() :: 'VARCHAR' | 'SINT64' | 'TIMESTAMP' | 'BOOLEAN' | 'DOUBLE'.
--export_type([tscolumntype/0, tscolumntypePB/0]).
+-export_type([tscolumnname/0, tscolumntype/0, tscolumntypePB/0]).
+
+%% @doc Convert a list of column names to partial #tscolumndescription records.
+-spec encode_columnnames(list(tscolumnname())) -> list(#tscolumndescription{}).
+encode_columnnames(ColumnNames) ->
+    [#tscolumndescription{name = C} || C <- ColumnNames].
 
 %% @doc Convert time series field type atoms returned from the DDL modules
 %% into Protobuf compatible upper case atoms.
