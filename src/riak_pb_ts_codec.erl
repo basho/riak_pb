@@ -28,6 +28,7 @@
 -include("riak_ts_pb.hrl").
 
 -export([encode_rows/2,
+         encode_rows_non_strict/1,
          decode_rows/1,
          encode_cells/1,
          decode_cells/1,
@@ -75,6 +76,16 @@ encode_field_type(boolean) ->
 encode_rows(ColumnTypes, Rows) ->
     [encode_row(ColumnTypes, Row) || Row <- Rows].
 
+%% @doc Only for encoding rows for PUTs on the erlang client.
+%%      Will not properly encode timestamp #tscell{} records,
+%%      but this is OK for this use case since the values
+%%      get cast in the order of:
+%%      lvldbvalue() -> #tscell{} -> lvldbvalue().
+%%      THEREFORE no info is lost for these cases.
+%% @end
+encode_rows_non_strict(Rows) ->
+    [encode_row_non_strict(Row) || Row <- Rows].
+
 %% @doc Decode a list of timeseries #tsrow{} to a list of tuples.
 %% Each row is converted through `decode_cells/1`, and the list
 %% of ldbvalue() is converted to a tuple of ldbvalue().
@@ -92,15 +103,17 @@ encode_cells(Cells) ->
 decode_cells(Cells) ->
     decode_cells(Cells, []).
 
-
-encode_tsdelreq(Bucket, Key, Options) ->
-    #tsdelreq{table   = Bucket,
-              key     = encode_cells(Key),
+-spec encode_tsdelreq(binary(), list(ldbvalue()), proplists:proplist()) -> #tsdelreq{}.
+encode_tsdelreq(TableName, Key, Options) ->
+    #tsdelreq{table   = TableName,
+              key     = encode_cells_non_strict(Key),
               vclock  = proplists:get_value(vclock, Options),
               timeout = proplists:get_value(timeout, Options)}.
-encode_tsgetreq(Bucket, Key, Options) ->
-    #tsgetreq{table   = Bucket,
-              key     = encode_cells(Key),
+
+-spec encode_tsgetreq(binary(), list(ldbvalue()), proplists:proplist()) -> #tsgetreq{}.
+encode_tsgetreq(TableName, Key, Options) ->
+    #tsgetreq{table   = TableName,
+              key     = encode_cells_non_strict(Key),
               timeout = proplists:get_value(timeout, Options)}.
 
 %% ---------------------------------------
@@ -110,6 +123,29 @@ encode_tsgetreq(Bucket, Key, Options) ->
 -spec encode_row(list(tscolumntype()), list(ldbvalue())) -> #tsrow{}.
 encode_row(ColumnTypes, RowCells) when length(ColumnTypes) =:= length(RowCells) ->
     #tsrow{cells = [encode_cell(ColumnTypeCell) || ColumnTypeCell <- lists:zip(ColumnTypes, RowCells)]}.
+
+%% @doc Only for encoding rows for PUTs on the erlang client.
+%%      Will not properly encode timestamp #tscell{} records,
+%%      but this is OK for these use cases since the values
+%%      get cast in the order of:
+%%      lvldbvalue() -> #tscell{} -> lvldbvalue().
+%%      THEREFORE no info is lost for these cases.
+%% @end
+-spec encode_row_non_strict(list(ldbvalue())) -> #tsrow{}.
+encode_row_non_strict(RowCells) ->
+    #tsrow{cells = encode_cells_non_strict(RowCells)}.
+
+%% @doc Only for encoding cells for PUTs on the erlang client,
+%%      and Key cells for get / delete requests.
+%%      Will not properly encode timestamp #tscell{} records,
+%%      but this is OK for these use cases since the values
+%%      get cast in the order of:
+%%      lvldbvalue() -> #tscell{} -> lvldbvalue().
+%%      THEREFORE no info is lost for these cases.
+%% @end
+-spec encode_cells_non_strict(list(ldbvalue())) -> list(#tscell{}).
+encode_cells_non_strict(Cells) ->
+    [encode_cell_non_strict(Cell) || Cell <- Cells].
 
 -spec encode_cell({tscolumntype(), ldbvalue()}) -> #tscell{}.
 encode_cell({varchar, V}) when is_binary(V) ->
@@ -127,6 +163,30 @@ encode_cell({_ColumnType, undefined}) ->
 %% NULL Cell
 %% TODO: represent null cells by something other than an empty list. emptyTsCell atom maybe?
 encode_cell({_ColumnType, []}) ->
+    #tscell{}.
+
+%% @doc Only for encoding rows for PUTs on the erlang client,
+%%      and Key cells for get / delete requests.
+%%      Will not properly encode timestamp #tscell{} records,
+%%      but this is OK for these use cases since the values
+%%      get cast in the order of:
+%%      lvldbvalue() -> #tscell{} -> lvldbvalue().
+%%      THEREFORE no info is lost for these cases.
+%% @end
+-spec encode_cell_non_strict(ldbvalue()) -> #tscell{}.
+encode_cell_non_strict(V) when is_binary(V) ->
+    #tscell{varchar_value = V};
+encode_cell_non_strict(V) when is_integer(V) ->
+    #tscell{sint64_value = V};
+encode_cell_non_strict(V) when is_float(V) ->
+    #tscell{double_value = V};
+encode_cell_non_strict(V) when is_boolean(V) ->
+    #tscell{boolean_value = V};
+encode_cell_non_strict(undefined) ->
+    #tscell{};
+%% NULL Cell
+%% TODO: represent null cells by something other than an empty list. emptyTsCell atom maybe?
+encode_cell_non_strict([]) ->
     #tscell{}.
 
 -spec decode_cells([#tscell{}], list(ldbvalue())) -> list(ldbvalue()).
