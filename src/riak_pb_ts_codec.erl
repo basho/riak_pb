@@ -97,18 +97,27 @@ encode_rows_non_strict(Rows) ->
 %% Each row is converted through `decode_cells/1`, and the list
 %% of ldbvalue() is converted to a tuple of ldbvalue().
 %% @end
--spec decode_rows([#tsrow{}]) -> list(tuple()).
+-spec decode_rows([#tsrow{}]) -> [tuple(ldbvalue())] | {error, {bad_ts_cell, #tscell{}}}.
 decode_rows(Rows) ->
-    [list_to_tuple(decode_cells(Cells)) || #tsrow{cells = Cells} <- Rows].
+    try
+        [list_to_tuple(decode_cells(Cells,[])) || #tsrow{cells = Cells} <- Rows]
+    catch
+        error : {bad_ts_cell, #tscell{}} = Error -> {error, Error}
+    end.
 
 -spec encode_cells(list({tscolumntype(), ldbvalue()})) -> [#tscell{}].
 encode_cells(Cells) ->
     [encode_cell(C) || C <- Cells].
 
 %% @doc Decode a list of timeseries #tscell{} to a list of ldbvalue().
--spec decode_cells([#tscell{}]) -> list(ldbvalue()).
+-spec decode_cells([#tscell{}]) -> [ldbvalue()] | {error, {bad_ts_cell, #tscell{}}}.
 decode_cells(Cells) ->
-    decode_cells(Cells, []).
+    try
+        decode_cells(Cells, [])
+    catch
+        error : {bad_ts_cell, #tscell{}} = Error -> {error, Error}
+    end.
+
 
 %% ---------------------------------------
 %% local functions
@@ -228,12 +237,14 @@ decode_cells([#tscell{varchar_value = undefined,
     double_value = undefined} | T], Acc) ->
     %% NULL Cell.
     %% TODO: represent null cells by something other than an empty list. emptyTsCell atom maybe?
-    decode_cells(T, [[] | Acc]).
+    decode_cells(T, [[] | Acc]);
+decode_cells([#tscell{} = BadRecord | _T], _Acc) ->
+    erlang:error({bad_ts_cell, BadRecord}).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
-encode_cells_test() ->
+encode_cell_test() ->
     %% Correct cells
     ?assertEqual(#tscell{varchar_value = <<"Foo">>}, encode_cell({varchar, <<"Foo">>})),
     ?assertEqual(#tscell{sint64_value = 64}, encode_cell({sint64, 64})),
@@ -256,6 +267,7 @@ encode_cells_test() ->
     ?assertError(function_clause, encode_cell({sint64, true})),
     ?assertError(function_clause, encode_cell({boolean, <<"42">>})),
     ?assertError(function_clause, encode_cell({boolean, 42})).
+
 
 encode_row_test() ->
     ?assertEqual(
@@ -308,24 +320,34 @@ decode_cell_test() ->
     ?assertEqual(
         [<<"Bar">>, 80, []],
         decode_cells([#tscell{varchar_value = <<"Bar">>}, #tscell{sint64_value = 80}, #tscell{}],[])),
+
+    BadCell = #tscell{varchar_value = <<"Foo">>, sint64_value = 30},
     ?assertError(
-        function_clause,
-        decode_cells([#tscell{varchar_value = <<"Foo">>, sint64_value = 30}],[])).
+        {bad_ts_cell, BadCell},
+        decode_cells([BadCell],[])).
 
 decode_cells_test() ->
     ?assertEqual(
         [<<"Bar">>, 80, []],
         decode_cells([#tscell{varchar_value = <<"Bar">>}, #tscell{sint64_value = 80}, #tscell{}])),
-    ?assertError(
-        function_clause,
-        decode_cells([#tscell{varchar_value = <<"Foo">>, sint64_value = 30}])).
+
+    BadCell = #tscell{varchar_value = <<"Foo">>, sint64_value = 30},
+    ?assertEqual(
+        {error, {bad_ts_cell, BadCell}},
+        decode_cells([BadCell])).
 
 decode_rows_test() ->
     ?assertEqual(
         [{<<"Bar">>, 80, []}, {<<"Baz">>, 90, false}],
         decode_rows([
             #tsrow{cells = [#tscell{varchar_value = <<"Bar">>}, #tscell{sint64_value = 80}, #tscell{}]},
-            #tsrow{cells = [#tscell{varchar_value = <<"Baz">>}, #tscell{sint64_value = 90}, #tscell{boolean_value = false}]}])).
+            #tsrow{cells = [#tscell{varchar_value = <<"Baz">>}, #tscell{sint64_value = 90}, #tscell{boolean_value = false}]}])),
+
+    BadCell = #tscell{varchar_value = <<"Foo">>, sint64_value = 30},
+    Rows = [#tsrow{cells=[BadCell]}],
+    ?assertEqual(
+        {error, {bad_ts_cell, BadCell}},
+        decode_rows(Rows)).
 
 -endif.
 
