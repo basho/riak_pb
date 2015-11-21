@@ -56,7 +56,7 @@ encode_columnnames(ColumnNames) when is_list(ColumnNames) ->
     [#tscolumndescription{name = C} || C <- ColumnNames].
 
 %% @doc Convert time series field type atoms returned from the DDL modules
-%% into Protobuf compatible upper case atoms.
+%%      into protocol buffer compatible upper case atoms.
 -spec encode_field_type(tscolumntype()) -> atom().
 encode_field_type(varchar) ->
     'VARCHAR';
@@ -69,40 +69,55 @@ encode_field_type(timestamp) ->
 encode_field_type(boolean) ->
     'BOOLEAN'.
 
-%% @doc Encode a set of time series rows from an internal format to the #tsrow record format.
-%% Takes a list of column types, and a list of rows.
-%% Each row is represented as a list of ldbvalue().
-%% An error is returned if any of the `Rows` individual row length do not match the length of the `ColumnTypes` list.
-%% @end
+%% @doc Use this when encoding data to send to the client.
+%%      Use encode_rows_non_strict/1 when encoding data to send to server.
+%%      Encode a set of time series rows from an internal format to the #tsrow record format.
+%%      Takes a list of column types, and a list of rows.
+%%      Each row is represented as a list of ldbvalue().
+%%      An error is returned if any of the `Rows` individual row length do not match the length of the `ColumnTypes` list.
 -spec encode_rows(list(tscolumntype()), list(list(ldbvalue()))) -> [#tsrow{}].
-encode_rows(ColumnTypes, Rows) when is_list(Rows), is_list(ColumnTypes)->
+encode_rows(ColumnTypes, Rows) when is_list(Rows), is_list(ColumnTypes) ->
     [encode_row(ColumnTypes, Row) || Row <- Rows].
 
-%% @doc Only for encoding rows for PUTs on the erlang client.
+%% @doc Use this when encoding data to send to the server(Puts).
+%%      Use encode_rows/2 when encoding data to send back to client.
+%%
 %%      Will not properly encode timestamp #tscell{} records,
-%%      but this is OK for this use case since the values
-%%      get cast in the order of:
+%%      but this is OK for Puts since the values get cast in the order of:
 %%      lvldbvalue() -> #tscell{} -> lvldbvalue().
 %%      THEREFORE no info is lost for these cases.
-%% @end
 encode_rows_non_strict(Rows) when is_list(Rows) ->
     [encode_row_non_strict(Row) || Row <- Rows].
 
 %% @doc Decode a list of timeseries #tsrow{} to a list of tuples.
-%% Each row is converted through `decode_cells/1`, and the list
-%% of ldbvalue() is converted to a tuple of ldbvalue().
-%% @end
+%%      Each row is converted through `decode_cells/1`, and the list
+%%      of ldbvalue() is converted to a tuple of ldbvalue().
 -spec decode_rows([#tsrow{}]) -> [tuple(ldbvalue())] | {error, {bad_ts_cell, #tscell{}}}.
 decode_rows(Rows) when is_list(Rows) ->
     try
-        [list_to_tuple(decode_cells(Cells,[])) || #tsrow{cells = Cells} <- Rows]
+        [list_to_tuple(decode_cells(Cells, [])) || #tsrow{cells = Cells} <- Rows]
     catch
         error : {bad_ts_cell, #tscell{}} = Error -> {error, Error}
     end.
 
+%% @doc Use this when encoding data to sent to the client.
+%%      Use encode_cells_non_strict/1 when encoding data send to the server.
+%%      Encode a list of {column type, value} tuples into a list of #tscell{}.
 -spec encode_cells(list({tscolumntype(), ldbvalue()})) -> [#tscell{}].
 encode_cells(Cells) when is_list(Cells) ->
     [encode_cell(C) || C <- Cells].
+
+%% @doc Use this when encoding data to send to the server (Get / Delete single record Primary Keys encoding).
+%%      Use encode_cells/1 when encoding data to send back to client.
+%%
+%%      Will not properly encode timestamp #tscell{} records,
+%%      but this is OK for these use cases since the values
+%%      get cast in the order of:
+%%      lvldbvalue() -> #tscell{} -> lvldbvalue().
+%%      THEREFORE no info is lost for these cases.
+-spec encode_cells_non_strict(list(ldbvalue())) -> list(#tscell{}).
+encode_cells_non_strict(Cells) ->
+    [encode_cell_non_strict(Cell) || Cell <- Cells].
 
 %% @doc Decode a list of timeseries #tscell{} to a list of ldbvalue().
 -spec decode_cells([#tscell{}]) -> [ldbvalue()] | {error, {bad_ts_cell, #tscell{}}}.
@@ -122,28 +137,18 @@ decode_cells(Cells) when is_list(Cells) ->
 encode_row(ColumnTypes, RowCells) when length(ColumnTypes) =:= length(RowCells) ->
     #tsrow{cells = [encode_cell(ColumnTypeCell) || ColumnTypeCell <- lists:zip(ColumnTypes, RowCells)]}.
 
-%% @doc Only for encoding rows for PUTs on the erlang client.
+%% @doc Use this when encoding data to send to the server (PUTS).
+%%      Use encode_row/2 when encoding data to send back to client.
+%%
 %%      Will not properly encode timestamp #tscell{} records,
 %%      but this is OK for these use cases since the values
 %%      get cast in the order of:
 %%      lvldbvalue() -> #tscell{} -> lvldbvalue().
 %%      THEREFORE no info is lost for these cases.
-%% @end
 -spec encode_row_non_strict(list(ldbvalue())) -> #tsrow{}.
 encode_row_non_strict(RowCells) ->
     #tsrow{cells = encode_cells_non_strict(RowCells)}.
 
-%% @doc Only for encoding cells for PUTs on the erlang client,
-%%      and Key cells for get / delete requests.
-%%      Will not properly encode timestamp #tscell{} records,
-%%      but this is OK for these use cases since the values
-%%      get cast in the order of:
-%%      lvldbvalue() -> #tscell{} -> lvldbvalue().
-%%      THEREFORE no info is lost for these cases.
-%% @end
--spec encode_cells_non_strict(list(ldbvalue())) -> list(#tscell{}).
-encode_cells_non_strict(Cells) ->
-    [encode_cell_non_strict(Cell) || Cell <- Cells].
 
 -spec encode_cell({tscolumntype(), ldbvalue()}) -> #tscell{}.
 encode_cell({varchar, V}) when is_binary(V) ->
@@ -163,14 +168,15 @@ encode_cell({_ColumnType, undefined}) ->
 encode_cell({_ColumnType, []}) ->
     #tscell{}.
 
-%% @doc Only for encoding rows for PUTs on the erlang client,
+%% @doc Use this when encoding data (puts, keys for get/deletes) to send to the server (PUTS).
+%%      Use encode_row/2 when encoding data to send back to client.
 %%      and Key cells for get / delete requests.
+%%
 %%      Will not properly encode timestamp #tscell{} records,
 %%      but this is OK for these use cases since the values
 %%      get cast in the order of:
 %%      lvldbvalue() -> #tscell{} -> lvldbvalue().
 %%      THEREFORE no info is lost for these cases.
-%% @end
 -spec encode_cell_non_strict(ldbvalue()) -> #tscell{}.
 encode_cell_non_strict(V) when is_binary(V) ->
     #tscell{varchar_value = V};
@@ -236,6 +242,10 @@ decode_cells([#tscell{varchar_value = undefined,
 decode_cells([#tscell{} = BadRecord | _T], _Acc) ->
     erlang:error({bad_ts_cell, BadRecord}).
 
+%% --------------------------------------------------------
+%% Unit Tests
+%% --------------------------------------------------------
+
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
@@ -265,9 +275,9 @@ encode_cell_test() ->
 
 encode_cells_test() ->
     ?assertEqual([#tscell{sint64_value = 64}, #tscell{timestamp_value = 64}, #tscell{double_value = 42.0}],
-        encode_cells([{sint64, 64},{timestamp, 64}, {double, 42.0}])),
+        encode_cells([{sint64, 64}, {timestamp, 64}, {double, 42.0}])),
     ?assertError(function_clause,
-        encode_cells([{sint64, 64},{timestamp, 64}, {boolean, 42.0}])).
+        encode_cells([{sint64, 64}, {timestamp, 64}, {boolean, 42.0}])).
 
 encode_row_test() ->
     ?assertEqual(
@@ -305,26 +315,26 @@ encode_rows_test() ->
 
 encode_field_type_test() ->
     ?assertEqual('VARCHAR', encode_field_type(varchar)),
-    ?assertEqual('SINT64',encode_field_type(sint64)),
-    ?assertEqual('TIMESTAMP',encode_field_type(timestamp)),
-    ?assertEqual('BOOLEAN',encode_field_type(boolean)),
-    ?assertEqual('DOUBLE',encode_field_type(double)).
+    ?assertEqual('SINT64', encode_field_type(sint64)),
+    ?assertEqual('TIMESTAMP', encode_field_type(timestamp)),
+    ?assertEqual('BOOLEAN', encode_field_type(boolean)),
+    ?assertEqual('DOUBLE', encode_field_type(double)).
 
 decode_cell_test() ->
-    ?assertEqual([<<"Foo">>], decode_cells([#tscell{varchar_value = <<"Foo">>}],[])),
-    ?assertEqual([42],      decode_cells([#tscell{sint64_value = 42}],[])),
-    ?assertEqual([64],      decode_cells([#tscell{timestamp_value = 64}],[])),
-    ?assertEqual([false],   decode_cells([#tscell{boolean_value = false}],[])),
-    ?assertEqual([42.2],    decode_cells([#tscell{double_value = 42.2}],[])),
-    ?assertEqual([[]],      decode_cells([#tscell{}],[])),
+    ?assertEqual([<<"Foo">>], decode_cells([#tscell{varchar_value = <<"Foo">>}], [])),
+    ?assertEqual([42], decode_cells([#tscell{sint64_value = 42}], [])),
+    ?assertEqual([64], decode_cells([#tscell{timestamp_value = 64}], [])),
+    ?assertEqual([false], decode_cells([#tscell{boolean_value = false}], [])),
+    ?assertEqual([42.2], decode_cells([#tscell{double_value = 42.2}], [])),
+    ?assertEqual([[]], decode_cells([#tscell{}], [])),
     ?assertEqual(
         [<<"Bar">>, 80, []],
-        decode_cells([#tscell{varchar_value = <<"Bar">>}, #tscell{sint64_value = 80}, #tscell{}],[])),
+        decode_cells([#tscell{varchar_value = <<"Bar">>}, #tscell{sint64_value = 80}, #tscell{}], [])),
 
     BadCell = #tscell{varchar_value = <<"Foo">>, sint64_value = 30},
     ?assertError(
         {bad_ts_cell, BadCell},
-        decode_cells([BadCell],[])).
+        decode_cells([BadCell], [])).
 
 decode_cells_test() ->
     ?assertEqual(
@@ -344,20 +354,20 @@ decode_rows_test() ->
             #tsrow{cells = [#tscell{varchar_value = <<"Baz">>}, #tscell{sint64_value = 90}, #tscell{boolean_value = false}]}])),
 
     BadCell = #tscell{varchar_value = <<"Foo">>, sint64_value = 30},
-    Rows = [#tsrow{cells=[BadCell]}],
+    Rows = [#tsrow{cells = [BadCell]}],
     ?assertEqual(
         {error, {bad_ts_cell, BadCell}},
         decode_rows(Rows)).
 
 encode_cell_non_strict_test() ->
     ?assertEqual(#tscell{varchar_value = <<"Foo">>}, encode_cell_non_strict(<<"Foo">>)),
-    ?assertEqual(#tscell{sint64_value = 64},         encode_cell_non_strict(64)),
-    ?assertNotEqual(#tscell{timestamp_value = 64},   encode_cell_non_strict(64)),
-    ?assertEqual(#tscell{boolean_value = true},      encode_cell_non_strict(true)),
-    ?assertEqual(#tscell{double_value = 42.0},       encode_cell_non_strict(42.0)),
-    ?assertEqual(#tscell{boolean_value = false},     encode_cell_non_strict(false)),
-    ?assertEqual(#tscell{},                          encode_cell_non_strict([])),
-    ?assertError(function_clause,                    encode_cell_non_strict(foo)).
+    ?assertEqual(#tscell{sint64_value = 64}, encode_cell_non_strict(64)),
+    ?assertNotEqual(#tscell{timestamp_value = 64}, encode_cell_non_strict(64)),
+    ?assertEqual(#tscell{boolean_value = true}, encode_cell_non_strict(true)),
+    ?assertEqual(#tscell{double_value = 42.0}, encode_cell_non_strict(42.0)),
+    ?assertEqual(#tscell{boolean_value = false}, encode_cell_non_strict(false)),
+    ?assertEqual(#tscell{}, encode_cell_non_strict([])),
+    ?assertError(function_clause, encode_cell_non_strict(foo)).
 
 encode_cells_non_strict_test() ->
     ?assertEqual([#tscell{varchar_value = <<"Foo">>}, #tscell{sint64_value = 3}, #tscell{double_value = 42.0}],
