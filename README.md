@@ -97,15 +97,8 @@ this version is too new for the Maven protocol-buffers plugin.
 
 You can install the correct version like so.
     
-    ```
+  ```
     brew tap homebrew/versions
     brew install homebrew/versions/protobuf250
-    ```
-
-
-A
-A
-
-
-A
+  ```
 
