@@ -32,7 +32,8 @@
 -compile(export_all).
 -endif.
 
--export([encode/1,      %% riakc_pb:encode
+-export([init/0,
+         encode/1,      %% riakc_pb:encode
          decode/2,      %% riakc_pb:decode
          msg_type/1,    %% riakc_pb:msg_type
          msg_code/1,    %% riakc_pb:msg_code
@@ -49,8 +50,11 @@
          encode_modfun/1,
          decode_modfun/2,
          encode_commit_hooks/1,
-         decode_commit_hooks/1
+         decode_commit_hooks/1,
+         encode_tsputreq/1
         ]).
+
+-on_load(init/0).
 
 %% @type modfun_property().
 %%
@@ -78,6 +82,31 @@
 %% Bucket properties that are commit hooks have this format.
 -type commit_hook_property() :: [ {struct, [{commit_hook_field(), binary()}]} ].
 
+
+-spec init() -> any().
+init() ->
+    SoName = case code:priv_dir(?MODULE) of
+                 {error, bad_name} ->
+                     case code:which(?MODULE) of
+                         Filename when is_list(Filename) ->
+                             filename:join([filename:dirname(Filename),"../priv", "riak_pb_codec"]);
+                         _ ->
+                             filename:join("../priv", "riak_pb_codec")
+                     end;
+                 Dir ->
+                     filename:join(Dir, "riak_pb_codec")
+             end,
+    erlang:load_nif(SoName, 0),
+
+    ok.
+
+encode_tsputreq(Msg) ->
+    io:format("bubba printf 1, Msg : ~p", [Msg]),
+    MsgType = element(1, Msg),
+    Encoder = encoder_for(MsgType),
+    [msg_code(MsgType) | Encoder:encode(Msg)].
+
+
 %% @doc Create an iolist of msg code and protocol buffer
 %% message. Replaces `riakc_pb:encode/1'.
 %%
@@ -96,6 +125,12 @@ encode(Msg) ->
 
 encode_pb(Msg) when is_atom(Msg) ->
     [msg_code(Msg)];
+encode_pb({tsputreq, _, _, _}=Msg) ->
+    encode_tsputreq(Msg);
+
+%%    MsgType = element(1, Msg),
+%%    Encoder = encoder_for(MsgType),
+%%    [msg_code(MsgType) | Encoder:encode(Msg)];
 encode_pb(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
