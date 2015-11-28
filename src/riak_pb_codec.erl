@@ -96,7 +96,6 @@ init() ->
     ok.
 
 encode_tsputreq(Msg) ->
-    io:format("bubba printf 1, Msg : ~p", [Msg]),
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
     [msg_code(MsgType) | Encoder:encode(Msg)].
@@ -114,7 +113,6 @@ encode({tsputreq, _, _, _}=Msg) ->
 %%    Encoder = encoder_for(MsgType),
 %%    [msg_code(MsgType) | Encoder:encode(Msg)];
 encode(Msg) when is_tuple(Msg) ->
-    io:format("bubba printf 2, Msg : ~p", [Msg]),
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
     [msg_code(MsgType) | Encoder:encode(Msg)].
