@@ -108,6 +108,31 @@ encode_tsputreq(Msg) ->
     [msg_code(MsgType) | Encoder:encode(Msg)].
 
 
+
+-spec init() -> any().
+init() ->
+    SoName = case code:priv_dir(?MODULE) of
+                 {error, bad_name} ->
+                     case code:which(?MODULE) of
+                         Filename when is_list(Filename) ->
+                             filename:join([filename:dirname(Filename),"../priv", "riak_pb_codec"]);
+                         _ ->
+                             filename:join("../priv", "riak_pb_codec")
+                     end;
+                 Dir ->
+                     filename:join(Dir, "riak_pb_codec")
+             end,
+    erlang:load_nif(SoName, 0),
+
+    ok.
+
+encode_tsputreq(Msg) ->
+    io:format("bubba printf 1, Msg : ~p", [Msg]),
+    MsgType = element(1, Msg),
+    Encoder = encoder_for(MsgType),
+    [msg_code(MsgType) | Encoder:encode(Msg)].
+
+
 %% @doc Create an iolist of msg code and protocol buffer
 %% message. Replaces `riakc_pb:encode/1'.
 %%
