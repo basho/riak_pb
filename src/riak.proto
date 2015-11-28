@@ -24,6 +24,7 @@
 /*
 ** Revision: 1.4
 */
+syntax = "proto2";
 
 // Java package specifiers
 option java_package = "com.basho.riak.protobuf";
