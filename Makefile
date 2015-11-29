@@ -1,4 +1,4 @@
-.PHONY: deps
+.PHONY: deps pb_nif
 
 all: deps compile_all
 
@@ -151,3 +151,18 @@ c_release: c_compile
 	@mkdir -p $(C_PREFIX)/include
 	@cp -p $(C_DIR)/*.c $(C_PREFIX)
 	@cp -p $(C_DIR)/*.h $(C_PREFIX)/include
+
+nif_build := $(wildcard riak_kv_ts/Makefile)
+
+$(info nif_build wildcard is $(wildcard riak_kv_ts/Makefile) and curdir is $(CURDIR))
+
+ifneq ($(nif_build),)
+B:=$(CURDIR)
+pb_nif : $B/riak_kv_ts/compile
+
+$(info Attempt to load nif_build: $(nif_build))
+include $(nif_build)
+else
+pb_nif:
+
+endif
