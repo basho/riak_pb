@@ -36,11 +36,13 @@ import "riak.proto"; // for RpbPair
 message TsQueryReq {
   // left optional to support parameterized queries in the future
   optional TsInterpolation query = 1;
+  optional bool stream = 2 [default = false];
 }
 
 message TsQueryResp {
   repeated TsColumnDescription columns = 1;
   repeated TsRow rows = 2;  // 0 to n rows
+  optional bool done = 3 [default = true];
 }
 
 
