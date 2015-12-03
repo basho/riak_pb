@@ -170,6 +170,7 @@ message RpbRawTermReq {
     required bool use_raw = 1;
 }
 
-// Erlang term encoding response - no message defined, just send
-// RpbRawTermResp
+message RpbRawTermResp {
+    required bool use_raw = 1;
+}
 
