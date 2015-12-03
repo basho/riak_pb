@@ -115,6 +115,7 @@ message TsCell {
 message TsListKeysReq {
   required bytes table = 1;
   optional uint32 timeout = 2;
+  optional bool stream = 3 [default = false];
 }
 
 message TsListKeysResp {
