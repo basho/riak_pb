@@ -164,3 +164,12 @@ message RpbAuthReq {
     required bytes user = 1;
     required bytes password = 2;
 }
+
+// Erlang term encoding
+message RpbRawTermReq {
+    required bool use_raw = 1;
+}
+
+// Erlang term encoding response - no message defined, just send
+// RpbRawTermResp
+

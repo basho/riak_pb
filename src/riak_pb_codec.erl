@@ -76,21 +76,43 @@
 %% @doc Create an iolist of msg code and protocol buffer
 %% message. Replaces `riakc_pb:encode/1'.
 -spec encode(atom() | tuple()) -> iolist().
-encode(Msg) when is_atom(Msg) ->
+encode(Msg) ->
+    case get(use_raw) of
+        true ->
+            encode_raw(Msg);
+        _ ->
+            encode_pb(Msg)
+    end.
+
+encode_pb(Msg) when is_atom(Msg) ->
     [msg_code(Msg)];
-encode(Msg) when is_tuple(Msg) ->
+encode_pb(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
     [msg_code(MsgType) | Encoder:encode(Msg)].
 
+encode_raw(Msg) ->
+    term_to_binary(Msg).
+
 %% @doc Decode a protocol buffer message given its type - if no bytes
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
 -spec decode(integer(), binary()) -> atom() | tuple().
-decode(MsgCode, <<>>) ->
-    msg_type(MsgCode);
 decode(MsgCode, MsgData) ->
+    case get(use_raw) of
+        true ->
+            decode_raw(MsgCode, MsgData);
+        _ ->
+            decode_pb(MsgCode, MsgData)
+    end.
+
+decode_pb(MsgCode, <<>>) ->
+    msg_type(MsgCode);
+decode_pb(MsgCode, MsgData) ->
     Decoder = decoder_for(MsgCode),
     Decoder:decode(msg_type(MsgCode), MsgData).
+
+decode_raw(_MsgCode, MsgData) ->
+    binary_to_term(MsgData).
 
 %% @doc Converts a message code into the symbolic message
 %% name. Replaces `riakc_pb:msg_type/1'.
