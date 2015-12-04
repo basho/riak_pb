@@ -96,8 +96,19 @@ encode_raw(Msg) when is_atom(Msg) ->
 encode_raw(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Code = msg_code(MsgType),
-    T2B = term_to_binary(Msg),
+    T2B = term_to_binary(de_stringify(Msg)),
     <<Code:8, T2B/binary>>.
+
+de_stringify(Tuple) when is_tuple(Tuple) ->
+    list_to_tuple(de_stringify(tuple_to_list(Tuple)));
+de_stringify(List) when is_list(List), is_integer(hd(List)) ->
+    %% Yes, this could corrupt utf-8 data, but we should never, ever
+    %% have put it in string format to begin with
+    list_to_binary(List);
+de_stringify(List) when is_list(List) ->
+    lists:map(fun de_stringify/1, List);
+de_stringify(Element) ->
+    Element.
 
 %% @doc Decode a protocol buffer message given its type - if no bytes
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
