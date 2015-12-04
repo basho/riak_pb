@@ -29,6 +29,7 @@
 option java_package = "com.basho.riak.protobuf";
 option java_outer_classname = "RiakPB";
 
+
 // Error response - may be generated for any Req
 message RpbErrorResp {
     required bytes errmsg = 1;
