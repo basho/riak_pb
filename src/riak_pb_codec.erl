@@ -108,6 +108,10 @@ encode_tsputreq(Msg) ->
     [msg_code(MsgType) | Encoder:encode(Msg)].
 
 
+%% The protobuf message ID for a timeseries query response, needed to
+%% allow our nif interface to identify the message for which we wish
+%% to perform optimized decoding.
+-define(TIMESERIES_QUERY_RESP, 91).
 
 -spec init() -> any().
 init() ->
