@@ -24,16 +24,11 @@
 /*
 ** Revision: 1.4
 */
-syntax = "proto2";
 
 // Java package specifiers
 option java_package = "com.basho.riak.protobuf";
 option java_outer_classname = "RiakKvPB";
 
-// C++ options
-//  LITE_RUNTIME proved faster in tests, hence used for time series
-option optimize_for = LITE_RUNTIME;
-option cc_enable_arenas = true;
 
 import "riak.proto"; // for RpbPair
 
