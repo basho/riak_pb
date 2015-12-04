@@ -91,8 +91,13 @@ encode_pb(Msg) when is_tuple(Msg) ->
     Encoder = encoder_for(MsgType),
     [msg_code(MsgType) | Encoder:encode(Msg)].
 
-encode_raw(Msg) ->
-    term_to_binary(Msg).
+encode_raw(Msg) when is_atom(Msg) ->
+    [msg_code(Msg)];
+encode_raw(Msg) when is_tuple(Msg) ->
+    MsgType = element(1, Msg),
+    Code = msg_code(MsgType),
+    T2B = term_to_binary(Msg),
+    <<Code:8, T2B/binary>>.
 
 %% @doc Decode a protocol buffer message given its type - if no bytes
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
@@ -111,6 +116,8 @@ decode_pb(MsgCode, MsgData) ->
     Decoder = decoder_for(MsgCode),
     Decoder:decode(msg_type(MsgCode), MsgData).
 
+decode_raw(MsgCode, <<>>) ->
+    msg_type(MsgCode);
 decode_raw(_MsgCode, MsgData) ->
     binary_to_term(MsgData).
 
