@@ -93,6 +93,8 @@ encode_pb(Msg) when is_tuple(Msg) ->
 
 encode_raw(Msg) when is_atom(Msg) ->
     [msg_code(Msg)];
+encode_raw({Msg}) when is_atom(Msg) ->
+    [msg_code(Msg), []];
 encode_raw(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Code = msg_code(MsgType),
