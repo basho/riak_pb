@@ -77,6 +77,10 @@
 %% Bucket properties that are commit hooks have this format.
 -type commit_hook_property() :: [ {struct, [{commit_hook_field(), binary()}]} ].
 
+%% The protobuf message ID for a timeseries query response, needed to
+%% allow our nif interface to identify the message for which we wish
+%% to perform optimized decoding.
+-define(TIMESERIES_QUERY_RESP, 91).
 
 -spec init() -> any().
 init() ->
@@ -113,16 +117,26 @@ encode({tsputreq, _, _, _}=Msg) ->
 %%    Encoder = encoder_for(MsgType),
 %%    [msg_code(MsgType) | Encoder:encode(Msg)];
 encode(Msg) when is_tuple(Msg) ->
-    io:format("bubba printf 2, Msg : ~p", [Msg]),
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
     [msg_code(MsgType) | Encoder:encode(Msg)].
+
+
+%%
+%% this is the default function that executes if NIF not present
+%%  this function encodes tsqueryresp
+decode_tsqueryresp(MsgData) ->
+    Decoder = decoder_for(?TIMESERIES_QUERY_RESP),
+    Decoder:decode(msg_type(?TIMESERIES_QUERY_RESP), MsgData).
+
 
 %% @doc Decode a protocol buffer message given its type - if no bytes
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
 -spec decode(integer(), binary()) -> atom() | tuple().
 decode(MsgCode, <<>>) ->
     msg_type(MsgCode);
+decode(?TIMESERIES_QUERY_RESP, MsgData) ->
+    decode_tsqueryresp(MsgData);
 decode(MsgCode, MsgData) ->
     Decoder = decoder_for(MsgCode),
     Decoder:decode(msg_type(MsgCode), MsgData).
