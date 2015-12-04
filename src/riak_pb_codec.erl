@@ -112,7 +112,6 @@ encode_tsputreq(Msg) ->
 %% allow our nif interface to identify the message for which we wish
 %% to perform optimized decoding.
 -define(TIMESERIES_QUERY_RESP, 91).
->>>>>>> Add code to pull in supplemental NIF.
 
 -spec init() -> any().
 init() ->
