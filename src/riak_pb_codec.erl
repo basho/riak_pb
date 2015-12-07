@@ -27,6 +27,11 @@
 
 -include("riak_pb.hrl").
 
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-compile(export_all).
+-endif.
+
 -export([encode/1,      %% riakc_pb:encode
          decode/2,      %% riakc_pb:decode
          msg_type/1,    %% riakc_pb:msg_type
@@ -92,9 +97,9 @@ encode_pb(Msg) when is_tuple(Msg) ->
     [msg_code(MsgType) | Encoder:encode(Msg)].
 
 encode_raw(Msg) when is_atom(Msg) ->
-    [msg_code(Msg)];
+    [msg_code(Msg)]; %% I/O layer will convert this to binary
 encode_raw({Msg}) when is_atom(Msg) ->
-    [msg_code(Msg), []];
+    [msg_code(Msg)]; %% I/O layer will convert this to binary
 encode_raw(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Code = msg_code(MsgType),
@@ -418,3 +423,59 @@ safe_to_atom(Binary) when is_binary(Binary) ->
             error_logger:warning_msg("Creating new atom from protobuffs message! ~p", [Binary]),
             binary_to_atom(Binary, latin1)
     end.
+
+-ifdef(TEST).
+-include("riak_kv_pb.hrl").
+
+%% One necessary omission: we do not have any messages today that
+%% include functions, so we cannot test decoding such records.
+
+decode_eq(Message, <<MsgCode:8, Rest/binary>>, DecodeFun) ->
+    ?assertEqual(Message, DecodeFun(MsgCode, Rest));
+decode_eq(Message, IoList, DecodeFun) ->
+    decode_eq(Message, iolist_to_binary(IoList), DecodeFun).
+
+record_test() ->
+    Req =
+        #rpbgetreq{n_val=4,
+                   notfound_ok=true,
+                   bucket = <<"bucket">>,
+                   key = <<"key">>},
+
+    decode_eq(Req, encode_pb(Req), fun decode_pb/2),
+    decode_eq(Req, encode_raw(Req), fun decode_raw/2).
+
+empty_atoms_test() ->
+    %% Empty messages are either empty records or atoms, depending on
+    %% whether the .proto file defines the message as an empty record
+    %% or ignores it. On the receiving end they are all atoms.
+
+    Resp1 = tsdelresp,    %% .proto does not define
+    Resp2 = {tsdelresp},  %% .proto defines as empty record
+
+    decode_eq(Resp1, encode_pb(Resp1), fun decode_pb/2),
+    decode_eq(Resp1, encode_raw(Resp1), fun decode_raw/2),
+    decode_eq(Resp1, encode_pb(Resp2), fun decode_pb/2),
+    decode_eq(Resp1, encode_raw(Resp2), fun decode_raw/2).
+
+mixed_strings_test() ->
+    %% Because the network layer will invoke iolist_to_binary/1 or its
+    %% equivalent, on the sending side we can get away with using
+    %% strings instead of binaries in records that expect the latter
+    Req =
+        #rpbgetreq{n_val=4,
+                   notfound_ok=true,
+                   bucket = "bucket",
+                   key = <<"key">>},
+
+    DecodedReq =
+        #rpbgetreq{n_val=4,
+                   notfound_ok=true,
+                   bucket = <<"bucket">>,
+                   key = <<"key">>},
+
+    decode_eq(DecodedReq, encode_pb(Req), fun decode_pb/2),
+    decode_eq(DecodedReq, encode_raw(Req), fun decode_raw/2).
+
+
+-endif. %% TEST
