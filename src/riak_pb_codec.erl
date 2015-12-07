@@ -87,7 +87,7 @@
 %% to perform optimized decoding.
 -define(TIMESERIES_QUERY_RESP, 91).
 
--spec init() -> any().
+-spec init() -> ok | {error, any()}.
 init() ->
     SoName = case code:priv_dir(?MODULE) of
                  {error, bad_name} ->
