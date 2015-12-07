@@ -100,9 +100,7 @@ init() ->
                  Dir ->
                      filename:join(Dir, "riak_pb_codec")
              end,
-    erlang:load_nif(SoName, 0),
-
-    ok.
+    ok = erlang:load_nif(SoName, 0).
 
 encode_tsputreq(Msg) ->
     MsgType = element(1, Msg),
@@ -444,7 +442,7 @@ encode_commit_hook({struct, Props}=Hook) ->
     end.
 
 %% @doc Converts a list of RpbCommitHook messages into commit hooks.
--spec decode_commit_hooks([ #rpbcommithook{} ]) -> [ commit_hook_property() ].
+-spec decode_commit_hooks(#rpbcommithook{} | [ #rpbcommithook{} ]) ->  commit_hook_property() .
 decode_commit_hooks(Hooks) ->
     [ decode_commit_hook(Hook) || Hook <- Hooks,
                                   Hook =/= #rpbcommithook{modfun=undefined, name=undefined} ].
