@@ -80,9 +80,14 @@
 
 %% @doc Create an iolist of msg code and protocol buffer
 %% message. Replaces `riakc_pb:encode/1'.
+%%
+%% NOTE: ugly hack alert. Rather than attempt to thread this
+%% information through the call chain, we are using the process
+%% dictionary to indicate whether the encoding should use protobuffs
+%% or straight term_to_binary encoding.
 -spec encode(atom() | tuple()) -> iolist().
 encode(Msg) ->
-    case get(use_raw) of
+    case get(pb_use_native_encoding) of
         true ->
             encode_raw(Msg);
         _ ->
@@ -119,9 +124,14 @@ de_stringify(Element) ->
 
 %% @doc Decode a protocol buffer message given its type - if no bytes
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
+%%
+%% NOTE: ugly hack alert. Rather than attempt to thread this
+%% information through the call chain, we are using the process
+%% dictionary to indicate whether the encoding should use protobuffs
+%% or straight term_to_binary encoding.
 -spec decode(integer(), binary()) -> atom() | tuple().
 decode(MsgCode, MsgData) ->
-    case get(use_raw) of
+    case get(pb_use_native_encoding) of
         true ->
             decode_raw(MsgCode, MsgData);
         _ ->

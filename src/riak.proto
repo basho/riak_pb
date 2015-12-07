@@ -166,11 +166,11 @@ message RpbAuthReq {
 }
 
 // Erlang term encoding
-message RpbRawTermReq {
-    required bool use_raw = 1;
+message RpbToggleEncodingReq {
+    required bool use_native = 1;
 }
 
-message RpbRawTermResp {
-    required bool use_raw = 1;
+message RpbToggleEncodingResp {
+    required bool use_native = 1;
 }
 
