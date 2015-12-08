@@ -79,7 +79,7 @@
 %% @type commit_hook_property().
 %%
 %% Bucket properties that are commit hooks have this format.
--type commit_hook_property() :: [ {struct, [{commit_hook_field(), binary()}]} ].
+-type commit_hook_property() :: {struct, [{commit_hook_field(), binary()}]}.
 
 %% The protobuf message ID for a timeseries query response, needed to
 %% allow our nif interface to identify the message for which we wish
@@ -99,9 +99,7 @@ init() ->
                  Dir ->
                      filename:join(Dir, "riak_pb_codec")
              end,
-    erlang:load_nif(SoName, 0),
-
-    ok.
+    ok = erlang:load_nif(SoName, 0).
 
 encode_tsputreq(Msg) ->
     MsgType = element(1, Msg),
@@ -426,12 +424,11 @@ decode_modfun(#rpbmodfun{module=Mod, function=Fun}=MF, _Prop) ->
             {binary_to_atom(Mod, latin1), binary_to_atom(Fun, latin1)}
     end.
 
-%% @doc Converts a list of commit hooks into a list of RpbCommitHook
-%% messages.
 -spec encode_commit_hooks([commit_hook_property()]) -> [ #rpbcommithook{} ].
 encode_commit_hooks(Hooks) ->
     [ encode_commit_hook(Hook) || Hook <- Hooks ].
 
+-spec encode_commit_hook(commit_hook_property()) -> #rpbcommithook{}.
 encode_commit_hook({struct, Props}=Hook) ->
     FoundProps = [ lists:keymember(Field, 1, Props) ||
                      Field <- [<<"mod">>, <<"fun">>, <<"name">>]],
@@ -445,12 +442,12 @@ encode_commit_hook({struct, Props}=Hook) ->
             erlang:error(badarg, [Hook])
     end.
 
-%% @doc Converts a list of RpbCommitHook messages into commit hooks.
--spec decode_commit_hooks([ #rpbcommithook{} ]) -> [ commit_hook_property() ].
+-spec decode_commit_hooks([ #rpbcommithook{} ]) ->  [ commit_hook_property() ].
 decode_commit_hooks(Hooks) ->
     [ decode_commit_hook(Hook) || Hook <- Hooks,
                                   Hook =/= #rpbcommithook{modfun=undefined, name=undefined} ].
 
+-spec decode_commit_hook(#rpbcommithook{}) -> commit_hook_property().
 decode_commit_hook(#rpbcommithook{modfun = Modfun}) when Modfun =/= undefined ->
     decode_modfun(Modfun, commit_hook);
 decode_commit_hook(#rpbcommithook{name = Name}) when Name =/= undefined ->
