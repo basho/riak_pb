@@ -63,6 +63,8 @@
 97,TsGetResp,riak_ts
 98,TsListKeysReq,riak_ts
 99,TsListKeysResp,riak_ts
+110,RpbToggleEncodingReq,riak
+111,RpbToggleEncodingResp,riak
 253,RpbAuthReq,riak
 254,RpbAuthResp,riak
 255,RpbStartTls,riak
