@@ -108,32 +108,6 @@ encode_tsputreq(Msg) ->
     [msg_code(MsgType) | Encoder:encode(Msg)].
 
 
-%% The protobuf message ID for a timeseries query response, needed to
-%% allow our nif interface to identify the message for which we wish
-%% to perform optimized decoding.
--define(TIMESERIES_QUERY_RESP, 91).
-
--spec init() -> ok | {error, any()}.
-init() ->
-    SoName = case code:priv_dir(?MODULE) of
-                 {error, bad_name} ->
-                     case code:which(?MODULE) of
-                         Filename when is_list(Filename) ->
-                             filename:join([filename:dirname(Filename),"../priv", "riak_pb_codec"]);
-                         _ ->
-                             filename:join("../priv", "riak_pb_codec")
-                     end;
-                 Dir ->
-                     filename:join(Dir, "riak_pb_codec")
-             end,
-    ok = erlang:load_nif(SoName, 0).
-
-encode_tsputreq(Msg) ->
-    MsgType = element(1, Msg),
-    Encoder = encoder_for(MsgType),
-    [msg_code(MsgType) | Encoder:encode(Msg)].
-
-
 %% @doc Create an iolist of msg code and protocol buffer
 %% message. Replaces `riakc_pb:encode/1'.
 %%
@@ -466,8 +440,7 @@ encode_commit_hook({struct, Props}=Hook) ->
             erlang:error(badarg, [Hook])
     end.
 
-%% @doc Converts a list of RpbCommitHook messages into commit hooks.
--spec decode_commit_hooks(#rpbcommithook{} | [ #rpbcommithook{} ]) ->  commit_hook_property() .
+-spec decode_commit_hooks([ #rpbcommithook{} ]) ->  [ commit_hook_property() ].
 decode_commit_hooks(Hooks) ->
     [ decode_commit_hook(Hook) || Hook <- Hooks,
                                   Hook =/= #rpbcommithook{modfun=undefined, name=undefined} ].
