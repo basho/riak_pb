@@ -27,6 +27,11 @@
 
 -include("riak_pb.hrl").
 
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-compile(export_all).
+-endif.
+
 -export([encode/1,      %% riakc_pb:encode
          decode/2,      %% riakc_pb:decode
          msg_type/1,    %% riakc_pb:msg_type
@@ -75,22 +80,74 @@
 
 %% @doc Create an iolist of msg code and protocol buffer
 %% message. Replaces `riakc_pb:encode/1'.
+%%
+%% NOTE: ugly hack alert. Rather than attempt to thread this
+%% information through the call chain, we are using the process
+%% dictionary to indicate whether the encoding should use protobuffs
+%% or straight term_to_binary encoding.
 -spec encode(atom() | tuple()) -> iolist().
-encode(Msg) when is_atom(Msg) ->
+encode(Msg) ->
+    case get(pb_use_native_encoding) of
+        true ->
+            encode_raw(Msg);
+        _ ->
+            encode_pb(Msg)
+    end.
+
+encode_pb(Msg) when is_atom(Msg) ->
     [msg_code(Msg)];
-encode(Msg) when is_tuple(Msg) ->
+encode_pb(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
     [msg_code(MsgType) | Encoder:encode(Msg)].
 
+encode_raw(Msg) when is_atom(Msg) ->
+    [msg_code(Msg)]; %% I/O layer will convert this to binary
+encode_raw({Msg}) when is_atom(Msg) ->
+    [msg_code(Msg)]; %% I/O layer will convert this to binary
+encode_raw(Msg) when is_tuple(Msg) ->
+    MsgType = element(1, Msg),
+    Code = msg_code(MsgType),
+    T2B = term_to_binary(de_stringify(Msg)),
+    <<Code:8, T2B/binary>>.
+
+de_stringify(Tuple) when is_tuple(Tuple) ->
+    list_to_tuple(de_stringify(tuple_to_list(Tuple)));
+de_stringify(List) when is_list(List), is_integer(hd(List)) ->
+    %% Yes, this could corrupt utf-8 data, but we should never, ever
+    %% have put it in string format to begin with
+    list_to_binary(List);
+de_stringify(List) when is_list(List) ->
+    lists:map(fun de_stringify/1, List);
+de_stringify(Element) ->
+    Element.
+
 %% @doc Decode a protocol buffer message given its type - if no bytes
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
+%%
+%% NOTE: ugly hack alert. Rather than attempt to thread this
+%% information through the call chain, we are using the process
+%% dictionary to indicate whether the encoding should use protobuffs
+%% or straight term_to_binary encoding.
 -spec decode(integer(), binary()) -> atom() | tuple().
-decode(MsgCode, <<>>) ->
-    msg_type(MsgCode);
 decode(MsgCode, MsgData) ->
+    case get(pb_use_native_encoding) of
+        true ->
+            decode_raw(MsgCode, MsgData);
+        _ ->
+            decode_pb(MsgCode, MsgData)
+    end.
+
+decode_pb(MsgCode, <<>>) ->
+    msg_type(MsgCode);
+decode_pb(MsgCode, MsgData) ->
     Decoder = decoder_for(MsgCode),
     Decoder:decode(msg_type(MsgCode), MsgData).
+
+decode_raw(MsgCode, <<>>) ->
+    msg_type(MsgCode);
+decode_raw(_MsgCode, MsgData) ->
+    binary_to_term(MsgData).
 
 %% @doc Converts a message code into the symbolic message
 %% name. Replaces `riakc_pb:msg_type/1'.
@@ -376,3 +433,59 @@ safe_to_atom(Binary) when is_binary(Binary) ->
             error_logger:warning_msg("Creating new atom from protobuffs message! ~p", [Binary]),
             binary_to_atom(Binary, latin1)
     end.
+
+-ifdef(TEST).
+-include("riak_kv_pb.hrl").
+
+%% One necessary omission: we do not have any messages today that
+%% include functions, so we cannot test decoding such records.
+
+decode_eq(Message, <<MsgCode:8, Rest/binary>>, DecodeFun) ->
+    ?assertEqual(Message, DecodeFun(MsgCode, Rest));
+decode_eq(Message, IoList, DecodeFun) ->
+    decode_eq(Message, iolist_to_binary(IoList), DecodeFun).
+
+record_test() ->
+    Req =
+        #rpbgetreq{n_val=4,
+                   notfound_ok=true,
+                   bucket = <<"bucket">>,
+                   key = <<"key">>},
+
+    decode_eq(Req, encode_pb(Req), fun decode_pb/2),
+    decode_eq(Req, encode_raw(Req), fun decode_raw/2).
+
+empty_atoms_test() ->
+    %% Empty messages are either empty records or atoms, depending on
+    %% whether the .proto file defines the message as an empty record
+    %% or ignores it. On the receiving end they are all atoms.
+
+    Resp1 = tsdelresp,    %% .proto does not define
+    Resp2 = {tsdelresp},  %% .proto defines as empty record
+
+    decode_eq(Resp1, encode_pb(Resp1), fun decode_pb/2),
+    decode_eq(Resp1, encode_raw(Resp1), fun decode_raw/2),
+    decode_eq(Resp1, encode_pb(Resp2), fun decode_pb/2),
+    decode_eq(Resp1, encode_raw(Resp2), fun decode_raw/2).
+
+mixed_strings_test() ->
+    %% Because the network layer will invoke iolist_to_binary/1 or its
+    %% equivalent, on the sending side we can get away with using
+    %% strings instead of binaries in records that expect the latter
+    Req =
+        #rpbgetreq{n_val=4,
+                   notfound_ok=true,
+                   bucket = "bucket",
+                   key = <<"key">>},
+
+    DecodedReq =
+        #rpbgetreq{n_val=4,
+                   notfound_ok=true,
+                   bucket = <<"bucket">>,
+                   key = <<"key">>},
+
+    decode_eq(DecodedReq, encode_pb(Req), fun decode_pb/2),
+    decode_eq(DecodedReq, encode_raw(Req), fun decode_raw/2).
+
+
+-endif. %% TEST

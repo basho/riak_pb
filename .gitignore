@@ -24,9 +24,14 @@ build
 *.pyc
 dist/*
 python*/
+.python-version
 
 # Java
 target/*
+
+#IntelliJ
+.idea/
+riak_pb.iml
 
 # C
 c/*

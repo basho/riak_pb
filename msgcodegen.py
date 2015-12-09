@@ -14,10 +14,15 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-# NOTE: TO RUN THIS SUCCESSFULLY, YOU NEED TO HAVE
-#       protobuf or python3_protobuf LOCALLY INSTALLED
+# NOTE: TO RUN THIS SUCCESSFULLY, YOU NEED TO HAVE THESE
+#       PACKAGES INSTALLED:
+#       protobuf or python3_protobuf
+#       six
 #
-# TO DEBUG: Set DISTUTILS_DEBUG=1 in the environment
+#       Run the following command to install them:
+#       python setup.py install
+#
+# TO DEBUG: Set DISTUTILS_DEBUG=1 in the environment or run as 'python setup.py -vv build_messages'
 #
 
 """
@@ -111,12 +116,11 @@ class MessageCodeMapping(ComparableMixin):
             klass = pbmod.__dict__[self.message]
             return klass
         except KeyError:
-            log.debug("Did not find '{0}' message class in module '{1}'",
+            log.warn("Did not find '%s' message class in module '%s'",
                       self.message, self.module_name)
-        except ImportError:
-            log.debug("Could not import module '{0}'", self.module_name)
-        except:
-            log.debug("Unexpected error: {0}", sys.exc_info()[0])
+        except ImportError as e:
+            log.error("Could not import module '%s', exception: %s", self.module_name, e)
+            raise
         return None
 
 
