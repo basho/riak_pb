@@ -132,6 +132,7 @@ encode_pb(Msg) when is_tuple(Msg) ->
     Encoder = encoder_for(MsgType),
     [msg_code(MsgType) | Encoder:encode(Msg)].
 
+
 encode_raw(Msg) when is_atom(Msg) ->
     [msg_code(Msg)]; %% I/O layer will convert this to binary
 encode_raw({Msg}) when is_atom(Msg) ->
