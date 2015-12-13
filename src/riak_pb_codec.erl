@@ -49,7 +49,9 @@
          encode_modfun/1,
          decode_modfun/2,
          encode_commit_hooks/1,
-         decode_commit_hooks/1
+         decode_commit_hooks/1,
+         encode_tsputreq/1,
+         decode_tsqueryresp/1
         ]).
 
 %% @type modfun_property().
@@ -76,7 +78,42 @@
 %% @type commit_hook_property().
 %%
 %% Bucket properties that are commit hooks have this format.
--type commit_hook_property() :: [ {struct, [{commit_hook_field(), binary()}]} ].
+-type commit_hook_property() :: {struct, [{commit_hook_field(), binary()}]}.
+
+%% The protobuf message ID for a timeseries query response, needed to
+%% allow our nif interface to identify the message for which we wish
+%% to perform optimized decoding.
+-define(TIMESERIES_QUERY_RESP, 91).
+
+-on_load(load_nif/0).
+load_nif() ->
+    SoName = case code:priv_dir(riak_kv_ts) of
+                 {error, bad_name} ->
+                     case code:which(?MODULE) of
+                         Filename when is_list(Filename) ->
+                             filename:join([filename:dirname(Filename),"../priv", ?MODULE]);
+                         _ ->
+                             filename:join("../priv", ?MODULE)
+                     end;
+                 Dir ->
+                     filename:join(Dir, ?MODULE)
+             end,
+    case erlang:load_nif(SoName, 0) of
+        ok ->
+            error_logger:info_msg("Loaded accelerated ~p NIF\n", [?MODULE]),
+            ok;
+        Error ->
+            error_logger:error_msg("Unable to load accelerated ~p NIF - ~p.\n"
+                                   "Safely reverting to default code",
+                                   [SoName, Error])
+    end,
+    ok.
+
+encode_tsputreq(Msg) ->
+    MsgType = element(1, Msg),
+    Encoder = encoder_for(MsgType),
+    [msg_code(MsgType) | Encoder:encode(Msg)].
+
 
 %% @doc Create an iolist of msg code and protocol buffer
 %% message. Replaces `riakc_pb:encode/1'.
@@ -96,10 +133,13 @@ encode(Msg) ->
 
 encode_pb(Msg) when is_atom(Msg) ->
     [msg_code(Msg)];
+encode_pb({tsputreq, _, _, _}=Msg) ->
+    encode_tsputreq(Msg);
 encode_pb(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
     [msg_code(MsgType) | Encoder:encode(Msg)].
+
 
 encode_raw(Msg) when is_atom(Msg) ->
     [msg_code(Msg)]; %% I/O layer will convert this to binary
@@ -122,6 +162,14 @@ de_stringify(List) when is_list(List) ->
 de_stringify(Element) ->
     Element.
 
+%%
+%% this is the default function that executes if NIF not present
+%%  this function encodes tsqueryresp
+decode_tsqueryresp(MsgData) ->
+    Decoder = decoder_for(?TIMESERIES_QUERY_RESP),
+    Decoder:decode(msg_type(?TIMESERIES_QUERY_RESP), MsgData).
+
+
 %% @doc Decode a protocol buffer message given its type - if no bytes
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
 %%
@@ -140,6 +188,8 @@ decode(MsgCode, MsgData) ->
 
 decode_pb(MsgCode, <<>>) ->
     msg_type(MsgCode);
+decode_pb(?TIMESERIES_QUERY_RESP, MsgData) ->
+    decode_tsqueryresp(MsgData);
 decode_pb(MsgCode, MsgData) ->
     Decoder = decoder_for(MsgCode),
     Decoder:decode(msg_type(MsgCode), MsgData).
@@ -383,12 +433,11 @@ decode_modfun(#rpbmodfun{module=Mod, function=Fun}=MF, _Prop) ->
             {binary_to_atom(Mod, latin1), binary_to_atom(Fun, latin1)}
     end.
 
-%% @doc Converts a list of commit hooks into a list of RpbCommitHook
-%% messages.
 -spec encode_commit_hooks([commit_hook_property()]) -> [ #rpbcommithook{} ].
 encode_commit_hooks(Hooks) ->
     [ encode_commit_hook(Hook) || Hook <- Hooks ].
 
+-spec encode_commit_hook(commit_hook_property()) -> #rpbcommithook{}.
 encode_commit_hook({struct, Props}=Hook) ->
     FoundProps = [ lists:keymember(Field, 1, Props) ||
                      Field <- [<<"mod">>, <<"fun">>, <<"name">>]],
@@ -402,12 +451,12 @@ encode_commit_hook({struct, Props}=Hook) ->
             erlang:error(badarg, [Hook])
     end.
 
-%% @doc Converts a list of RpbCommitHook messages into commit hooks.
--spec decode_commit_hooks([ #rpbcommithook{} ]) -> [ commit_hook_property() ].
+-spec decode_commit_hooks([ #rpbcommithook{} ]) ->  [ commit_hook_property() ].
 decode_commit_hooks(Hooks) ->
     [ decode_commit_hook(Hook) || Hook <- Hooks,
                                   Hook =/= #rpbcommithook{modfun=undefined, name=undefined} ].
 
+-spec decode_commit_hook(#rpbcommithook{}) -> commit_hook_property().
 decode_commit_hook(#rpbcommithook{modfun = Modfun}) when Modfun =/= undefined ->
     decode_modfun(Modfun, commit_hook);
 decode_commit_hook(#rpbcommithook{name = Name}) when Name =/= undefined ->
