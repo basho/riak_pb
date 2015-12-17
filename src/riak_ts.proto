@@ -128,9 +128,8 @@ message TsCoverageReq {
   // left optional to support parameterized queries in the future
   optional TsInterpolation query = 1;
   required bytes table = 2;
-  optional uint32 min_partitions = 3;   // If undefined, we build a normal coverage plan. If <ring_size, we build a coverage plan with exactly ring_size entries, anything larger will have a power of 2 entries covering keyspaces smaller than a partition
-  optional bytes replace_cover = 4;     // For failure recovery
-  repeated bytes unavailable_cover = 5; // Other coverage contexts that have failed to assist Riak in deciding what nodes to avoid
+  optional bytes replace_cover = 3;     // For failure recovery
+  repeated bytes unavailable_cover = 4; // Other coverage contexts that have failed to assist Riak in deciding what nodes to avoid
 }
 
 // The coverage response is the same as KV: RpbCoverageResp / RpbCoverageEntry
