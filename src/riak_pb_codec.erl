@@ -50,8 +50,7 @@
          encode_modfun/1,
          decode_modfun/2,
          encode_commit_hooks/1,
-         decode_commit_hooks/1,
-         encode_tsputreq/1
+         decode_commit_hooks/1
         ]).
 
 -on_load(init/0).
@@ -171,6 +170,13 @@ decode_tsqueryresp(MsgData) ->
 %% dictionary to indicate whether the encoding should use protobuffs
 %% or straight term_to_binary encoding.
 -spec decode(integer(), binary()) -> atom() | tuple().
+decode(MsgCode, MsgData) ->
+    case get(pb_use_native_encoding) of
+        true ->
+            decode_raw(MsgCode, MsgData);
+        _ ->
+            decode_pb(MsgCode, MsgData)
+    end.
 
 decode_pb(MsgCode, <<>>) ->
     msg_type(MsgCode);
