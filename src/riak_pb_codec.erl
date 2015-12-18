@@ -128,14 +128,11 @@ encode_pb(Msg) when is_atom(Msg) ->
     [msg_code(Msg)];
 encode_pb({tsputreq, _, _, _}=Msg) ->
     encode_tsputreq(Msg);
-
-%%    MsgType = element(1, Msg),
-%%    Encoder = encoder_for(MsgType),
-%%    [msg_code(MsgType) | Encoder:encode(Msg)];
 encode_pb(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
     [msg_code(MsgType) | Encoder:encode(Msg)].
+
 
 encode_raw(Msg) when is_atom(Msg) ->
     [msg_code(Msg)]; %% I/O layer will convert this to binary
