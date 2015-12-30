@@ -134,7 +134,7 @@ message TsCoverageReq {
 
 // Segmented TS coverage plan response
 message TsCoverageResp {
-   repeated RpbCoverageEntry entries = 1;
+   repeated TsCoverageEntry entries = 1;
 }
 
 // Segment of a TS coverage plan
