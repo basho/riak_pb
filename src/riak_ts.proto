@@ -132,4 +132,25 @@ message TsCoverageReq {
   repeated bytes unavailable_cover = 4; // Other coverage contexts that have failed to assist Riak in deciding what nodes to avoid
 }
 
-// The coverage response is the same as KV: RpbCoverageResp / RpbCoverageEntry
+// Segmented TS coverage plan response
+message TsCoverageResp {
+   repeated RpbCoverageEntry entries = 1;
+}
+
+// Segment of a TS coverage plan
+message TsCoverageEntry {
+    required bytes ip = 1;
+    required uint32 port = 2;
+    required bytes cover_context = 3; // Opaque context to pass into follow-up request
+    optional TsRange range = 4; // Might be other types of coverage queries/responses
+}
+
+// Each prospective subquery has a range of valid time values
+message TsRange {
+    required bytes field_name = 1;
+    required sint64 lower_bound = 2;
+    required bool lower_bound_inclusive = 3;
+    required sint64 upper_bound = 4;
+    required bool upper_bound_inclusive = 5;
+    required bytes desc = 6; // Some human readable description of the time range
+}
