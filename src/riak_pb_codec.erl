@@ -93,7 +93,7 @@ encode(Msg) ->
 encode(true, Msg) ->
     encode_raw(Msg);
 
-encode(false, Msg) ->
+encode(_, Msg) ->
     encode_pb(Msg).
 
 encode_pb(Msg) when is_atom(Msg) ->
