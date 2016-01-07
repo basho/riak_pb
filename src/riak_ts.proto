@@ -37,6 +37,7 @@ message TsQueryReq {
   // left optional to support parameterized queries in the future
   optional TsInterpolation query = 1;
   optional bool stream = 2 [default = false];
+  optional bytes cover_context = 3; // chopped up coverage plan per-req
 }
 
 message TsQueryResp {
@@ -120,4 +121,36 @@ message TsListKeysReq {
 message TsListKeysResp {
   repeated TsRow keys = 1;
   optional bool done = 2;
+}
+
+// Request a segmented coverage plan for this query
+message TsCoverageReq {
+  // left optional to support parameterized queries in the future
+  optional TsInterpolation query = 1;
+  required bytes table = 2;
+  optional bytes replace_cover = 3;     // For failure recovery
+  repeated bytes unavailable_cover = 4; // Other coverage contexts that have failed to assist Riak in deciding what nodes to avoid
+}
+
+// Segmented TS coverage plan response
+message TsCoverageResp {
+   repeated TsCoverageEntry entries = 1;
+}
+
+// Segment of a TS coverage plan
+message TsCoverageEntry {
+    required bytes ip = 1;
+    required uint32 port = 2;
+    required bytes cover_context = 3; // Opaque context to pass into follow-up request
+    optional TsRange range = 4; // Might be other types of coverage queries/responses
+}
+
+// Each prospective subquery has a range of valid time values
+message TsRange {
+    required bytes field_name = 1;
+    required sint64 lower_bound = 2;
+    required bool lower_bound_inclusive = 3;
+    required sint64 upper_bound = 4;
+    required bool upper_bound_inclusive = 5;
+    required bytes desc = 6; // Some human readable description of the time range
 }
