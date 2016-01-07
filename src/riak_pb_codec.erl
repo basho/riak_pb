@@ -33,6 +33,7 @@
 -endif.
 
 -export([encode/1,      %% riakc_pb:encode
+	 encode/2,      %% riakc_pb:encode
          decode/2,      %% riakc_pb:decode
          msg_type/1,    %% riakc_pb:msg_type
          msg_code/1,    %% riakc_pb:msg_code
