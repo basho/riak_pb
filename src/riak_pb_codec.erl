@@ -33,6 +33,7 @@
 -endif.
 
 -export([encode/1,      %% riakc_pb:encode
+	 encode/2,      %% riakc_pb:encode
          decode/2,      %% riakc_pb:decode
          msg_type/1,    %% riakc_pb:msg_type
          msg_code/1,    %% riakc_pb:msg_code
@@ -86,13 +87,15 @@
 %% dictionary to indicate whether the encoding should use protobuffs
 %% or straight term_to_binary encoding.
 -spec encode(atom() | tuple()) -> iolist().
-encode(Msg) ->
-    case get(pb_use_native_encoding) of
-        true ->
-            encode_raw(Msg);
-        _ ->
-            encode_pb(Msg)
-    end.
+
+encode(Msg) ->    
+    encode(get(pb_use_native_encoding), Msg).
+
+encode(true, Msg) ->
+    encode_raw(Msg);
+
+encode(_, Msg) ->
+    encode_pb(Msg).
 
 encode_pb(Msg) when is_atom(Msg) ->
     [msg_code(Msg)];
