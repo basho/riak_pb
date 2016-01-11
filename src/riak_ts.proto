@@ -67,7 +67,7 @@ message TsPutReq {
   repeated TsRow rows = 3;
 }
 
-message TsPutReqTtb {
+message TsTtbPutReq {
   required bytes table = 1;
 
   // optional: omitting it should use table order
