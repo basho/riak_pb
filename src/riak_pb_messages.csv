@@ -68,6 +68,9 @@
 102,TsCoverageEntry,riak_ts
 103,TsRange,riak_ts
 104,TsTtbPutReq,riak_ts
+105,TsTtbPutResp,riak_ts
+106,TsTtbQueryReq,riak_ts
+107,TsTtbQueryResp,riak_ts
 110,RpbToggleEncodingReq,riak
 111,RpbToggleEncodingResp,riak
 253,RpbAuthReq,riak
