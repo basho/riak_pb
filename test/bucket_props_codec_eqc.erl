@@ -137,7 +137,7 @@ linkfun() ->
     ?LET({M,F}, {atom(), atom()}, {linkfun, {modfun, M, F}}).
 
 datatype() ->
-    {datatype, elements([counter, set, map])}.
+    {datatype, elements([counter, set, map, hll])}.
 
 yz_index() ->
     {search_index, non_empty(binary())}.

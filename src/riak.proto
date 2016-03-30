@@ -157,6 +157,9 @@ message RpbBucketProps {
 
     // KV fast path
     optional bool write_once = 28;
+
+    // Hyperlolog DT Precision
+    optional uint32 hll_precision = 29;
 }
 
 // Authentication request
