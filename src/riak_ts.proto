@@ -90,12 +90,7 @@ message TsTtbPutReq {
 }
 
 message TsTtbPutResp {
-  required bytes table = 1;
 
-  // optional: omitting it should use table order
-  repeated TsColumnDescription columns = 2;
-
-  repeated TsRow rows = 3;
 }
 
 message TsPutResp {
