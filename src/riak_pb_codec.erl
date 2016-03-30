@@ -33,7 +33,6 @@
 -endif.
 
 -export([encode/1,      %% riakc_pb:encode
-	 encode/2,      %% riakc_pb:encode
          decode/2,      %% riakc_pb:decode
          msg_type/1,    %% riakc_pb:msg_type
          msg_code/1,    %% riakc_pb:msg_code
@@ -88,42 +87,14 @@
 %% or straight term_to_binary encoding.
 -spec encode(atom() | tuple()) -> iolist().
 
-encode(Msg) ->    
-    encode(get(pb_use_native_encoding), Msg).
-
-encode(true, Msg) ->
-    encode_raw(Msg);
-
-encode(_, Msg) ->
-    encode_pb(Msg).
-
-encode_pb(Msg) when is_atom(Msg) ->
-    [msg_code(Msg)];
-encode_pb(Msg) when is_tuple(Msg) ->
+encode(Msg) when is_atom(Msg) ->
+    [msg_code(Msg)]; %% I/O layer will convert this to binary
+encode({Msg}) when is_atom(Msg) ->
+    [msg_code(Msg)]; %% I/O layer will convert this to binary
+encode(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
     [msg_code(MsgType) | Encoder:encode(Msg)].
-
-encode_raw(Msg) when is_atom(Msg) ->
-    [msg_code(Msg)]; %% I/O layer will convert this to binary
-encode_raw({Msg}) when is_atom(Msg) ->
-    [msg_code(Msg)]; %% I/O layer will convert this to binary
-encode_raw(Msg) when is_tuple(Msg) ->
-    MsgType = element(1, Msg),
-    Code = msg_code(MsgType),
-    T2B = term_to_binary(de_stringify(Msg)),
-    <<Code:8, T2B/binary>>.
-
-de_stringify(Tuple) when is_tuple(Tuple) ->
-    list_to_tuple(de_stringify(tuple_to_list(Tuple)));
-de_stringify(List) when is_list(List), is_integer(hd(List)) ->
-    %% Yes, this could corrupt utf-8 data, but we should never, ever
-    %% have put it in string format to begin with
-    list_to_binary(List);
-de_stringify(List) when is_list(List) ->
-    lists:map(fun de_stringify/1, List);
-de_stringify(Element) ->
-    Element.
 
 %% @doc Decode a protocol buffer message given its type - if no bytes
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
@@ -134,23 +105,8 @@ de_stringify(Element) ->
 %% or straight term_to_binary encoding.
 -spec decode(integer(), binary()) -> atom() | tuple().
 decode(MsgCode, MsgData) ->
-    case get(pb_use_native_encoding) of
-        true ->
-            decode_raw(MsgCode, MsgData);
-        _ ->
-            decode_pb(MsgCode, MsgData)
-    end.
-
-decode_pb(MsgCode, <<>>) ->
-    msg_type(MsgCode);
-decode_pb(MsgCode, MsgData) ->
     Decoder = decoder_for(MsgCode),
     Decoder:decode(msg_type(MsgCode), MsgData).
-
-decode_raw(MsgCode, <<>>) ->
-    msg_type(MsgCode);
-decode_raw(_MsgCode, MsgData) ->
-    binary_to_term(MsgData).
 
 %% @doc Converts a message code into the symbolic message
 %% name. Replaces `riakc_pb:msg_type/1'.
