@@ -46,19 +46,6 @@ message TsQueryResp {
   optional bool done = 3 [default = true];
 }
 
-message TsTtbQueryReq {
-  // left optional to support parameterized queries in the future
-  optional TsInterpolation query = 1;
-  optional bool stream = 2 [default = false];
-  optional bytes cover_context = 3; // chopped up coverage plan per-req
-}
-
-message TsTtbQueryResp {
-  repeated TsColumnDescription columns = 1;
-  repeated TsRow rows = 2;  // 0 to n rows
-  optional bool done = 3 [default = true];
-}
-
 message TsGetReq {
   required bytes table = 1;
   repeated TsCell key = 2;
@@ -78,19 +65,6 @@ message TsPutReq {
   repeated TsColumnDescription columns = 2;
 
   repeated TsRow rows = 3;
-}
-
-message TsTtbPutReq {
-  required bytes table = 1;
-
-  // optional: omitting it should use table order
-  repeated TsColumnDescription columns = 2;
-
-  repeated TsRow rows = 3;
-}
-
-message TsTtbPutResp {
-
 }
 
 message TsPutResp {

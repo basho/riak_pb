@@ -26,6 +26,7 @@
 -module(riak_pb_codec).
 
 -include("riak_pb.hrl").
+-include("riak_ts_ttb.hrl").
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -78,31 +79,28 @@
 %% Bucket properties that are commit hooks have this format.
 -type commit_hook_property() :: [ {struct, [{commit_hook_field(), binary()}]} ].
 
-%% @doc Create an iolist of msg code and protocol buffer
-%% message. Replaces `riakc_pb:encode/1'.
-%%
-%% NOTE: ugly hack alert. Rather than attempt to thread this
-%% information through the call chain, we are using the process
-%% dictionary to indicate whether the encoding should use protobuffs
-%% or straight term_to_binary encoding.
+%% @doc Create an iolist of msg code and encoded message. Replaces
+%% `riakc_pb:encode/1'.
+
 -spec encode(atom() | tuple()) -> iolist().
 
 encode(Msg) when is_atom(Msg) ->
-    [msg_code(Msg)]; %% I/O layer will convert this to binary
+    encode_msg_no_body(msg_code(Msg), Msg);
 encode({Msg}) when is_atom(Msg) ->
-    [msg_code(Msg)]; %% I/O layer will convert this to binary
+    encode_msg_no_body(msg_code(Msg), Msg);
 encode(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
     [msg_code(MsgType) | Encoder:encode(Msg)].
 
+encode_msg_no_body(?TTB_MSG_CODE, Msg) ->
+    encode({Msg, <<>>});
+encode_msg_no_body(MsgCode, _Msg) ->
+    [MsgCode]. %% I/O layer will convert this to binary
+
 %% @doc Decode a protocol buffer message given its type - if no bytes
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
-%%
-%% NOTE: ugly hack alert. Rather than attempt to thread this
-%% information through the call chain, we are using the process
-%% dictionary to indicate whether the encoding should use protobuffs
-%% or straight term_to_binary encoding.
+
 -spec decode(integer(), binary()) -> atom() | tuple().
 decode(MsgCode, MsgData) ->
     Decoder = decoder_for(MsgCode),
@@ -111,16 +109,32 @@ decode(MsgCode, MsgData) ->
 %% @doc Converts a message code into the symbolic message
 %% name. Replaces `riakc_pb:msg_type/1'.
 -spec msg_type(integer()) -> atom().
-msg_type(Int) -> riak_pb_messages:msg_type(Int).
+msg_type(?TTB_MSG_CODE) ->
+    ttbmsg;
+msg_type(Int) -> 
+    riak_pb_messages:msg_type(Int).
 
 %% @doc Converts a symbolic message name into a message code. Replaces
 %% `riakc_pb:msg_code/1'.
 -spec msg_code(atom()) -> integer().
+
+%% Intercept TTB-encoded messages
+
+msg_code(tsttbputreq) -> ?TTB_MSG_CODE;
+msg_code(tsttbputresp) -> ?TTB_MSG_CODE;
+msg_code(tsttbqueryreq) -> ?TTB_MSG_CODE;
+msg_code(tsttbqueryresp) -> ?TTB_MSG_CODE;
+
+%% All others are PB-encoded messages
+
 msg_code(Atom) -> riak_pb_messages:msg_code(Atom).
 
-%% @doc Selects the appropriate PB decoder for a message code.
+%% @doc Selects the appropriate decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
-decoder_for(N) -> riak_pb_messages:decoder_for(N).
+decoder_for(?TTB_MSG_CODE) ->
+    riak_ts_ttb;
+decoder_for(N) -> 
+    riak_pb_messages:decoder_for(N).
 
 %% @doc Selects the appropriate PB encoder for a given message name.
 -spec encoder_for(atom()) -> module().
