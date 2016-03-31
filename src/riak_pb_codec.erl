@@ -93,6 +93,19 @@ encode(Msg) when is_tuple(Msg) ->
     Encoder = encoder_for(MsgType),
     [msg_code(MsgType) | Encoder:encode(Msg)].
 
+%% ------------------------------------------------------------
+%% Encode a message when no content body is present (message atom
+%% only).  
+%% 
+%% For PB messages, this simply encodes the message code, which serves
+%% to identify the encoded message on the other side of the socket
+%% connection.
+%%
+%% For TTB messages, we cannot do this, since all TTB messages have
+%% the same message code.  Instead, we encode a message consisting of
+%% the atom identifying the message type
+%% ------------------------------------------------------------
+
 encode_msg_no_body(?TTB_MSG_CODE, Msg) ->
     encode({Msg, <<>>});
 encode_msg_no_body(MsgCode, _Msg) ->
