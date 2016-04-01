@@ -26,7 +26,7 @@
 -module(riak_ts_ttb).
 
 -export([encode/1,
-	 decode/2]).
+         decode/2]).
 
 %% ------------------------------------------------------------
 %% Encode for TTS simply converts any strings to binary and encodes to
