@@ -121,6 +121,13 @@ decode(MsgCode, MsgData) ->
 
 %% @doc Converts a message code into the symbolic message
 %% name. Replaces `riakc_pb:msg_type/1'.
+%% 
+%% Note: If this is a TTB message (MsgCode == ?TTB_MSG_CODE), this
+%% function returns the same tag for all messages, since there is no
+%% 1-1 correspondence between MsgCode and MsgType for TTB messages
+%% (type is instead encoded in the message).  This just allows
+%% decode/2 to be used transparently for all types of messages.
+
 -spec msg_type(integer()) -> atom().
 msg_type(?TTB_MSG_CODE) ->
     ttbmsg;
@@ -131,7 +138,8 @@ msg_type(Int) ->
 %% `riakc_pb:msg_code/1'.
 -spec msg_code(atom()) -> integer().
 
-%% Intercept TTB-encoded messages
+%% Intercept TTB-encoded messages.  All TTB messages use the same
+%% MsgCode for transport
 
 msg_code(tsttbputreq) -> ?TTB_MSG_CODE;
 msg_code(tsttbputresp) -> ?TTB_MSG_CODE;

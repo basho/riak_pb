@@ -41,7 +41,7 @@ encode(Msg) ->
 %% Decode does the reverse
 %% ------------------------------------------------------------
 
-decode(_MsgType, MsgData) ->
+decode(_MsgCode, MsgData) ->
     return_resp(binary_to_term(MsgData)).
 
 %% ------------------------------------------------------------
