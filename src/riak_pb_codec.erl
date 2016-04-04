@@ -26,7 +26,6 @@
 -module(riak_pb_codec).
 
 -include("riak_pb.hrl").
--include("riak_ts_ttb.hrl").
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -100,14 +99,8 @@ encode(Msg) when is_tuple(Msg) ->
 %% For PB messages, this simply encodes the message code, which serves
 %% to identify the encoded message on the other side of the socket
 %% connection.
-%%
-%% For TTB messages, we cannot do this, since all TTB messages have
-%% the same message code.  Instead, we encode a message consisting of
-%% the atom identifying the message type
 %% ------------------------------------------------------------
 
-encode_msg_no_body(?TTB_MSG_CODE, Msg) ->
-    encode({Msg, <<>>});
 encode_msg_no_body(MsgCode, _Msg) ->
     [MsgCode]. %% I/O layer will convert this to binary
 
@@ -121,39 +114,17 @@ decode(MsgCode, MsgData) ->
 
 %% @doc Converts a message code into the symbolic message
 %% name. Replaces `riakc_pb:msg_type/1'.
-%% 
-%% Note: If this is a TTB message (MsgCode == ?TTB_MSG_CODE), this
-%% function returns the same tag for all messages, since there is no
-%% 1-1 correspondence between MsgCode and MsgType for TTB messages
-%% (type is instead encoded in the message).  This just allows
-%% decode/2 to be used transparently for all types of messages.
-
 -spec msg_type(integer()) -> atom().
-msg_type(?TTB_MSG_CODE) ->
-    ttbmsg;
 msg_type(Int) -> 
     riak_pb_messages:msg_type(Int).
 
 %% @doc Converts a symbolic message name into a message code. Replaces
 %% `riakc_pb:msg_code/1'.
 -spec msg_code(atom()) -> integer().
-
-%% Intercept TTB-encoded messages.  All TTB messages use the same
-%% MsgCode for transport
-
-msg_code(tsttbputreq) -> ?TTB_MSG_CODE;
-msg_code(tsttbputresp) -> ?TTB_MSG_CODE;
-msg_code(tsttbqueryreq) -> ?TTB_MSG_CODE;
-msg_code(tsttbqueryresp) -> ?TTB_MSG_CODE;
-
-%% All others are PB-encoded messages
-
 msg_code(Atom) -> riak_pb_messages:msg_code(Atom).
 
 %% @doc Selects the appropriate decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
-decoder_for(?TTB_MSG_CODE) ->
-    riak_ts_ttb;
 decoder_for(N) -> 
     riak_pb_messages:decoder_for(N).
 
@@ -446,21 +417,16 @@ record_test() ->
                    bucket = <<"bucket">>,
                    key = <<"key">>},
 
-    decode_eq(Req, encode_pb(Req), fun decode_pb/2),
-    decode_eq(Req, encode_raw(Req), fun decode_raw/2).
+    decode_eq(Req, encode(Req), fun decode/2).
 
 empty_atoms_test() ->
     %% Empty messages are either empty records or atoms, depending on
     %% whether the .proto file defines the message as an empty record
     %% or ignores it. On the receiving end they are all atoms.
 
-    Resp1 = tsdelresp,    %% .proto does not define
-    Resp2 = {tsdelresp},  %% .proto defines as empty record
+    Resp = {tsdelresp},  %% .proto defines as empty record
 
-    decode_eq(Resp1, encode_pb(Resp1), fun decode_pb/2),
-    decode_eq(Resp1, encode_raw(Resp1), fun decode_raw/2),
-    decode_eq(Resp1, encode_pb(Resp2), fun decode_pb/2),
-    decode_eq(Resp1, encode_raw(Resp2), fun decode_raw/2).
+    decode_eq(Resp, encode(Resp), fun decode/2).
 
 mixed_strings_test() ->
     %% Because the network layer will invoke iolist_to_binary/1 or its
@@ -478,8 +444,6 @@ mixed_strings_test() ->
                    bucket = <<"bucket">>,
                    key = <<"key">>},
 
-    decode_eq(DecodedReq, encode_pb(Req), fun decode_pb/2),
-    decode_eq(DecodedReq, encode_raw(Req), fun decode_raw/2).
-
+    decode_eq(DecodedReq, encode(Req), fun decode/2).
 
 -endif. %% TEST

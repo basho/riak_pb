@@ -1,6 +1,6 @@
 %% -------------------------------------------------------------------
 %%
-%% riak_ts_ttb.erl: term-to-binary utility functions for Riak TS messages
+%% riak_ttb_codec.erl: term-to-binary utility functions for Riak TS messages
 %%
 %% Copyright (c) 2015 Basho Technologies, Inc.  All Rights Reserved.
 %%
@@ -20,10 +20,9 @@
 %%
 %% -------------------------------------------------------------------
 
-%% @doc Utility functions for decoding and encoding term-to-binary
-%%      messages related to Riak TS.
+%% @doc Codec for term-to-binary messages.
 
--module(riak_ts_ttb).
+-module(riak_ttb_codec).
 
 -export([encode/1,
          decode/2]).
@@ -66,4 +65,3 @@ de_stringify(List) when is_list(List) ->
     lists:map(fun de_stringify/1, List);
 de_stringify(Element) ->
     Element.
-
