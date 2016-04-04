@@ -1,7 +1,7 @@
 %% -------------------------------------------------------------------
 %%
-%% riak_ttb_ts_codec.erl: term-to-binary utility functions for
-%%                        Riak TS messages
+%% riak_ttb_codec.erl: term-to-binary codec functions for
+%%                     Riak messages
 %%
 %% Copyright (c) 2015 Basho Technologies, Inc.  All Rights Reserved.
 %%
@@ -21,16 +21,16 @@
 %%
 %% -------------------------------------------------------------------
 
-%% @doc Codec for term-to-binary messages.
+%% @doc Codec for Riak term-to-binary messages.
 
--module(riak_ttb_ts_codec).
+-module(riak_ttb_codec).
 
 -export([encode/1,
-         encode_rows/1,
+         encode_ts_rows/1,
          decode/2]).
 
 %% ------------------------------------------------------------
-%% Encode for TTS simply converts any strings to binary and encodes to
+%% Encode for TTB simply converts any strings to binary and encodes to
 %% erlang binary format
 %% ------------------------------------------------------------
 
@@ -68,10 +68,10 @@ de_stringify(List) when is_list(List) ->
 de_stringify(Element) ->
     Element.
 
-encode_rows(Rows) ->
-    [encode_row(Row) || Row <- Rows].
+encode_ts_rows(Rows) ->
+    [encode_ts_row(Row) || Row <- Rows].
 
-encode_row(Row) when is_list(Row) ->
+encode_ts_row(Row) when is_list(Row) ->
     list_to_tuple(Row);
-encode_row(Row) when is_tuple(Row) ->
+encode_ts_row(Row) when is_tuple(Row) ->
     Row.
