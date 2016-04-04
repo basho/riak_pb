@@ -30,7 +30,6 @@
 -export([encode_columnnames/1,
          encode_rows/2,
          encode_rows_non_strict/1,
-         encode_rows_for_ttb/1,
          encode_columns/2,
          decode_rows/1,
          encode_cells/1,
@@ -94,14 +93,6 @@ encode_rows(ColumnTypes, Rows) ->
 %% @end
 encode_rows_non_strict(Rows) ->
     [encode_row_non_strict(Row) || Row <- Rows].
-
-encode_rows_for_ttb(Rows) ->
-    [encode_row_for_ttb(Row) || Row <- Rows].
-
-encode_row_for_ttb(Row) when is_list(Row) ->
-    list_to_tuple(Row);
-encode_row_for_ttb(Row) when is_tuple(Row) ->
-    Row.
 
 -spec encode_columns([binary()], [riak_pb_ts_codec:tscolumntype()]) ->
                                            [#tscolumndescription{}].
