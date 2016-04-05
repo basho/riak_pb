@@ -29,7 +29,7 @@
 
 -export([encode/1,
          encode_ts_rows/1,
-         decode/2]).
+         decode/1]).
 
 %% ------------------------------------------------------------
 %% Encode for TTB simply converts any strings to binary and encodes to
@@ -44,7 +44,7 @@ encode(Msg) ->
 %% Decode does the reverse
 %% ------------------------------------------------------------
 
-decode(MsgCode, MsgData) when MsgCode =:= ?TTB_MSG_CODE ->
+decode(MsgData) ->
     return_resp(binary_to_term(MsgData)).
 
 %% ------------------------------------------------------------
