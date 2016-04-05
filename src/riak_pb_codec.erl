@@ -94,8 +94,8 @@ encode(Msg) when is_tuple(Msg) ->
 
 %% ------------------------------------------------------------
 %% Encode a message when no content body is present (message atom
-%% only).  
-%% 
+%% only).
+%%
 %% For PB messages, this simply encodes the message code, which serves
 %% to identify the encoded message on the other side of the socket
 %% connection.
@@ -108,6 +108,8 @@ encode_msg_no_body(MsgCode, _Msg) ->
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
 
 -spec decode(integer(), binary()) -> atom() | tuple().
+-decode(MsgCode, <<>>) ->
+    msg_type(MsgCode);
 decode(MsgCode, MsgData) ->
     Decoder = decoder_for(MsgCode),
     Decoder:decode(msg_type(MsgCode), MsgData).
@@ -115,7 +117,7 @@ decode(MsgCode, MsgData) ->
 %% @doc Converts a message code into the symbolic message
 %% name. Replaces `riakc_pb:msg_type/1'.
 -spec msg_type(integer()) -> atom().
-msg_type(Int) -> 
+msg_type(Int) ->
     riak_pb_messages:msg_type(Int).
 
 %% @doc Converts a symbolic message name into a message code. Replaces
@@ -125,7 +127,7 @@ msg_code(Atom) -> riak_pb_messages:msg_code(Atom).
 
 %% @doc Selects the appropriate decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
-decoder_for(N) -> 
+decoder_for(N) ->
     riak_pb_messages:decoder_for(N).
 
 %% @doc Selects the appropriate PB encoder for a given message name.
