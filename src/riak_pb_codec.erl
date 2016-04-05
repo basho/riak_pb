@@ -107,6 +107,8 @@ encode_msg_no_body(MsgCode, _Msg) ->
 
 %% @doc Convert a property list to an RpbBucketProps message
 %% @private
+post_decode(Msg=#tsgetreq{key=K}) ->
+    Msg#tsgetreq{key=riak_pb_ts_codec:decode_cells(K)};
 post_decode(Msg=#tsputreq{rows=R}) ->
     Msg#tsputreq{rows=riak_pb_ts_codec:decode_rows(R)};
 post_decode(Msg) ->
