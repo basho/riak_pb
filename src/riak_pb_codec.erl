@@ -108,7 +108,7 @@ encode_msg_no_body(MsgCode, _Msg) ->
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
 
 -spec decode(integer(), binary()) -> atom() | tuple().
--decode(MsgCode, <<>>) ->
+decode(MsgCode, <<>>) ->
     msg_type(MsgCode);
 decode(MsgCode, MsgData) ->
     Decoder = decoder_for(MsgCode),
