@@ -26,6 +26,7 @@
 -module(riak_pb_codec).
 
 -include("riak_pb.hrl").
+-include("riak_ts_pb.hrl").
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -104,15 +105,22 @@ encode(Msg) when is_tuple(Msg) ->
 encode_msg_no_body(MsgCode, _Msg) ->
     [MsgCode]. %% I/O layer will convert this to binary
 
+%% @doc Convert a property list to an RpbBucketProps message
+%% @private
+post_decode(Msg=#tsputreq{rows=R}) ->
+    Msg#tsputreq{rows=riak_pb_ts_codec:decode_rows(R)};
+post_decode(Msg) ->
+    Msg.
+
 %% @doc Decode a protocol buffer message given its type - if no bytes
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
-
 -spec decode(integer(), binary()) -> atom() | tuple().
 decode(MsgCode, <<>>) ->
     msg_type(MsgCode);
 decode(MsgCode, MsgData) ->
     Decoder = decoder_for(MsgCode),
-    Decoder:decode(msg_type(MsgCode), MsgData).
+    Decoded = Decoder:decode(msg_type(MsgCode), MsgData),
+    post_decode(Decoded).
 
 %% @doc Converts a message code into the symbolic message
 %% name. Replaces `riakc_pb:msg_type/1'.
