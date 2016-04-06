@@ -436,7 +436,7 @@ empty_atoms_test() ->
     %% whether the .proto file defines the message as an empty record
     %% or ignores it. On the receiving end they are all atoms.
 
-    Resp = {tsdelresp},  %% .proto defines as empty record
+    Resp = tsdelresp,  %% .proto defines as empty record
 
     decode_eq(Resp, encode(Resp), fun decode/2).
 

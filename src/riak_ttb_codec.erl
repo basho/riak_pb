@@ -37,8 +37,7 @@
 %% ------------------------------------------------------------
 
 encode(Msg) ->
-    T2B=term_to_binary(de_stringify(Msg)),
-    [?TTB_MSG_CODE | <<T2B/binary>>].
+    [?TTB_MSG_CODE, term_to_binary(de_stringify(Msg))].
 
 %% ------------------------------------------------------------
 %% Decode does the reverse
