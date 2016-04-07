@@ -46,7 +46,6 @@ message TsQueryResp {
   optional bool done = 3 [default = true];
 }
 
-
 message TsGetReq {
   required bytes table = 1;
   repeated TsCell key = 2;
@@ -60,15 +59,6 @@ message TsGetResp {
 
 
 message TsPutReq {
-  required bytes table = 1;
-
-  // optional: omitting it should use table order
-  repeated TsColumnDescription columns = 2;
-
-  repeated TsRow rows = 3;
-}
-
-message TsTtbPutReq {
   required bytes table = 1;
 
   // optional: omitting it should use table order
