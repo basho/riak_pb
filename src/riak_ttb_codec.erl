@@ -61,7 +61,12 @@ return_resp(Resp) ->
 encode_ts_rows(Rows) ->
     [encode_ts_row(Row) || Row <- Rows].
 
-encode_ts_row(Row) when is_list(Row) ->
-    list_to_tuple(Row);
 encode_ts_row(Row) when is_tuple(Row) ->
-    Row.
+    tuple_to_list(Row);
+encode_ts_row(Row) when is_list(Row) ->
+    list_to_tuple([undefined_to_empty(Cell) || Cell <- Row]).
+
+undefined_to_empty(undefined) ->
+    [];
+undefined_to_empty(Cell) ->
+    Cell.
