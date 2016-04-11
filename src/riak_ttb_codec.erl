@@ -37,7 +37,7 @@
 %% ------------------------------------------------------------
 
 encode(Msg) ->
-    [?TTB_MSG_CODE, term_to_binary(de_stringify(Msg))].
+    [?TTB_MSG_CODE, term_to_binary(convert_row(Msg))].
 
 %% ------------------------------------------------------------
 %% Decode does the reverse
@@ -58,14 +58,18 @@ return_resp({Atom, <<>>}) ->
 return_resp(Resp) ->
     Resp.
 
+convert_row(Row) when is_tuple(Row) ->
+    List = tuple_to_list(Row),
+    NoStrings = lists:map(fun de_stringify/1, List),
+    list_to_tuple(NoStrings).
+
 de_stringify(Tuple) when is_tuple(Tuple) ->
-    list_to_tuple(de_stringify(tuple_to_list(Tuple)));
-de_stringify(List) when is_list(List), is_integer(hd(List)) ->
-    %% Yes, this could corrupt utf-8 data, but we should never, ever
-    %% have put it in string format to begin with
+    convert_row(Tuple);
+de_stringify(List) when is_list(List), is_tuple(hd(List)) ->
+    [convert_row(Row) || Row <- List];
+%% Empty lists must remain lists (for null values)
+de_stringify(List) when is_list(List), length(List) > 0, is_integer(hd(List)) ->
     list_to_binary(List);
-de_stringify(List) when is_list(List) ->
-    lists:map(fun de_stringify/1, List);
 de_stringify(Element) ->
     Element.
 
