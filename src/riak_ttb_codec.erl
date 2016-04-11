@@ -3,7 +3,7 @@
 %% riak_ttb_codec.erl: term-to-binary codec functions for
 %%                     Riak messages
 %%
-%% Copyright (c) 2015 Basho Technologies, Inc.  All Rights Reserved.
+%% Copyright (c) 2015-2016 Basho Technologies, Inc.  All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -37,7 +37,7 @@
 %% ------------------------------------------------------------
 
 encode(Msg) ->
-    [?TTB_MSG_CODE, term_to_binary(de_stringify(Msg))].
+    [?TTB_MSG_CODE, term_to_binary(Msg)].
 
 %% ------------------------------------------------------------
 %% Decode does the reverse
@@ -57,17 +57,6 @@ return_resp({Atom, <<>>}) ->
     Atom;
 return_resp(Resp) ->
     Resp.
-
-de_stringify(Tuple) when is_tuple(Tuple) ->
-    list_to_tuple(de_stringify(tuple_to_list(Tuple)));
-de_stringify(List) when is_list(List), is_integer(hd(List)) ->
-    %% Yes, this could corrupt utf-8 data, but we should never, ever
-    %% have put it in string format to begin with
-    list_to_binary(List);
-de_stringify(List) when is_list(List) ->
-    lists:map(fun de_stringify/1, List);
-de_stringify(Element) ->
-    Element.
 
 encode_ts_rows(Rows) ->
     [encode_ts_row(Row) || Row <- Rows].
