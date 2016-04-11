@@ -37,7 +37,7 @@
 %% ------------------------------------------------------------
 
 encode(Msg) ->
-    [?TTB_MSG_CODE, term_to_binary(de_stringify(Msg))].
+    [?TTB_MSG_CODE, term_to_binary(Msg)].
 
 %% ------------------------------------------------------------
 %% Decode does the reverse
@@ -57,32 +57,6 @@ return_resp({Atom, <<>>}) ->
     Atom;
 return_resp(Resp) ->
     Resp.
-
-de_stringify(Tuple) when is_tuple(Tuple) ->
-    list_to_tuple(de_stringify(tuple_to_list(Tuple)));
-de_stringify(List) when is_list(List) andalso length(List) > 0 andalso is_integer(hd(List)) ->
-    %% Yes, this could corrupt utf-8 data, but we should never, ever
-    %% have put it in string format to begin with
-    list_to_binary(List);
-    %% okay, this is where [[41, 42, 43]], which is a valid tabular
-    %% representation of a SELECT query result comprising one row of 3
-    %% elements, becomes a string, and then a binary.
-
-    %% Only apply this to the top-level lists and to the innermost lists.
-
-de_stringify(Tab) when is_list(Tab) andalso length(Tab) > 0 andalso is_list(hd(Tab)) ->
-    lists:map(
-      fun(Row) ->
-              lists:map(
-                fun(Elem) when is_list(Elem) -> list_to_binary(Elem);
-                   (Elem) -> Elem
-                end, Row)
-      end,
-      Tab);
-de_stringify(List) when is_list(List) ->
-    [de_stringify(X) || X <- List];
-de_stringify(Element) ->
-    Element.
 
 encode_ts_rows(Rows) ->
     [encode_ts_row(Row) || Row <- Rows].
