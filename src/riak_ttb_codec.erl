@@ -28,7 +28,6 @@
 -include("riak_ts_ttb.hrl").
 
 -export([encode/1,
-         encode_ts_rows/1,
          decode/1]).
 
 %% ------------------------------------------------------------
@@ -38,6 +37,7 @@
 
 encode(Msg) ->
     [?TTB_MSG_CODE, term_to_binary(Msg)].
+
 
 %% ------------------------------------------------------------
 %% Decode does the reverse
@@ -57,16 +57,3 @@ return_resp({Atom, <<>>}) ->
     Atom;
 return_resp(Resp) ->
     Resp.
-
-encode_ts_rows(Rows) ->
-    [encode_ts_row(Row) || Row <- Rows].
-
-encode_ts_row(Row) when is_tuple(Row) ->
-    encode_ts_row(tuple_to_list(Row));
-encode_ts_row(Row) when is_list(Row) ->
-    list_to_tuple([undefined_to_empty(Cell) || Cell <- Row]).
-
-undefined_to_empty(undefined) ->
-    [];
-undefined_to_empty(Cell) ->
-    Cell.
