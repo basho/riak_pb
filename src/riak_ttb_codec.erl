@@ -62,7 +62,7 @@ encode_ts_rows(Rows) ->
     [encode_ts_row(Row) || Row <- Rows].
 
 encode_ts_row(Row) when is_tuple(Row) ->
-    tuple_to_list(Row);
+    encode_ts_row(tuple_to_list(Row));
 encode_ts_row(Row) when is_list(Row) ->
     list_to_tuple([undefined_to_empty(Cell) || Cell <- Row]).
 
