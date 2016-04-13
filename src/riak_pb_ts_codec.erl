@@ -148,8 +148,10 @@ encode_row_non_strict(RowCells) ->
 %%      lvldbvalue() -> #tscell{} -> lvldbvalue().
 %%      THEREFORE no info is lost for these cases.
 %% @end
--spec encode_cells_non_strict(list(ldbvalue())) -> list(#tscell{}).
-encode_cells_non_strict(Cells) ->
+-spec encode_cells_non_strict(list(ldbvalue()) | tuple(ldbvalue())) -> list(#tscell{}).
+encode_cells_non_strict(Cells) when is_tuple(Cells) ->
+    encode_cells_non_strict(tuple_to_list(Cells));
+encode_cells_non_strict(Cells) when is_list(Cells) ->
     [encode_cell_non_strict(Cell) || Cell <- Cells].
 
 -spec encode_cell({tscolumntype(), ldbvalue()}) -> #tscell{}.
