@@ -80,7 +80,7 @@ encode_field_type(boolean) ->
 %% Each row is represented as a list of ldbvalue().
 %% An error is returned if any of the `Rows` individual row length do not match the length of the `ColumnTypes` list.
 %% @end
--spec encode_rows(list(tscolumntype()), list(list(ldbvalue()))) -> [#tsrow{}].
+-spec encode_rows(list(tscolumntype()), list(tuple(ldbvalue())) | list(list(ldbvalue()))) -> [#tsrow{}].
 encode_rows(ColumnTypes, Rows) ->
     [encode_row(ColumnTypes, Row) || Row <- Rows].
 
@@ -122,9 +122,12 @@ decode_cells(Cells) ->
 %% local functions
 %% ---------------------------------------
 
--spec encode_row(list(tscolumntype()), list(ldbvalue())) -> #tsrow{}.
-encode_row(ColumnTypes, RowCells) when length(ColumnTypes) =:= length(RowCells) ->
-    #tsrow{cells = [encode_cell(ColumnTypeCell) || ColumnTypeCell <- lists:zip(ColumnTypes, RowCells)]}.
+-spec encode_row(list(tscolumntype()), list(ldbvalue()) | tuple(ldbvalue())) -> #tsrow{}.
+encode_row(ColumnTypes, RowCells) when is_tuple(RowCells) ->
+    encode_row(ColumnTypes, tuple_to_list(RowCells));
+encode_row(ColumnTypes, RowCells) when is_list(RowCells), length(ColumnTypes) =:= length(RowCells) ->
+    #tsrow{cells = [encode_cell(ColumnTypeCell) ||
+                    ColumnTypeCell <- lists:zip(ColumnTypes, RowCells)]}.
 
 %% @doc Only for encoding rows for PUTs on the erlang client.
 %%      Will not properly encode timestamp #tscell{} records,
@@ -145,8 +148,10 @@ encode_row_non_strict(RowCells) ->
 %%      lvldbvalue() -> #tscell{} -> lvldbvalue().
 %%      THEREFORE no info is lost for these cases.
 %% @end
--spec encode_cells_non_strict(list(ldbvalue())) -> list(#tscell{}).
-encode_cells_non_strict(Cells) ->
+-spec encode_cells_non_strict(list(ldbvalue()) | tuple(ldbvalue())) -> list(#tscell{}).
+encode_cells_non_strict(Cells) when is_tuple(Cells) ->
+    encode_cells_non_strict(tuple_to_list(Cells));
+encode_cells_non_strict(Cells) when is_list(Cells) ->
     [encode_cell_non_strict(Cell) || Cell <- Cells].
 
 -spec encode_cell({tscolumntype(), ldbvalue()}) -> #tscell{}.
