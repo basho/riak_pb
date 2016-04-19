@@ -35,7 +35,9 @@
          encode_cells/1,
          encode_cells_non_strict/1,
          decode_cells/1,
-         encode_field_type/1]).
+         encode_field_type/1,
+         encode_cover_list/1,
+         decode_cover_list/1]).
 
 
 -type tsrow() :: #tsrow{}.
@@ -242,6 +244,57 @@ decode_cells([#tscell{varchar_value = undefined,
     %% NULL Cell.
     %% TODO: represent null cells by something other than an empty list. emptyTsCell atom maybe?
     decode_cells(T, [[] | Acc]).
+
+
+
+%% Copied and modified from riak_kv_pb_coverage:convert_list. Would
+%% be nice to collapse them back together, probably with a closure,
+%% but time and effort.
+-type ts_range() :: {FieldName::binary(),
+                     {{StartVal::integer(), StartIncl::boolean()},
+                      {EndVal::integer(), EndIncl::boolean()}}}.
+
+-spec encode_cover_list([{{IP::string(), Port::non_neg_integer()},
+                          Context::binary(),
+                          ts_range(),
+                          SQLText::binary()}]) -> [#tscoverageentry{}].
+encode_cover_list(Entries) ->
+    [#tscoverageentry{ip = IP, port = Port,
+                      cover_context = Context,
+                      range = encode_ts_range({Range, SQLText})}
+     || {{IP, Port}, Context, Range, SQLText} <- Entries].
+
+-spec decode_cover_list([#tscoverageentry{}]) ->
+                               [{{IP::string(), Port::non_neg_integer()},
+                                 CoverContext::binary(), ts_range(), Text::binary()}].
+decode_cover_list(Entries) ->
+    [begin
+         {RangeStruct, Text} = decode_ts_range(Range),
+         {{IP, Port}, CoverContext, RangeStruct, Text}
+     end || #tscoverageentry{ip = IP, port = Port,
+                             cover_context = CoverContext,
+                             range = Range} <- Entries].
+
+-spec encode_ts_range({ts_range(), binary()}) -> #tsrange{}.
+encode_ts_range({{FieldName, {{StartVal, StartIncl}, {EndVal, EndIncl}}}, Text}) ->
+    #tsrange{field_name            = FieldName,
+             lower_bound           = StartVal,
+             lower_bound_inclusive = StartIncl,
+             upper_bound           = EndVal,
+             upper_bound_inclusive = EndIncl,
+             desc                  = Text
+            }.
+
+-spec decode_ts_range(#tsrange{}) -> {ts_range(), binary()}.
+decode_ts_range(#tsrange{field_name            = FieldName,
+                         lower_bound           = StartVal,
+                         lower_bound_inclusive = StartIncl,
+                         upper_bound           = EndVal,
+                         upper_bound_inclusive = EndIncl,
+                         desc                  = Text}) ->
+    {{FieldName, {{StartVal, StartIncl}, {EndVal, EndIncl}}}, Text}.
+
+
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
