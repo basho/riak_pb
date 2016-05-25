@@ -24,6 +24,11 @@ erl_compile:
 erl_clean:
 	@${REBAR} clean
 
+erl_protogen:
+	@${REBAR} --config protogen.config clean
+	@${REBAR} --config protogen.config get-deps
+	@${REBAR} --config protogen.config compile
+
 compile: erl_compile # Hack for tools.mk
 
 release: compile
