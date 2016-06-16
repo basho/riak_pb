@@ -1,4 +1,3 @@
-%% -------------------------------------------------------------------
 %%
 %% riak_pb_ts_codec.erl: protocol buffer utility functions for Riak TS messages
 %%
@@ -59,7 +58,7 @@
 -export_type([tscolumnname/0, tscolumntype/0, tscolumntypePB/0]).
 
 %% @doc Convert a list of column names to partial #tscolumndescription records.
--spec encode_columnnames(list(tscolumnname())) -> list(#tscolumndescription{}).
+-spec encode_columnnames([tscolumnname()]) -> [#tscolumndescription{}].
 encode_columnnames(ColumnNames) ->
     [#tscolumndescription{name = C} || C <- ColumnNames].
 
@@ -82,7 +81,7 @@ encode_field_type(boolean) ->
 %% Each row is represented as a list of ldbvalue().
 %% An error is returned if any of the `Rows` individual row length do not match the length of the `ColumnTypes` list.
 %% @end
--spec encode_rows(list(tscolumntype()), list(tuple(ldbvalue())) | list(list(ldbvalue()))) -> [#tsrow{}].
+-spec encode_rows([tscolumntype()], [{ldbvalue()}] | [[ldbvalue()]]) -> [#tsrow{}].
 encode_rows(ColumnTypes, Rows) ->
     [encode_row(ColumnTypes, Row) || Row <- Rows].
 
@@ -107,16 +106,16 @@ encode_columns(ColumnNames, ColumnTypes) ->
 %% Each row is converted through `decode_cells/1`, and the list
 %% of ldbvalue() is converted to a tuple of ldbvalue().
 %% @end
--spec decode_rows([#tsrow{}]) -> list(tuple()).
+-spec decode_rows([#tsrow{}]) -> [{ldbvalue()}].
 decode_rows(Rows) ->
     [list_to_tuple(decode_cells(Cells)) || #tsrow{cells = Cells} <- Rows].
 
--spec encode_cells(list({tscolumntype(), ldbvalue()})) -> [#tscell{}].
+-spec encode_cells([{tscolumntype(), ldbvalue()}]) -> [#tscell{}].
 encode_cells(Cells) ->
     [encode_cell(C) || C <- Cells].
 
 %% @doc Decode a list of timeseries #tscell{} to a list of ldbvalue().
--spec decode_cells([#tscell{}]) -> list(ldbvalue()).
+-spec decode_cells([#tscell{}]) -> [ldbvalue()].
 decode_cells(Cells) ->
     decode_cells(Cells, []).
 
@@ -124,7 +123,7 @@ decode_cells(Cells) ->
 %% local functions
 %% ---------------------------------------
 
--spec encode_row(list(tscolumntype()), list(ldbvalue()) | tuple(ldbvalue())) -> #tsrow{}.
+-spec encode_row([tscolumntype()], [ldbvalue()] | {ldbvalue()}) -> #tsrow{}.
 encode_row(ColumnTypes, RowCells) when is_tuple(RowCells) ->
     encode_row(ColumnTypes, tuple_to_list(RowCells));
 encode_row(ColumnTypes, RowCells) when is_list(RowCells), length(ColumnTypes) =:= length(RowCells) ->
@@ -138,7 +137,7 @@ encode_row(ColumnTypes, RowCells) when is_list(RowCells), length(ColumnTypes) =:
 %%      lvldbvalue() -> #tscell{} -> lvldbvalue().
 %%      THEREFORE no info is lost for these cases.
 %% @end
--spec encode_row_non_strict(list(ldbvalue())) -> #tsrow{}.
+-spec encode_row_non_strict([ldbvalue()]) -> #tsrow{}.
 encode_row_non_strict(RowCells) ->
     #tsrow{cells = encode_cells_non_strict(RowCells)}.
 
@@ -150,7 +149,7 @@ encode_row_non_strict(RowCells) ->
 %%      lvldbvalue() -> #tscell{} -> lvldbvalue().
 %%      THEREFORE no info is lost for these cases.
 %% @end
--spec encode_cells_non_strict(list(ldbvalue()) | tuple(ldbvalue())) -> list(#tscell{}).
+-spec encode_cells_non_strict([ldbvalue()] | {ldbvalue()}) -> [#tscell{}].
 encode_cells_non_strict(Cells) when is_tuple(Cells) ->
     encode_cells_non_strict(tuple_to_list(Cells));
 encode_cells_non_strict(Cells) when is_list(Cells) ->
@@ -198,7 +197,7 @@ encode_cell_non_strict(undefined) ->
 encode_cell_non_strict([]) ->
     #tscell{}.
 
--spec decode_cells([#tscell{}], list(ldbvalue())) -> list(ldbvalue()).
+-spec decode_cells([#tscell{}], [ldbvalue()]) -> [ldbvalue()].
 decode_cells([], Acc) ->
     lists:reverse(Acc);
 decode_cells([#tscell{varchar_value = Bin,
@@ -394,4 +393,3 @@ decode_rows_test() ->
             #tsrow{cells = [#tscell{varchar_value = <<"Baz">>}, #tscell{sint64_value = 90}, #tscell{boolean_value = false}]}])).
 
 -endif.
-
