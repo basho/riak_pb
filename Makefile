@@ -4,14 +4,12 @@ all: deps compile_all
 
 deps: erl_deps
 
-compile_all: erl_compile c_compile
+compile_all: erl_compile
 
-clean: erl_clean c_clean
+clean: erl_clean
 
 distclean: clean
 	rm -rf dist
-
-release: c_release
 
 # Erlang-specific build steps
 DIALYZER_APPS = kernel stdlib erts crypto compiler hipe syntax_tools
