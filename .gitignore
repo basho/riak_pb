@@ -19,5 +19,9 @@ dialyzer_warnings
 # Java
 target/*
 
+#IntelliJ
+.idea/
+riak_pb.iml
+
 # C
 c/*

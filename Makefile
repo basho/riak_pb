@@ -4,14 +4,12 @@ all: deps compile_all
 
 deps: erl_deps
 
-compile_all: erl_compile java_compile c_compile
+compile_all: erl_compile
 
-clean: erl_clean java_clean c_clean
+clean: erl_clean
 
 distclean: clean
 	rm -rf dist
-
-release: java_release c_release
 
 # Erlang-specific build steps
 DIALYZER_APPS = kernel stdlib erts crypto compiler hipe syntax_tools
@@ -27,24 +25,6 @@ erl_clean:
 	@${REBAR} clean
 
 compile: erl_compile # Hack for tools.mk
-
-# Java specific build steps
-java_compile:
-	@echo "==> Java (compile)"
-	@mvn install
-
-java_clean:
-	@echo "==> Java (clean)"
-	@mvn clean
-
-java_release:
-	@echo "==> Java"
-ifeq ($(RELEASE_GPG_KEYNAME),)
-	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
-else
-	@mvn clean
-	@mvn deploy
-endif
 
 # C specific build steps
 PROTOC	 = protoc-c
