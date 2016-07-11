@@ -26,6 +26,19 @@ erl_clean:
 
 compile: erl_compile # Hack for tools.mk
 
+release: compile
+ifeq ($(VERSION),)
+	$(error VERSION must be set to build a release and deploy this package)
+endif
+ifeq ($(RELEASE_GPG_KEYNAME),)
+	$(error RELEASE_GPG_KEYNAME must be set to build a release and deploy this package)
+endif
+	@echo "==> Tagging version $(VERSION)"
+	@bash ./build/publish $(VERSION) validate
+	@git tag --sign -a "$(VERSION)" -m "riak_pb $(VERSION)" --local-user "$(RELEASE_GPG_KEYNAME)"
+	@git push --tags
+	@bash ./build/publish $(VERSION)
+
 # C specific build steps
 PROTOC	 = protoc-c
 PROTOS	:= $(wildcard src/*.proto)
