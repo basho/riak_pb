@@ -432,9 +432,13 @@ decode_operation(#dtop{map_op=#mapop{}=Op}, Mods) ->
 encode_operation(Op, counter) ->
     #dtop{counter_op=encode_counter_op(Op)};
 encode_operation(Op, set) ->
-    #dtop{set_op=encode_set_op(Op)};
+    S = encode_set_op(Op),
+    SetOp = S#setop{is_gset=false},
+    #dtop{set_op=SetOp};
 encode_operation(Op, gset) ->
-    #dtop{set_op=encode_set_op(Op)};
+    S = encode_set_op(Op),
+    SetOp = S#setop{is_gset=true},
+    #dtop{set_op=SetOp};
 encode_operation(Op, map) ->
     #dtop{map_op=encode_map_op(Op)}.
 
