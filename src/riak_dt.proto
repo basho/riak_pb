@@ -69,6 +69,7 @@ message MapEntry {
     repeated MapEntry map_value      = 6;
 }
 
+
 /*
  * =============== FETCH =================
  */
@@ -107,7 +108,6 @@ message DtValue {
     optional sint64   counter_value = 1;
     repeated bytes    set_value     = 2;
     repeated MapEntry map_value     = 3;
-    repeated bytes    gset_value    = 4;
 }
 
 
@@ -133,6 +133,7 @@ message DtFetchResp {
     optional DtValue  value   = 3;
 }
 
+
 /*
  * =============== UPDATE =================
  */
@@ -146,6 +147,7 @@ message CounterOp {
     optional sint64 increment = 1;
 }
 
+
 /*
  * An operation to update a Set, either on its own or inside a Map.
  * Set members are opaque binary values, you can only add or remove
@@ -154,18 +156,8 @@ message CounterOp {
 message SetOp {
     repeated bytes adds    = 1;
     repeated bytes removes = 2;
+    optional bool  is_gset = 3;
 }
-
-
-/*
- * An operation to update a GSet, on its own.
- * GSet members are opaque binary values, you can only add
- * them to a Set.
- */
-message GSetOp {
-    repeated bytes adds    = 1;
-}
-
 
 
 /*
@@ -195,8 +187,8 @@ message MapUpdate {
     optional bytes     register_op = 4;
     optional FlagOp    flag_op     = 5;
     optional MapOp     map_op      = 6;
-
 }
+
 
 /*
  * An operation to update a Map. All operations apply to individual
@@ -212,6 +204,7 @@ message MapOp {
     repeated MapUpdate updates = 2;
 }
 
+
 /*
  * A "union" type for update operations. The included operation
  * depends on the datatype being updated.
@@ -220,8 +213,8 @@ message DtOp {
     optional CounterOp counter_op = 1;
     optional SetOp     set_op     = 2;
     optional MapOp     map_op     = 3;
-    optional GSetOp    gset_op    = 4;
 }
+
 
 /*
  * The equivalent of KV's "RpbPutReq", results in an empty response or
@@ -267,6 +260,5 @@ message DtUpdateResp {
     optional sint64   counter_value = 3;
     repeated bytes    set_value     = 4;
     repeated MapEntry map_value     = 5;
-    repeated bytes    gset_value    = 6;
 }
 

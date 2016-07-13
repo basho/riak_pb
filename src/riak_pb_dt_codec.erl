@@ -48,14 +48,13 @@
 -type context() :: binary() | undefined.
 -type counter_value() :: integer().
 -type set_value() :: [ binary() ].
--type gset_value() :: [ binary() ].
 -type register_value() :: binary().
 -type flag_value() :: boolean().
 -type map_entry() :: {map_field(), embedded_value()}.
 -type map_field() :: {binary(), embedded_type()}.
 -type map_value() :: [ map_entry() ].
 -type embedded_value() :: counter_value() | set_value() | register_value() | flag_value() | map_value().
--type toplevel_value() :: counter_value() | gset_value() | set_value() | map_value() | undefined.
+-type toplevel_value() :: counter_value() | set_value() | map_value() | undefined.
 -type fetch_response() :: {toplevel_type(), toplevel_value(), context()}.
 
 %% Type names as atoms
@@ -66,14 +65,12 @@
 -type counter_op() :: increment | decrement | {increment | decrement, integer()}.
 -type simple_set_op() :: {add, binary()} | {remove, binary()} | {add_all, [binary()]} | {remove_all, [binary()]}.
 -type set_op() :: simple_set_op() | {update, [simple_set_op()]}.
--type simple_gset_op() :: {add, binary()} | {add_all, [binary()]}.
--type gset_op() :: simple_gset_op() | {update, [simple_gset_op()]}.
 -type flag_op() :: enable | disable.
 -type register_op() :: {assign, binary()}.
 -type simple_map_op() :: {remove, map_field()} | {update, map_field(), embedded_type_op()}.
 -type map_op() :: simple_map_op() | {update, [simple_map_op()]}.
 -type embedded_type_op() :: counter_op() | set_op() | register_op() | flag_op() | map_op().
--type toplevel_op() :: counter_op() | gset_op() | set_op() | map_op().
+-type toplevel_op() :: counter_op() | set_op() | map_op().
 -type update() :: {toplevel_type(), toplevel_op(), context()}.
 
 %% Request options
@@ -282,7 +279,7 @@ encode_fetch_response(Type, Value, Context, Mods) ->
         set ->
             Response#dtfetchresp{value=#dtvalue{set_value=Value}};
         gset ->
-            Response#dtfetchresp{value=#dtvalue{gset_value=Value}};
+            Response#dtfetchresp{value=#dtvalue{set_value=Value}};
         map ->
             Response#dtfetchresp{value=#dtvalue{map_value=[encode_map_entry(Entry, Mods) || Entry <- Value]}}
     end.
@@ -313,9 +310,13 @@ encode_counter_op({decrement, Int}) when is_integer(Int) ->
 -spec decode_set_op(#setop{}) -> set_op().
 decode_set_op(#setop{adds=A, removes=[]}) ->
     {add_all, A};
-decode_set_op(#setop{adds=[], removes=R}) ->
+decode_set_op(#setop{adds=[], removes=_R, is_gset=true}) ->
+    {error, <<"Can't remove from GSet">>};
+decode_set_op(#setop{adds=[], removes=R, is_gset=false}) ->
     {remove_all, R};
-decode_set_op(#setop{adds=A, removes=R}) ->
+decode_set_op(#setop{adds=_A, removes=_R, is_gset=true}) ->
+    {error, <<"Can't remove from GSet">>};
+decode_set_op(#setop{adds=A, removes=R, is_gset=false}) ->
     {update, [{add_all, A}, {remove_all, R}]}.
 
 %% @doc Encodes a set operation into a SetOp message.
@@ -337,26 +338,6 @@ encode_set_update({remove, Member}, #setop{removes=R}=S) when is_binary(Member) 
 encode_set_update({remove_all, Members}, #setop{removes=R}=S) when is_list(Members) ->
     S#setop{removes=Members++R}.
 
-
-
-%% @doc Decodes a GSetOp message into a gset operation.
--spec decode_gset_op(#setop{}) -> gset_op().
-decode_gset_op(#gsetop{adds=A}) ->
-    {add_all, A}.
-
-%% @doc Encodes a set operation into a SetOp message.
--spec encode_gset_op(gset_op()) -> #gsetop{}.
-encode_gset_op({update, Ops}) when is_list(Ops) ->
-    lists:foldr(fun encode_gset_update/2, #gsetop{}, Ops);
-encode_gset_op({C, _}=Op) when add == C; add_all == C ->
-    encode_gset_op({update, [Op]}).
-
-%% @doc Folds a set update into the SetOp message.
--spec encode_gset_update(simple_gset_op(), #gsetop{}) -> #gsetop{}.
-encode_gset_update({add, Member}, #gsetop{adds=A}=S) when is_binary(Member) ->
-    S#gsetop{adds=[Member|A]};
-encode_gset_update({add_all, Members}, #gsetop{adds=A}=S) when is_list(Members) ->
-    S#gsetop{adds=Members++A}.
 
 %% @doc Decodes a operation name from a PB message into an atom.
 -spec decode_flag_op(atom()) -> atom().
@@ -443,8 +424,6 @@ decode_operation(#dtop{counter_op=#counterop{}=Op}, _) ->
     decode_counter_op(Op);
 decode_operation(#dtop{set_op=#setop{}=Op}, _) ->
     decode_set_op(Op);
-decode_operation(#dtop{gset_op=#gsetop{}=Op}, _) ->
-    decode_gset_op(Op);
 decode_operation(#dtop{map_op=#mapop{}=Op}, Mods) ->
     decode_map_op(Op, Mods).
 
@@ -455,7 +434,7 @@ encode_operation(Op, counter) ->
 encode_operation(Op, set) ->
     #dtop{set_op=encode_set_op(Op)};
 encode_operation(Op, gset) ->
-    #dtop{gset_op=encode_gset_op(Op)};
+    #dtop{set_op=encode_set_op(Op)};
 encode_operation(Op, map) ->
     #dtop{map_op=encode_map_op(Op)}.
 
@@ -464,9 +443,9 @@ encode_operation(Op, map) ->
 -spec operation_type(#dtop{}) -> toplevel_type().
 operation_type(#dtop{counter_op=#counterop{}}) ->
     counter;
-operation_type(#dtop{set_op=#setop{}}) ->
+operation_type(#dtop{set_op=#setop{is_gset=false}}) ->
     set;
-operation_type(#dtop{gset_op=#gsetop{}}) ->
+operation_type(#dtop{set_op=#setop{is_gset=true}}) ->
     gset;
 operation_type(#dtop{map_op=#mapop{}}) ->
     map.
