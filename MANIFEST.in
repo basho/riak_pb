@@ -1,3 +1,0 @@
-include version.py
-include msgcodegen.py
-include src/riak_pb_messages.csv

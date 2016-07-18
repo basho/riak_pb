@@ -87,3 +87,18 @@ community.
 
 6. A Basho engineer or community maintainer will review your patch and
    merge it into the main repository or send you feedback.
+
+## Build Prerequisites
+
+* protoc v 2.5.0
+
+On OSX the default version installed by brew is 2.6.x (Nov 2015)
+this version is too new for the Maven protocol-buffers plugin.
+
+You can install the correct version like so.
+    
+  ```
+    brew tap homebrew/versions
+    brew install homebrew/versions/protobuf250
+  ```
+
