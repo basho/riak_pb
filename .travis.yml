@@ -5,6 +5,5 @@ notifications:
 otp_release:
   - 18.3
   - 17.5
-  - R16B02
-  - R15B01
-  - R15B
+  - R16B03
+  - R15B03
