@@ -29,23 +29,31 @@
 operation_type/1,
 decode_fetch_response/1,
 encode_fetch_response/4,
-encode_update_request/3]).
+encode_update_request/4,
+decode_update_response/3
+]).
 
 -define(CONTEXT, undefined_context).
 -define(SET_VALUE, [<<"binarytemple">>]).
+
+operation_type_gset_test() ->
+  OpType = operation_type(#dtop{set_op = #gsetop{}}),
+  ?assertEqual(OpType, gset).
 
 decode_operation_gset_test() ->
   Op = #dtop{set_op = #gsetop{adds = ?SET_VALUE}},
   OpDecode = decode_operation(Op),
   ?assertEqual(OpDecode, {add_all, ?SET_VALUE}).
 
-operation_type_gset_test() ->
-  OpType = operation_type(#dtop{set_op = #gsetop{}}),
-  ?assertEqual(OpType, gset).
-
 decode_fetch_response_gset_test() ->
   Res = decode_fetch_response(#dtfetchresp{context = ?CONTEXT, type = 'GSET', value = #dtvalue{set_value = ?SET_VALUE}}),
   ?assertEqual(Res, {gset, ?SET_VALUE, ?CONTEXT}).
+
+decode_update_response_test() ->
+  Res = decode_update_response(
+    #dtupdateresp{set_value = ?SET_VALUE, context = ?CONTEXT}, set, true
+  ),
+  ?assertEqual({set, ?SET_VALUE, undefined_context}, Res).
 
 encode_fetch_response_gset_test() ->
   Resp = encode_fetch_response(gset, #dtvalue{set_value = ?SET_VALUE}, ?CONTEXT, []),
@@ -57,11 +65,12 @@ encode_fetch_response_gset_test() ->
   )
 .
 encode_update_request_gset_test() ->
-  ReqParams = [{<<"btype">>, <<"bucket">>},
+  Res = encode_update_request(
+    {<<"btype">>, <<"bucket">>},
     <<"key">>,
     {gset, {update, [{add_all, ?SET_VALUE}]}, ?CONTEXT},
-    []],
-  Res = apply(riak_pb_dt_codec, encode_update_request, ReqParams),
+    []
+  ),
   ?assertMatch(#dtupdatereq{
     bucket = <<"bucket">>,
     type = <<"btype">>,
