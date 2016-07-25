@@ -350,6 +350,26 @@ encode_set_update({remove, Member}, #setop{removes=R}=S) when is_binary(Member) 
 encode_set_update({remove_all, Members}, #setop{removes=R}=S) when is_list(Members) ->
     S#setop{removes=Members++R}.
 
+
+%% @doc Decodes a GSetOp message into a gset operation.
+-spec decode_gset_op(#setop{}) -> gset_op().
+decode_gset_op(#gsetop{adds=A}) ->
+    {add_all, A}.
+
+%% @doc Encodes a set operation into a SetOp message.
+-spec encode_gset_op(gset_op()) -> #gsetop{}.
+encode_gset_op({update, Ops}) when is_list(Ops) ->
+    lists:foldr(fun encode_gset_update/2, #gsetop{}, Ops);
+encode_gset_op({C, _}=Op) when add == C; add_all == C ->
+    encode_gset_op({update, [Op]}).
+
+%% @doc Folds a set update into the SetOp message.
+-spec encode_gset_update(simple_gset_op(), #gsetop{}) -> #gsetop{}.
+encode_gset_update({add, Member}, #gsetop{adds=A}=S) when is_binary(Member) ->
+    S#gsetop{adds=[Member|A]};
+encode_gset_update({add_all, Members}, #gsetop{adds=A}=S) when is_list(Members) ->
+    S#gsetop{adds=Members++A}.
+
 %% @doc Decodes a operation name from a PB message into an atom.
 -spec decode_flag_op(atom()) -> atom().
 
