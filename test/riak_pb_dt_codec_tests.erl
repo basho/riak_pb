@@ -62,7 +62,6 @@ encode_update_request_gset_test() ->
     {gset, {update, [{add_all, ?SET_VALUE}]}, ?CONTEXT},
     []],
   Res = apply(riak_pb_dt_codec, encode_update_request, ReqParams),
-  ?debugVal(Res),
   ?assertMatch(#dtupdatereq{
     bucket = <<"bucket">>,
     type = <<"btype">>,
