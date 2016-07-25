@@ -161,7 +161,6 @@ message SetOp {
     repeated bytes removes = 2;
 }
 
-
 /*
  * An operation to update a GSet, on its own.
  * GSet members are opaque binary values, you can only add
@@ -170,7 +169,6 @@ message SetOp {
 message GSetOp {
     repeated bytes adds    = 1;
 }
-
 
 /*
  * An operation to update a Hyperloglog Set, a top-level DT.
