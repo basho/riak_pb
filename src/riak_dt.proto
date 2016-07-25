@@ -107,7 +107,6 @@ message DtValue {
     optional sint64   counter_value = 1;
     repeated bytes    set_value     = 2;
     repeated MapEntry map_value     = 3;
-    repeated bytes    gset_value    = 4;
 }
 
 
@@ -167,7 +166,6 @@ message GSetOp {
 }
 
 
-
 /*
  * An operation to be applied to a value stored in a Map -- the
  * contents of an UPDATE operation. The operation field that is
@@ -220,7 +218,6 @@ message DtOp {
     optional CounterOp counter_op = 1;
     optional SetOp     set_op     = 2;
     optional MapOp     map_op     = 3;
-    optional GSetOp    gset_op    = 4;
 }
 
 /*

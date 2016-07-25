@@ -282,7 +282,7 @@ encode_fetch_response(Type, Value, Context, Mods) ->
         set ->
             Response#dtfetchresp{value=#dtvalue{set_value=Value}};
         gset ->
-            Response#dtfetchresp{value=#dtvalue{gset_value=Value}};
+            Response#dtfetchresp{value=#dtvalue{set_value=Value}};
         map ->
             Response#dtfetchresp{value=#dtvalue{map_value=[encode_map_entry(Entry, Mods) || Entry <- Value]}}
     end.
@@ -336,27 +336,6 @@ encode_set_update({remove, Member}, #setop{removes=R}=S) when is_binary(Member) 
     S#setop{removes=[Member|R]};
 encode_set_update({remove_all, Members}, #setop{removes=R}=S) when is_list(Members) ->
     S#setop{removes=Members++R}.
-
-
-
-%% @doc Decodes a GSetOp message into a gset operation.
--spec decode_gset_op(#setop{}) -> gset_op().
-decode_gset_op(#gsetop{adds=A}) ->
-    {add_all, A}.
-
-%% @doc Encodes a set operation into a SetOp message.
--spec encode_gset_op(gset_op()) -> #gsetop{}.
-encode_gset_op({update, Ops}) when is_list(Ops) ->
-    lists:foldr(fun encode_gset_update/2, #gsetop{}, Ops);
-encode_gset_op({C, _}=Op) when add == C; add_all == C ->
-    encode_gset_op({update, [Op]}).
-
-%% @doc Folds a set update into the SetOp message.
--spec encode_gset_update(simple_gset_op(), #gsetop{}) -> #gsetop{}.
-encode_gset_update({add, Member}, #gsetop{adds=A}=S) when is_binary(Member) ->
-    S#gsetop{adds=[Member|A]};
-encode_gset_update({add_all, Members}, #gsetop{adds=A}=S) when is_list(Members) ->
-    S#gsetop{adds=Members++A}.
 
 %% @doc Decodes a operation name from a PB message into an atom.
 -spec decode_flag_op(atom()) -> atom().
@@ -443,8 +422,6 @@ decode_operation(#dtop{counter_op=#counterop{}=Op}, _) ->
     decode_counter_op(Op);
 decode_operation(#dtop{set_op=#setop{}=Op}, _) ->
     decode_set_op(Op);
-decode_operation(#dtop{gset_op=#gsetop{}=Op}, _) ->
-    decode_gset_op(Op);
 decode_operation(#dtop{map_op=#mapop{}=Op}, Mods) ->
     decode_map_op(Op, Mods).
 
@@ -454,8 +431,6 @@ encode_operation(Op, counter) ->
     #dtop{counter_op=encode_counter_op(Op)};
 encode_operation(Op, set) ->
     #dtop{set_op=encode_set_op(Op)};
-encode_operation(Op, gset) ->
-    #dtop{gset_op=encode_gset_op(Op)};
 encode_operation(Op, map) ->
     #dtop{map_op=encode_map_op(Op)}.
 
@@ -466,8 +441,6 @@ operation_type(#dtop{counter_op=#counterop{}}) ->
     counter;
 operation_type(#dtop{set_op=#setop{}}) ->
     set;
-operation_type(#dtop{gset_op=#gsetop{}}) ->
-    gset;
 operation_type(#dtop{map_op=#mapop{}}) ->
     map.
 
