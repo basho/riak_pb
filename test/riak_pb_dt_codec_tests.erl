@@ -25,7 +25,11 @@
 
 -include("riak_dt_pb.hrl").
 
--import(riak_pb_dt_codec, [decode_operation/1, operation_type/1, decode_fetch_response/1, encode_fetch_response/4]).
+-import(riak_pb_dt_codec, [decode_operation/1,
+operation_type/1,
+decode_fetch_response/1,
+encode_fetch_response/4,
+encode_update_request/3]).
 
 -define(CONTEXT, undefined_context).
 -define(SET_VALUE, [<<"binarytemple">>]).
@@ -51,4 +55,22 @@ encode_fetch_response_gset_test() ->
         {dtvalue, undefined, ?SET_VALUE, []},
         []}}
   )
+.
+encode_update_request_gset_test() ->
+  ReqParams = [{<<"btype">>, <<"bucket">>},
+                <<"key">>,
+              {gset, {update, [{add_all,?SET_VALUE}]}, ?CONTEXT},
+              []],
+  Res = apply(riak_pb_dt_codec,  encode_update_request, ReqParams),
+  ?debugVal(Res),
+
+  ?assertMatch( #dtupdatereq{
+    bucket = <<"bucket">>,
+    type =  <<"btype">>,
+    key = <<"key">>,
+    op = #dtop{
+        set_op = #gsetop{adds = ?SET_VALUE}
+    }
+  }, Res  ) ,
+  ok
 .

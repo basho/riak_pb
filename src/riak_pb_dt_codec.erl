@@ -23,6 +23,8 @@
 
 -include("riak_dt_pb.hrl").
 
+-include_lib("eunit/include/eunit.hrl").
+
 -export([
          encode_fetch_request/2,
          encode_fetch_request/3,
@@ -72,7 +74,7 @@
 -type set_op() :: simple_set_op() | {update, [simple_set_op()]}.
 -type hll_op() :: {add, binary()} | {add_all, [binary()]}.
 -type simple_gset_op() :: {add, binary()} | {add_all, [binary()]}.
--type gset_op() :: simple_gset_op() | {update, [simple_gset_op()]}.
+-type gset_op() :: simple_gset_op().
 -type flag_op() :: enable | disable.
 -type register_op() :: {assign, binary()}.
 -type simple_map_op() :: {remove, map_field()} | {update, map_field(), embedded_type_op()}.
