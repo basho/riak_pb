@@ -27,29 +27,28 @@
 
 -import(riak_pb_dt_codec, [decode_operation/1, operation_type/1, decode_fetch_response/1, encode_fetch_response/4]).
 
--define(CONTEXT,undefined_context).
--define(SET_VALUE,  [<<"binarytemple">>] ).
+-define(CONTEXT, undefined_context).
+-define(SET_VALUE, [<<"binarytemple">>]).
 
 decode_operation_gset_test() ->
-  Op = #dtop{set_op = #gsetop{adds = ?SET_VALUE }},
+  Op = #dtop{set_op = #gsetop{adds = ?SET_VALUE}},
   OpDecode = decode_operation(Op),
-  ?assertEqual(OpDecode, {add_all, ?SET_VALUE }).
+  ?assertEqual(OpDecode, {add_all, ?SET_VALUE}).
 
 operation_type_gset_test() ->
   OpType = operation_type(#dtop{set_op = #gsetop{}}),
   ?assertEqual(OpType, gset).
 
 decode_fetch_response_gset_test() ->
-  Res = decode_fetch_response(#dtfetchresp{context =  ?CONTEXT, type = 'GSET', value = #dtvalue{set_value = ?SET_VALUE }}),
-  ?assertEqual(Res , {gset,?SET_VALUE ,?CONTEXT} ).
+  Res = decode_fetch_response(#dtfetchresp{context = ?CONTEXT, type = 'GSET', value = #dtvalue{set_value = ?SET_VALUE}}),
+  ?assertEqual(Res, {gset, ?SET_VALUE, ?CONTEXT}).
 
 encode_fetch_response_gset_test() ->
- Resp =   encode_fetch_response(gset, #dtvalue{set_value = ?SET_VALUE } , ?CONTEXT, []),
-  ?debugVal(Resp),
+  Resp = encode_fetch_response(gset, #dtvalue{set_value = ?SET_VALUE}, ?CONTEXT, []),
   ?assertEqual(Resp,
-    {dtfetchresp,?CONTEXT,'GSET',
-      {dtvalue,undefined,
-        {dtvalue,undefined,?SET_VALUE,[]},
+    {dtfetchresp, ?CONTEXT, 'GSET',
+      {dtvalue, undefined,
+        {dtvalue, undefined, ?SET_VALUE, []},
         []}}
-    )
- .
+  )
+.
