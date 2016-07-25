@@ -264,6 +264,5 @@ message DtUpdateResp {
     optional sint64   counter_value = 3;
     repeated bytes    set_value     = 4;
     repeated MapEntry map_value     = 5;
-    repeated bytes    gset_value    = 6;
 }
 
