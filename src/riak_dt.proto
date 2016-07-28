@@ -124,6 +124,7 @@ message DtFetchResp {
         COUNTER = 1;
         SET     = 2;
         MAP     = 3;
+        GSET    = 4;
     }
 
     optional bytes    context = 1;
@@ -155,6 +156,15 @@ message SetOp {
 }
 
 /*
+ * An operation to update a GSet, on its own.
+ * GSet members are opaque binary values, you can only add
+ * them to a Set.
+ */
+message GSetOp {
+    repeated bytes adds    = 1;
+}
+
+/*
  * An operation to be applied to a value stored in a Map -- the
  * contents of an UPDATE operation. The operation field that is
  * present depends on the type of the field to which it is applied.
@@ -181,6 +191,7 @@ message MapUpdate {
     optional bytes     register_op = 4;
     optional FlagOp    flag_op     = 5;
     optional MapOp     map_op      = 6;
+
 }
 
 /*
@@ -252,3 +263,4 @@ message DtUpdateResp {
     repeated bytes    set_value     = 4;
     repeated MapEntry map_value     = 5;
 }
+
