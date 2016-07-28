@@ -157,6 +157,8 @@ message RpbBucketProps {
 
     // KV fast path
     optional bool write_once = 28;
+
+    optional bool dvv_enabled = 29;
 }
 
 // Authentication request

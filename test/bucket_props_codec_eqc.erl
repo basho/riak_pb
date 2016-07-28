@@ -94,7 +94,8 @@ bucket_prop() ->
            yz_index(),
            datatype(),
            flag(consistent),
-           flag(write_once)]).
+           flag(write_once),
+           flag(dvv_enabled)]).
 
 sortuniq(Gen) ->
     ?LET(L, Gen, lists:ukeysort(1,L)).

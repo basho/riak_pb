@@ -223,7 +223,8 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
                                     search_index=Index,
                                     datatype=Datatype,
                                     consistent=Consistent,
-                                    write_once=WriteOnce
+                                    write_once=WriteOnce,
+                                    dvv_enabled=DVVEnabled
                                    }) ->
     %% Extract numerical properties
     [ {P,V} || {P,V} <- [ {n_val, N}, {old_vclock, Old}, {young_vclock, Young},
@@ -234,7 +235,7 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
        {BProp, Bool} <- [{allow_mult, AM}, {last_write_wins, LWW},
                          {basic_quorum, BQ}, {notfound_ok, NFOK},
                          {search, Search}, {consistent, Consistent},
-                         {write_once, WriteOnce}],
+                         {write_once, WriteOnce}, {dvv_enabled, DVVEnabled}],
         Bool /= undefined ] ++
 
     %% Extract commit hooks
@@ -328,6 +329,8 @@ encode_bucket_props([{consistent, S}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{consistent = encode_bool(S)});
 encode_bucket_props([{write_once, S}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{write_once = encode_bool(S)});
+encode_bucket_props([{dvv_enabled, Flag} | Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{dvv_enabled = encode_bool(Flag)});
 encode_bucket_props([_Ignore|Rest], Pb) ->
     %% Ignore any properties not explicitly part of the PB message
     encode_bucket_props(Rest, Pb).
@@ -380,11 +383,12 @@ encode_commit_hook({struct, Props}=Hook) ->
     end.
 
 %% @doc Converts a list of RpbCommitHook messages into commit hooks.
--spec decode_commit_hooks([ #rpbcommithook{} ]) -> [ commit_hook_property() ].
+-spec decode_commit_hooks([ #rpbcommithook{} ]) -> [ modfun_property() | commit_hook_property() ].
 decode_commit_hooks(Hooks) ->
     [ decode_commit_hook(Hook) || Hook <- Hooks,
                                   Hook =/= #rpbcommithook{modfun=undefined, name=undefined} ].
 
+-spec decode_commit_hook( #rpbcommithook{} ) -> modfun_property() | commit_hook_property().
 decode_commit_hook(#rpbcommithook{modfun = Modfun}) when Modfun =/= undefined ->
     decode_modfun(Modfun, commit_hook);
 decode_commit_hook(#rpbcommithook{name = Name}) when Name =/= undefined ->
