@@ -22,7 +22,7 @@
 */
 
 /*
-** Revision: 2.0
+** Revision: 2.2.0
 */
 
 // Java package specifiers
@@ -107,6 +107,11 @@ message DtValue {
     optional sint64   counter_value = 1;
     repeated bytes    set_value     = 2;
     repeated MapEntry map_value     = 3;
+
+    /* We return an estimated cardinality of the Hyperloglog set
+     * on fetch.
+     */
+    optional uint64   hll_value     = 4;
 }
 
 
@@ -124,6 +129,7 @@ message DtFetchResp {
         COUNTER = 1;
         SET     = 2;
         MAP     = 3;
+        HLL     = 4;
     }
 
     optional bytes    context = 1;
@@ -152,6 +158,14 @@ message CounterOp {
 message SetOp {
     repeated bytes adds    = 1;
     repeated bytes removes = 2;
+}
+
+/*
+ * An operation to update a Hyperloglog Set, a top-level DT.
+ * You can only add to a HllSet.
+ */
+message HllOp {
+    repeated bytes adds    = 1;
 }
 
 /*
@@ -205,6 +219,11 @@ message DtOp {
     optional CounterOp counter_op = 1;
     optional SetOp     set_op     = 2;
     optional MapOp     map_op     = 3;
+
+    /* Adding values to a hyperloglog (set) is just like adding values
+     * to a set.
+     */
+    optional HllOp     hll_op     = 4;
 }
 
 /*
@@ -251,4 +270,5 @@ message DtUpdateResp {
     optional sint64   counter_value = 3;
     repeated bytes    set_value     = 4;
     repeated MapEntry map_value     = 5;
+    optional uint64   hll_value     = 6;
 }

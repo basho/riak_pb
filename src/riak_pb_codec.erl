@@ -223,12 +223,14 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
                                     search_index=Index,
                                     datatype=Datatype,
                                     consistent=Consistent,
-                                    write_once=WriteOnce
+                                    write_once=WriteOnce,
+                                    hll_precision=HllPrecision
                                    }) ->
     %% Extract numerical properties
-    [ {P,V} || {P,V} <- [ {n_val, N}, {old_vclock, Old}, {young_vclock, Young},
-                          {big_vclock, Big}, {small_vclock, Small} ],
-               V /= undefined ] ++
+    [ {P,V} || {P,V} <- [{n_val, N}, {old_vclock, Old}, {young_vclock, Young},
+                       {big_vclock, Big}, {small_vclock, Small},
+                       {hll_precision, HllPrecision}],
+              V /= undefined ] ++
     %% Extract booleans
     [ {BProp, decode_bool(Bool)} ||
        {BProp, Bool} <- [{allow_mult, AM}, {last_write_wins, LWW},
@@ -328,6 +330,8 @@ encode_bucket_props([{consistent, S}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{consistent = encode_bool(S)});
 encode_bucket_props([{write_once, S}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{write_once = encode_bool(S)});
+encode_bucket_props([{hll_precision, Num}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{hll_precision = Num});
 encode_bucket_props([_Ignore|Rest], Pb) ->
     %% Ignore any properties not explicitly part of the PB message
     encode_bucket_props(Rest, Pb).
@@ -383,7 +387,7 @@ encode_commit_hook({struct, Props}=Hook) ->
 -spec decode_commit_hooks([ #rpbcommithook{} ]) -> [ commit_hook_property() ].
 decode_commit_hooks(Hooks) ->
     [ decode_commit_hook(Hook) || Hook <- Hooks,
-                                  Hook =/= #rpbcommithook{modfun=undefined, name=undefined} ].
+                                 Hook =/= #rpbcommithook{modfun=undefined, name=undefined} ].
 
 decode_commit_hook(#rpbcommithook{modfun = Modfun}) when Modfun =/= undefined ->
     decode_modfun(Modfun, commit_hook);
