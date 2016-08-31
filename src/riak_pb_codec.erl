@@ -432,7 +432,6 @@ record_test() ->
                    notfound_ok=true,
                    bucket = <<"bucket">>,
                    key = <<"key">>},
-
     decode_eq(Req, encode(Req), fun decode/2).
 
 empty_atoms_test() ->
