@@ -417,6 +417,7 @@ safe_to_atom(Binary) when is_binary(Binary) ->
 
 -ifdef(TEST).
 -include("riak_kv_pb.hrl").
+-include("riak_dt_pb.hrl").
 
 %% One necessary omission: we do not have any messages today that
 %% include functions, so we cannot test decoding such records.
@@ -433,6 +434,31 @@ record_test() ->
                    bucket = <<"bucket">>,
                    key = <<"key">>},
     decode_eq(Req, encode(Req), fun decode/2).
+
+optional_booleans_test() ->
+    Req = #dtfetchreq{bucket = "bucket",
+                      key = <<"key">>,
+                      type = <<"type">>},
+    ?assertEqual(undefined, Req#dtfetchreq.r),
+    ?assertEqual(undefined, Req#dtfetchreq.pr),
+    ?assertEqual(undefined, Req#dtfetchreq.basic_quorum),
+    ?assertEqual(undefined, Req#dtfetchreq.notfound_ok),
+    ?assertEqual(undefined, Req#dtfetchreq.timeout),
+    ?assertEqual(undefined, Req#dtfetchreq.sloppy_quorum),
+    ?assertEqual(undefined, Req#dtfetchreq.n_val),
+    ?assertEqual(true, Req#dtfetchreq.include_context),
+    DecodedReq = #dtfetchreq{bucket = <<"bucket">>,
+                             key = <<"key">>,
+                             type = <<"type">>,
+                             r = undefined,
+                             pr = undefined,
+                             basic_quorum = undefined,
+                             notfound_ok = undefined,
+                             timeout = undefined,
+                             sloppy_quorum = undefined,
+                             n_val = undefined,
+                             include_context = true},
+    decode_eq(DecodedReq, encode(Req), fun decode/2).
 
 empty_atoms_test() ->
     %% Empty messages are either empty records or atoms, depending on
