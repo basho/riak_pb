@@ -26,6 +26,12 @@
 -module(riak_pb_codec).
 
 -include("riak_pb.hrl").
+-include("riak_ts_pb.hrl").
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-compile(export_all).
+-endif.
 
 -export([encode/1,      %% riakc_pb:encode
          decode/2,      %% riakc_pb:decode
@@ -73,15 +79,40 @@
 %% Bucket properties that are commit hooks have this format.
 -type commit_hook_property() :: [ {struct, [{commit_hook_field(), binary()}]} ].
 
-%% @doc Create an iolist of msg code and protocol buffer
-%% message. Replaces `riakc_pb:encode/1'.
+%% @doc Create an iolist of msg code and encoded message. Replaces
+%% `riakc_pb:encode/1'.
+
 -spec encode(atom() | tuple()) -> iolist().
+
 encode(Msg) when is_atom(Msg) ->
-    [msg_code(Msg)];
+    encode_msg_no_body(msg_code(Msg), Msg);
+encode({Msg}) when is_atom(Msg) ->
+    encode_msg_no_body(msg_code(Msg), Msg);
 encode(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
     [msg_code(MsgType) | Encoder:encode(Msg)].
+
+%% ------------------------------------------------------------
+%% Encode a message when no content body is present (message atom
+%% only).
+%%
+%% For PB messages, this simply encodes the message code, which serves
+%% to identify the encoded message on the other side of the socket
+%% connection.
+%% ------------------------------------------------------------
+
+encode_msg_no_body(MsgCode, _Msg) ->
+    [MsgCode]. %% I/O layer will convert this to binary
+
+%% @doc Convert a property list to an RpbBucketProps message
+%% @private
+post_decode(Msg=#tsgetreq{key=K}) ->
+    Msg#tsgetreq{key=riak_pb_ts_codec:decode_cells(K)};
+post_decode(Msg=#tsputreq{rows=R}) ->
+    Msg#tsputreq{rows=riak_pb_ts_codec:decode_rows(R)};
+post_decode(Msg) ->
+    Msg.
 
 %% @doc Decode a protocol buffer message given its type - if no bytes
 %% return the atom for the message code. Replaces `riakc_pb:decode/2'.
@@ -90,21 +121,24 @@ decode(MsgCode, <<>>) ->
     msg_type(MsgCode);
 decode(MsgCode, MsgData) ->
     Decoder = decoder_for(MsgCode),
-    Decoder:decode(msg_type(MsgCode), MsgData).
+    Decoded = Decoder:decode(msg_type(MsgCode), MsgData),
+    post_decode(Decoded).
 
 %% @doc Converts a message code into the symbolic message
 %% name. Replaces `riakc_pb:msg_type/1'.
 -spec msg_type(integer()) -> atom().
-msg_type(Int) -> riak_pb_messages:msg_type(Int).
+msg_type(Int) ->
+    riak_pb_messages:msg_type(Int).
 
 %% @doc Converts a symbolic message name into a message code. Replaces
 %% `riakc_pb:msg_code/1'.
 -spec msg_code(atom()) -> integer().
 msg_code(Atom) -> riak_pb_messages:msg_code(Atom).
 
-%% @doc Selects the appropriate PB decoder for a message code.
+%% @doc Selects the appropriate decoder for a message code.
 -spec decoder_for(pos_integer()) -> module().
-decoder_for(N) -> riak_pb_messages:decoder_for(N).
+decoder_for(N) ->
+    riak_pb_messages:decoder_for(N).
 
 %% @doc Selects the appropriate PB encoder for a given message name.
 -spec encoder_for(atom()) -> module().
@@ -190,12 +224,14 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
                                     datatype=Datatype,
                                     consistent=Consistent,
                                     write_once=WriteOnce,
-                                    ttl=TTL
+                                    ttl=TTL,
+                                    hll_precision=HllPrecision
                                    }) ->
     %% Extract numerical properties
-    [ {P,V} || {P,V} <- [ {n_val, N}, {old_vclock, Old}, {young_vclock, Young},
-                          {big_vclock, Big}, {small_vclock, Small}, {ttl, TTL}],
-               V /= undefined ] ++
+    [ {P,V} || {P,V} <- [{n_val, N}, {old_vclock, Old}, {young_vclock, Young},
+                       {big_vclock, Big}, {small_vclock, Small}, {ttl, TTL},
+                       {hll_precision, HllPrecision}],
+              V /= undefined ] ++
     %% Extract booleans
     [ {BProp, decode_bool(Bool)} ||
        {BProp, Bool} <- [{allow_mult, AM}, {last_write_wins, LWW},
@@ -297,6 +333,8 @@ encode_bucket_props([{write_once, S}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{write_once = encode_bool(S)});
 encode_bucket_props([{ttl, Num}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{ttl = Num});
+encode_bucket_props([{hll_precision, Num}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{hll_precision = Num});
 encode_bucket_props([_Ignore|Rest], Pb) ->
     %% Ignore any properties not explicitly part of the PB message
     encode_bucket_props(Rest, Pb).
@@ -352,7 +390,7 @@ encode_commit_hook({struct, Props}=Hook) ->
 -spec decode_commit_hooks([ #rpbcommithook{} ]) -> [ commit_hook_property() ].
 decode_commit_hooks(Hooks) ->
     [ decode_commit_hook(Hook) || Hook <- Hooks,
-                                  Hook =/= #rpbcommithook{modfun=undefined, name=undefined} ].
+                                 Hook =/= #rpbcommithook{modfun=undefined, name=undefined} ].
 
 decode_commit_hook(#rpbcommithook{modfun = Modfun}) when Modfun =/= undefined ->
     decode_modfun(Modfun, commit_hook);
@@ -379,3 +417,77 @@ safe_to_atom(Binary) when is_binary(Binary) ->
             error_logger:warning_msg("Creating new atom from protobuffs message! ~p", [Binary]),
             binary_to_atom(Binary, latin1)
     end.
+
+-ifdef(TEST).
+-include("riak_kv_pb.hrl").
+-include("riak_dt_pb.hrl").
+
+%% One necessary omission: we do not have any messages today that
+%% include functions, so we cannot test decoding such records.
+
+decode_eq(Message, <<MsgCode:8, Rest/binary>>, DecodeFun) ->
+    ?assertEqual(Message, DecodeFun(MsgCode, Rest));
+decode_eq(Message, IoList, DecodeFun) ->
+    decode_eq(Message, iolist_to_binary(IoList), DecodeFun).
+
+record_test() ->
+    Req =
+        #rpbgetreq{n_val=4,
+                   notfound_ok=true,
+                   bucket = <<"bucket">>,
+                   key = <<"key">>},
+    decode_eq(Req, encode(Req), fun decode/2).
+
+optional_booleans_test() ->
+    Req = #dtfetchreq{bucket = "bucket",
+                      key = <<"key">>,
+                      type = <<"type">>},
+    ?assertEqual(undefined, Req#dtfetchreq.r),
+    ?assertEqual(undefined, Req#dtfetchreq.pr),
+    ?assertEqual(undefined, Req#dtfetchreq.basic_quorum),
+    ?assertEqual(undefined, Req#dtfetchreq.notfound_ok),
+    ?assertEqual(undefined, Req#dtfetchreq.timeout),
+    ?assertEqual(undefined, Req#dtfetchreq.sloppy_quorum),
+    ?assertEqual(undefined, Req#dtfetchreq.n_val),
+    ?assertEqual(true, Req#dtfetchreq.include_context),
+    DecodedReq = #dtfetchreq{bucket = <<"bucket">>,
+                             key = <<"key">>,
+                             type = <<"type">>,
+                             r = undefined,
+                             pr = undefined,
+                             basic_quorum = undefined,
+                             notfound_ok = undefined,
+                             timeout = undefined,
+                             sloppy_quorum = undefined,
+                             n_val = undefined,
+                             include_context = true},
+    decode_eq(DecodedReq, encode(Req), fun decode/2).
+
+empty_atoms_test() ->
+    %% Empty messages are either empty records or atoms, depending on
+    %% whether the .proto file defines the message as an empty record
+    %% or ignores it. On the receiving end they are all atoms.
+
+    Resp = tsdelresp,  %% .proto defines as empty record
+
+    decode_eq(Resp, encode(Resp), fun decode/2).
+
+mixed_strings_test() ->
+    %% Because the network layer will invoke iolist_to_binary/1 or its
+    %% equivalent, on the sending side we can get away with using
+    %% strings instead of binaries in records that expect the latter
+    Req =
+        #rpbgetreq{n_val=4,
+                   notfound_ok=true,
+                   bucket = "bucket",
+                   key = <<"key">>},
+
+    DecodedReq =
+        #rpbgetreq{n_val=4,
+                   notfound_ok=true,
+                   bucket = <<"bucket">>,
+                   key = <<"key">>},
+
+    decode_eq(DecodedReq, encode(Req), fun decode/2).
+
+-endif. %% TEST

@@ -157,7 +157,12 @@ message RpbBucketProps {
 
     // KV fast path
     optional bool write_once = 28;
-    optional uint32 ttl = 29;
+
+    // Hyperlolog DT Precision
+    optional uint32 hll_precision = 29;
+
+    // KV sweeper object expiry time
+    optional uint32 ttl = 30;
 }
 
 // Authentication request

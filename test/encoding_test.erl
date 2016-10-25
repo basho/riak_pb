@@ -2,6 +2,7 @@
 -compile([export_all]).
 -include_lib("eunit/include/eunit.hrl").
 -include("riak_pb_kv_codec.hrl").
+-include("riak_dt_pb.hrl").
 
 pb_test_() ->
     [{"content encode decode",
@@ -82,6 +83,22 @@ pb_test_() ->
                                              riak_pb_kv_codec:encode_content({MetaData, Value}))))),
                  ?assertEqual([], dict:to_list(MetaData2)),
                  ?assertEqual(Value, Value2)
+             end)},
+     {"riak_dt-dtfetchreq-encode-decode",
+      ?_test(begin
+                 RBin = <<10,1,97,18,1,97,26,1,97>>,
+                 R = riak_dt_pb:decode(dtfetchreq, RBin),
+                 ?assertEqual(<<"a">>, R#dtfetchreq.type),
+                 ?assertEqual(<<"a">>, R#dtfetchreq.bucket),
+                 ?assertEqual(<<"a">>, R#dtfetchreq.key),
+                 ?assertEqual(undefined, R#dtfetchreq.r),
+                 ?assertEqual(undefined, R#dtfetchreq.pr),
+                 ?assertEqual(undefined, R#dtfetchreq.basic_quorum),
+                 ?assertEqual(undefined, R#dtfetchreq.notfound_ok),
+                 ?assertEqual(undefined, R#dtfetchreq.timeout),
+                 ?assertEqual(undefined, R#dtfetchreq.sloppy_quorum),
+                 ?assertEqual(undefined, R#dtfetchreq.n_val),
+                 ?assertEqual(true, R#dtfetchreq.include_context)
              end)},
      {"msg code encode decode",
       ?_test(begin

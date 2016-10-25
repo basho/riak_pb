@@ -4,14 +4,12 @@ all: deps compile_all
 
 deps: erl_deps
 
-compile_all: erl_compile python_compile python3_compile java_compile c_compile
+compile_all: erl_compile
 
-clean: erl_clean python_clean python3_clean java_clean c_clean
+clean: erl_clean
 
 distclean: clean
 	rm -rf dist
-
-release: python_release python3_release java_release c_release
 
 # Erlang-specific build steps
 DIALYZER_APPS = kernel stdlib erts crypto compiler hipe syntax_tools
@@ -28,93 +26,18 @@ erl_clean:
 
 compile: erl_compile # Hack for tools.mk
 
-# Python 2.x specific build steps
-python_compile:
-	@echo "==> Python (compile)"
-	@protoc -Isrc --python_out=riak_pb src/*.proto
-	@./setup.py build_messages build --build-base=python
-
-python_clean:
-	@echo "==> Python (clean)"
-	@./setup.py clean --build-base=python clean_messages
-	@rm -rf *.pyc riak_pb/*_pb2.py riak_pb/*.pyc riak_pb.egg-info python
-
-python_release: python_clean
-ifeq ($(RELEASE_GPG_KEYNAME),)
-	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
-else
-	@echo "==> Python (release)"
-	@protoc -Isrc --python_out=riak_pb src/*.proto
-	@python2.7 setup.py build_messages build --build-base=python
-	@python2.7 setup.py build --build-base=python bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
-	@python2.7 setup.py clean --build-base=python clean_messages
-	@rm -rf *.pyc riak_pb/*_pb2.py riak_pb/*.pyc riak_pb.egg-info python
-	@protoc -Isrc --python_out=riak_pb src/*.proto
-	@python2.7 setup.py build_messages build --build-base=python
-	@python2.7 setup.py build --build-base=python sdist upload -s -i $(RELEASE_GPG_KEYNAME)
-	@python2.6 setup.py clean --build-base=python clean_messages
-	@rm -rf riak_pb/*_pb2.pyc *.pyc python_riak_pb.egg-info python
-	@protoc -Isrc --python_out=riak_pb src/*.proto
-	@python2.6 setup.py build_messages build --build-base=python
-	@python2.6 setup.py build --build-base=python bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
+release: compile
+ifeq ($(VERSION),)
+	$(error VERSION must be set to build a release and deploy this package)
 endif
-
-python_install: python_compile
-	@echo "==> Python (install)"
-	@./setup.py build_messages build --build-base=python install
-
-# Python 3.x specific build steps
-python3_compile:
-	@echo "==> Python 3 (compile)"
-	@protoc -Isrc --python_out=riak_pb src/*.proto
-	@python3 setup.py build_messages build --build-base=python3
-
-python3_clean:
-	@echo "==> Python 3 (clean)"
-	@python3 setup.py clean --build-base=python3 clean_messages
-	@rm -rf riak_pb/*_pb2.py riak_pb/__pycache__ __pycache__ python3_riak_pb.egg-info python3
-
-python3_release: python3_clean
 ifeq ($(RELEASE_GPG_KEYNAME),)
-	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
-else
-	@echo "==> Python 3 (release)"
-	@protoc -Isrc --python_out=riak_pb src/*.proto
-	@python3.4 setup.py build_messages build --build-base=python3
-	@python3.4 setup.py build --build-base=python3 bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
-	@python3.4 setup.py clean --build-base=python3 clean_messages
-	@rm -rf riak_pb/*_pb2.py riak_pb/__pycache__ __pycache__ python3_riak_pb.egg-info python3
-	@protoc -Isrc --python_out=riak_pb src/*.proto
-	@python3.4 setup.py build_messages build --build-base=python3
-	@python3.4 setup.py build --build-base=python3 sdist upload -s -i $(RELEASE_GPG_KEYNAME)
-	@python3.4 setup.py clean --build-base=python3 clean_messages
-	@rm -rf riak_pb/*_pb2.py riak_pb/__pycache__ __pycache__ python3_riak_pb.egg-info python3
-	@protoc -Isrc --python_out=riak_pb src/*.proto
-	@python3.3 setup.py build_messages build --build-base=python3
-	@python3.3 setup.py build --build-base=python3 bdist_egg upload -s -i $(RELEASE_GPG_KEYNAME)
+	$(error RELEASE_GPG_KEYNAME must be set to build a release and deploy this package)
 endif
-
-python3_install: python3_compile
-	@echo "==> Python 3 (install)"
-	@python3 setup.py build_messages build --build-base=python3 install
-
-# Java specific build steps
-java_compile:
-	@echo "==> Java (compile)"
-	@mvn install
-
-java_clean:
-	@echo "==> Java (clean)"
-	@mvn clean
-
-java_release:
-	@echo "==> Java"
-ifeq ($(RELEASE_GPG_KEYNAME),)
-	@echo "RELEASE_GPG_KEYNAME must be set to release/deploy"
-else
-	@mvn clean
-	@mvn deploy
-endif
+	@echo "==> Tagging version $(VERSION)"
+	@bash ./build/publish $(VERSION) validate
+	@git tag --sign -a "$(VERSION)" -m "riak_pb $(VERSION)" --local-user "$(RELEASE_GPG_KEYNAME)"
+	@git push --tags
+	@bash ./build/publish $(VERSION)
 
 # C specific build steps
 PROTOC	 = protoc-c
