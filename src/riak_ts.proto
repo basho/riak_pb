@@ -25,6 +25,9 @@
 ** Revision: 1.0rc7
 */
 
+syntax = "proto3";
+package basho.riak.api.pb.message;
+
 // Java package specifiers
 option java_package = "com.basho.riak.protobuf";
 option java_outer_classname = "RiakTsPB";
@@ -34,22 +37,22 @@ import "riak.proto"; // for RpbPair
 
 // Dispatch a query to Riak
 message TsQueryReq {
-  // left optional to support parameterized queries in the future
-  optional TsInterpolation query = 1;
-  optional bool stream = 2 [default = false];
-  optional bytes cover_context = 3; // chopped up coverage plan per-req
+  // left to support parameterized queries in the future
+  TsInterpolation query = 1;
+  bool stream = 2;
+  bytes cover_context = 3; // chopped up coverage plan per-req
 }
 
 message TsQueryResp {
   repeated TsColumnDescription columns = 1;
   repeated TsRow rows = 2;  // 0 to n rows
-  optional bool done = 3 [default = true];
+  bool done = 3;
 }
 
 message TsGetReq {
-  required bytes table = 1;
+  bytes table = 1;
   repeated TsCell key = 2;
-  optional uint32 timeout = 3;
+  uint32 timeout = 3;
 }
 
 message TsGetResp {
@@ -59,7 +62,7 @@ message TsGetResp {
 
 
 message TsPutReq {
-  required bytes table = 1;
+  bytes table = 1;
 
   // optional: omitting it should use table order
   repeated TsColumnDescription columns = 2;
@@ -72,10 +75,10 @@ message TsPutResp {
 }
 
 message TsDelReq {
-  required bytes table = 1;
+  bytes table = 1;
   repeated TsCell key = 2;
-  optional bytes vclock = 3;
-  optional uint32 timeout = 4;
+  bytes vclock = 3;
+  uint32 timeout = 4;
 }
 
 message TsDelResp {
@@ -83,7 +86,7 @@ message TsDelResp {
 }
 
 message TsInterpolation {
-  required bytes base = 1;
+  bytes base = 1;
   repeated RpbPair interpolations = 2;
 }
 
@@ -96,8 +99,8 @@ enum TsColumnType {
 }
 
 message TsColumnDescription {
-  required bytes name = 1;
-  required TsColumnType type = 2;
+  bytes name = 1;
+  TsColumnType type = 2;
 }
 
 message TsRow {
@@ -105,29 +108,29 @@ message TsRow {
 }
 
 message TsCell {
-  optional bytes varchar_value = 1;
-  optional sint64 sint64_value = 2;
-  optional sint64 timestamp_value = 3;
-  optional bool boolean_value = 4;
-  optional double double_value = 5;
+  bytes varchar_value = 1;
+  sint64 sint64_value = 2;
+  sint64 timestamp_value = 3;
+  bool boolean_value = 4;
+  double double_value = 5;
 }
 
 message TsListKeysReq {
-  required bytes table = 1;
-  optional uint32 timeout = 2;
+  bytes table = 1;
+  uint32 timeout = 2;
 }
 
 message TsListKeysResp {
   repeated TsRow keys = 1;
-  optional bool done = 2;
+  bool done = 2;
 }
 
 // Request a segmented coverage plan for this query
 message TsCoverageReq {
-  // left optional to support parameterized queries in the future
-  optional TsInterpolation query = 1;
-  required bytes table = 2;
-  optional bytes replace_cover = 3;     // For failure recovery
+  // left to support parameterized queries in the future
+  TsInterpolation query = 1;
+  bytes table = 2;
+  bytes replace_cover = 3;     // For failure recovery
   repeated bytes unavailable_cover = 4; // Other coverage contexts that have failed to assist Riak in deciding what nodes to avoid
 }
 
@@ -138,18 +141,18 @@ message TsCoverageResp {
 
 // Segment of a TS coverage plan
 message TsCoverageEntry {
-    required bytes ip = 1;
-    required uint32 port = 2;
-    required bytes cover_context = 3; // Opaque context to pass into follow-up request
-    optional TsRange range = 4; // Might be other types of coverage queries/responses
+    bytes ip = 1;
+    uint32 port = 2;
+    bytes cover_context = 3; // Opaque context to pass into follow-up request
+    TsRange range = 4; // Might be other types of coverage queries/responses
 }
 
 // Each prospective subquery has a range of valid time values
 message TsRange {
-    required bytes field_name = 1;
-    required sint64 lower_bound = 2;
-    required bool lower_bound_inclusive = 3;
-    required sint64 upper_bound = 4;
-    required bool upper_bound_inclusive = 5;
-    required bytes desc = 6; // Some human readable description of the time range
+    bytes field_name = 1;
+    sint64 lower_bound = 2;
+    bool lower_bound_inclusive = 3;
+    sint64 upper_bound = 4;
+    bool upper_bound_inclusive = 5;
+    bytes desc = 6; // Some human readable description of the time range
 }

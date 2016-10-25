@@ -11,7 +11,7 @@
 **
 **   http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing,
+** Unless by applicable law or agreed to in writing,
 ** software distributed under the License is distributed on an
 ** "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 ** KIND, either express or implied.  See the License for the
@@ -24,6 +24,9 @@
 /*
 ** Revision: 2.2.0
 */
+
+syntax = "proto3";
+package basho.riak.api.pb.message;
 
 // Java package specifiers
 option java_package = "com.basho.riak.protobuf";
@@ -44,6 +47,7 @@ message MapField {
      * sets, registers, flags, and maps.
      */
     enum MapFieldType {
+        DEFAULT = 0;
         COUNTER  = 1;
         SET      = 2;
         REGISTER = 3;
@@ -51,8 +55,8 @@ message MapField {
         MAP      = 5;
     }
 
-    required bytes        name = 1;
-    required MapFieldType type = 2;
+    bytes        name = 1;
+    MapFieldType type = 2;
 }
 
 
@@ -61,11 +65,11 @@ message MapField {
  * defined in the field determines which value type is expected.
  */
 message MapEntry {
-    required MapField field = 1;
-    optional sint64   counter_value  = 2;
+    MapField field = 1;
+    sint64   counter_value  = 2;
     repeated bytes    set_value      = 3;
-    optional bytes    register_value = 4;
-    optional bool     flag_value     = 5;
+    bytes    register_value = 4;
+    bool     flag_value     = 5;
     repeated MapEntry map_value      = 6;
 }
 
@@ -80,22 +84,22 @@ message MapEntry {
  */
 message DtFetchReq {
     // The identifier: bucket, key and bucket-type
-    required bytes bucket = 1;
-    required bytes key    = 2;
-    required bytes type  = 3;
+    bytes bucket = 1;
+    bytes key    = 2;
+    bytes type  = 3;
 
     // Request options
-    optional uint32 r             =  4;
-    optional uint32 pr            =  5;
-    optional bool   basic_quorum  =  6;
-    optional bool   notfound_ok   =  7;
-    optional uint32 timeout       =  8;
-    optional bool   sloppy_quorum =  9;  // Experimental, may change/disappear
-    optional uint32 n_val         = 10;  // Experimental, may change/disappear
+    uint32 r             =  4;
+    uint32 pr            =  5;
+    bool   basic_quorum  =  6;
+    bool   notfound_ok   =  7;
+    uint32 timeout       =  8;
+    bool   sloppy_quorum =  9;  // Experimental, may change/disappear
+    uint32 n_val         = 10;  // Experimental, may change/disappear
 
     // For read-only requests or context-free operations, you can set
     // this to false to reduce the size of the response payload.
-    optional bool include_context = 11 [default=true];
+    bool include_context = 11;
 }
 
 
@@ -104,14 +108,14 @@ message DtFetchReq {
  * then empty values (sets, maps) should be treated as such.
  */
 message DtValue {
-    optional sint64   counter_value = 1;
+    sint64   counter_value = 1;
     repeated bytes    set_value     = 2;
     repeated MapEntry map_value     = 3;
 
     /* We return an estimated cardinality of the Hyperloglog set
      * on fetch.
      */
-    optional uint64   hll_value     = 4;
+    uint64   hll_value     = 4;
 }
 
 
@@ -126,15 +130,16 @@ message DtValue {
  */
 message DtFetchResp {
     enum DataType {
+        DEFAULT = 0;
         COUNTER = 1;
         SET     = 2;
         MAP     = 3;
         HLL     = 4;
     }
 
-    optional bytes    context = 1;
-    required DataType type    = 2;
-    optional DtValue  value   = 3;
+    bytes    context = 1;
+    DataType type    = 2;
+    DtValue  value   = 3;
 }
 
 /*
@@ -147,7 +152,7 @@ message DtFetchResp {
  * the meaning is an increment by 1.
  */
 message CounterOp {
-    optional sint64 increment = 1;
+    sint64 increment = 1;
 }
 
 /*
@@ -179,22 +184,23 @@ message MapUpdate {
      * disabled, and there are no arguments to the operations.
      */
     enum FlagOp {
+        DEFAULT = 0;
         ENABLE  = 1;
         DISABLE = 2;
     }
 
-    required MapField  field       = 1;
+    MapField  field       = 1;
 
-    optional CounterOp counter_op  = 2;
-    optional SetOp     set_op      = 3;
+    CounterOp counter_op  = 2;
+    SetOp     set_op      = 3;
 
     /*
      * There is only one operation on a register, which is to set its
      * value, therefore the "operation" is the new value.
      */
-    optional bytes     register_op = 4;
-    optional FlagOp    flag_op     = 5;
-    optional MapOp     map_op      = 6;
+    bytes     register_op = 4;
+    FlagOp    flag_op     = 5;
+    MapOp     map_op      = 6;
 }
 
 /*
@@ -216,14 +222,14 @@ message MapOp {
  * depends on the datatype being updated.
  */
 message DtOp {
-    optional CounterOp counter_op = 1;
-    optional SetOp     set_op     = 2;
-    optional MapOp     map_op     = 3;
+    CounterOp counter_op = 1;
+    SetOp     set_op     = 2;
+    MapOp     map_op     = 3;
 
     /* Adding values to a hyperloglog (set) is just like adding values
      * to a set.
      */
-    optional HllOp     hll_op     = 4;
+    HllOp     hll_op     = 4;
 }
 
 /*
@@ -234,25 +240,25 @@ message DtOp {
  */
 message DtUpdateReq {
     // The identifier
-    required bytes bucket = 1;
-    optional bytes key    = 2; // missing key results in server-assigned key, like KV
-    required bytes type   = 3; // bucket type, not data-type (but the data-type is constrained per bucket-type)
+    bytes bucket = 1;
+    bytes key    = 2; // missing key results in server-assigned key, like KV
+    bytes type   = 3; // bucket type, not data-type (but the data-type is constrained per bucket-type)
 
     // Opaque update-context
-    optional bytes context = 4;
+    bytes context = 4;
 
     // The operations
-    required DtOp  op = 5;
+    DtOp  op = 5;
 
     // Request options
-    optional uint32 w               =  6;
-    optional uint32 dw              =  7;
-    optional uint32 pw              =  8;
-    optional bool   return_body     =  9 [default=false];
-    optional uint32 timeout         = 10;
-    optional bool   sloppy_quorum   = 11;  // Experimental, may change/disappear
-    optional uint32 n_val           = 12;  // Experimental, may change/disappear
-    optional bool   include_context = 13 [default=true]; // When return_body is true, should the context be returned too?
+    uint32 w               =  6;
+    uint32 dw              =  7;
+    uint32 pw              =  8;
+    bool   return_body     =  9;
+    uint32 timeout         = 10;
+    bool   sloppy_quorum   = 11;  // Experimental, may change/disappear
+    uint32 n_val           = 12;  // Experimental, may change/disappear
+    bool   include_context = 13; // When return_body is true, should the context be returned too?
 }
 
 
@@ -263,12 +269,12 @@ message DtUpdateReq {
  */
 message DtUpdateResp {
     // The key, if assigned by the server
-    optional bytes    key           = 1;
+    bytes    key           = 1;
 
     // The opaque update context and value, if return_body was set.
-    optional bytes    context       = 2;
-    optional sint64   counter_value = 3;
+    bytes    context       = 2;
+    sint64   counter_value = 3;
     repeated bytes    set_value     = 4;
     repeated MapEntry map_value     = 5;
-    optional uint64   hll_value     = 6;
+    uint64   hll_value     = 6;
 }

@@ -25,6 +25,9 @@
 ** Revision: 1.4
 */
 
+syntax = "proto3";
+package basho.riak.api.pb.message;
+
 // Java package specifiers
 option java_package = "com.basho.riak.protobuf";
 option java_outer_classname = "RiakKvPB";
@@ -33,131 +36,131 @@ import "riak.proto"; // for RpbPair
 
 // Get ClientId Request - no message defined, just send RpbGetClientIdReq message code
 message RpbGetClientIdResp {
-    required bytes client_id = 1; // Client id in use for this connection
+    bytes client_id = 1; // Client id in use for this connection
 }
 
 message RpbSetClientIdReq {
-    required bytes client_id = 1; // Client id to use for this connection
+    bytes client_id = 1; // Client id to use for this connection
 }
 // Set ClientId Request - no message defined, just send RpbSetClientIdReq message code
 
 
 // Get Request - retrieve bucket/key
 message RpbGetReq {
-    required bytes bucket = 1;
-    required bytes key = 2;
-    optional uint32 r = 3;
-    optional uint32 pr = 4;
-    optional bool basic_quorum = 5;
-    optional bool notfound_ok = 6;
-    optional bytes if_modified = 7;     // fail if the supplied vclock does not match
-    optional bool head = 8;             // return everything but the value
-    optional bool deletedvclock = 9;    // return the tombstone's vclock, if applicable
-    optional uint32 timeout = 10;
-    optional bool sloppy_quorum = 11;   // Experimental, may change/disappear
-    optional uint32 n_val = 12;         // Experimental, may change/disappear
-    optional bytes type = 13;           // Bucket type, if not set we assume the 'default' type
+    bytes bucket = 1;
+    bytes key = 2;
+    uint32 r = 3;
+    uint32 pr = 4;
+    bool basic_quorum = 5;
+    bool notfound_ok = 6;
+    bytes if_modified = 7;     // fail if the supplied vclock does not match
+    bool head = 8;             // return everything but the value
+    bool deletedvclock = 9;    // return the tombstone's vclock, if applicable
+    uint32 timeout = 10;
+    bool sloppy_quorum = 11;   // Experimental, may change/disappear
+    uint32 n_val = 12;         // Experimental, may change/disappear
+    bytes type = 13;           // Bucket type, if not set we assume the 'default' type
 }
 
 // Get Response - if the record was not found there will be no content/vclock
 message RpbGetResp {
     repeated RpbContent content = 1;
-    optional bytes vclock = 2;        // the opaque vector clock for the object
-    optional bool unchanged = 3;
+    bytes vclock = 2;        // the opaque vector clock for the object
+    bool unchanged = 3;
 }
 
 
 // Put request - if options.return_body is set then the updated metadata/data for
 //               the key will be returned.
 message RpbPutReq {
-    required bytes bucket = 1;
-    optional bytes key = 2;
-    optional bytes vclock = 3;
-    required RpbContent content = 4;
-    optional uint32 w = 5;
-    optional uint32 dw = 6;
-    optional bool return_body = 7;
-    optional uint32 pw = 8;
-    optional bool if_not_modified = 9;
-    optional bool if_none_match = 10;
-    optional bool return_head = 11;
-    optional uint32 timeout = 12;
-    optional bool asis = 13;
-    optional bool sloppy_quorum = 14; // Experimental, may change/disappear
-    optional uint32 n_val = 15;       // Experimental, may change/disappear
-    optional bytes type = 16;         // Bucket type, if not set we assume the 'default' type
+    bytes bucket = 1;
+    bytes key = 2;
+    bytes vclock = 3;
+    RpbContent content = 4;
+    uint32 w = 5;
+    uint32 dw = 6;
+    bool return_body = 7;
+    uint32 pw = 8;
+    bool if_not_modified = 9;
+    bool if_none_match = 10;
+    bool return_head = 11;
+    uint32 timeout = 12;
+    bool asis = 13;
+    bool sloppy_quorum = 14; // Experimental, may change/disappear
+    uint32 n_val = 15;       // Experimental, may change/disappear
+    bytes type = 16;         // Bucket type, if not set we assume the 'default' type
 }
 
-// Put response - same as get response with optional key if one was generated
+// Put response - same as get response with key if one was generated
 message RpbPutResp {
     repeated RpbContent content = 1;
-    optional bytes vclock = 2;        // the opaque vector clock for the object
-    optional bytes key = 3;           // the key generated, if any
+    bytes vclock = 2;        // the opaque vector clock for the object
+    bytes key = 3;           // the key generated, if any
 }
 
 
 // Delete request
 message RpbDelReq {
-    required bytes bucket = 1;
-    required bytes key = 2;
-    optional uint32 rw = 3;
-    optional bytes vclock = 4;
-    optional uint32 r = 5;
-    optional uint32 w = 6;
-    optional uint32 pr = 7;
-    optional uint32 pw = 8;
-    optional uint32 dw = 9;
-    optional uint32 timeout = 10;
-    optional bool sloppy_quorum = 11; // Experimental, may change/disappear
-    optional uint32 n_val = 12;       // Experimental, may change/disappear
-    optional bytes type = 13;         // Bucket type, if not set we assume the 'default' type
+    bytes bucket = 1;
+    bytes key = 2;
+    uint32 rw = 3;
+    bytes vclock = 4;
+    uint32 r = 5;
+    uint32 w = 6;
+    uint32 pr = 7;
+    uint32 pw = 8;
+    uint32 dw = 9;
+    uint32 timeout = 10;
+    bool sloppy_quorum = 11; // Experimental, may change/disappear
+    uint32 n_val = 12;       // Experimental, may change/disappear
+    bytes type = 13;         // Bucket type, if not set we assume the 'default' type
 }
 
 // Delete response - not defined, will return a RpbDelResp on success or RpbErrorResp on failure
 
 // List buckets request
 message RpbListBucketsReq {
-    optional uint32 timeout = 1;
-    optional bool stream = 2;
-    optional bytes type = 3;         // Bucket type, if not set we assume the 'default' type
+    uint32 timeout = 1;
+    bool stream = 2;
+    bytes type = 3;         // Bucket type, if not set we assume the 'default' type
 }
 
 // List buckets response - one or more of these packets will be sent
 // the last one will have done set true (and may not have any buckets in it)
 message RpbListBucketsResp {
     repeated bytes buckets = 1;
-    optional bool done = 2;
+    bool done = 2;
 }
 
 
 // List keys in bucket request
 message RpbListKeysReq {
-    required bytes bucket = 1;
-    optional uint32 timeout = 2;
-    optional bytes type = 3;         // Bucket type, if not set we assume the 'default' type
+    bytes bucket = 1;
+    uint32 timeout = 2;
+    bytes type = 3;         // Bucket type, if not set we assume the 'default' type
 }
 
 // List keys in bucket response - one or more of these packets will be sent
 // the last one will have done set true (and may not have any keys in it)
 message RpbListKeysResp {
     repeated bytes keys = 1;
-    optional bool done = 2;
+    bool done = 2;
 }
 
 
 // Map/Reduce request
 message RpbMapRedReq {
-    required bytes request = 1;
-    required bytes content_type = 2;
+    bytes request = 1;
+    bytes content_type = 2;
 }
 
 // Map/Reduce response
 // one or more of these packets will be sent the last one will have done set
 // true (and may not have phase/data in it)
 message RpbMapRedResp {
-    optional uint32 phase = 1;
-    optional bytes response = 2;
-    optional bool done = 3;
+    uint32 phase = 1;
+    bytes response = 2;
+    bool done = 3;
 }
 
 // Secondary Index query request
@@ -167,24 +170,24 @@ message RpbIndexReq {
         range = 1;
     }
 
-    required bytes bucket = 1;
-    required bytes index = 2;
-    required IndexQueryType qtype = 3;
-    optional bytes key = 4; // key here means equals value for index?
-    optional bytes range_min = 5;
-    optional bytes range_max = 6;
-    optional bool return_terms = 7;
-    optional bool stream = 8;
-    optional uint32 max_results = 9;
-    optional bytes continuation = 10;
-    optional uint32 timeout = 11;
-    optional bytes type = 12;         // Bucket type, if not set we assume the 'default' type
-    optional bytes term_regex = 13;
+    bytes bucket = 1;
+    bytes index = 2;
+    IndexQueryType qtype = 3;
+    bytes key = 4; // key here means equals value for index?
+    bytes range_min = 5;
+    bytes range_max = 6;
+    bool return_terms = 7;
+    bool stream = 8;
+    uint32 max_results = 9;
+    bytes continuation = 10;
+    uint32 timeout = 11;
+    bytes type = 12;         // Bucket type, if not set we assume the 'default' type
+    bytes term_regex = 13;
     // Whether to use pagination sort for non-paginated queries
-    optional bool pagination_sort = 14;
+    bool pagination_sort = 14;
     // parallel extraction extension
-    optional bytes cover_context = 15; // chopped up coverage plan per-req
-    optional bool return_body = 16; // Return values with keys, only works with $bucket/$key index queries
+    bytes cover_context = 15; // chopped up coverage plan per-req
+    bool return_body = 16; // Return values with keys, only works with $bucket/$key index queries
 
 }
 
@@ -192,105 +195,105 @@ message RpbIndexReq {
 message RpbIndexResp {
     repeated bytes keys = 1;
     repeated RpbPair results = 2;
-    optional bytes continuation = 3;
-    optional bool done = 4;
+    bytes continuation = 3;
+    bool done = 4;
 }
 
 // Stolen from CS bucket response, to be used when return_body=true
 message RpbIndexBodyResp {
     repeated RpbIndexObject objects = 1;
-    optional bytes continuation = 2;
-    optional bool done = 3;
+    bytes continuation = 2;
+    bool done = 3;
 }
 
 // added solely for riak_cs currently
 // for folding over a bucket and returning
 // objects.
 message RpbCSBucketReq {
-    required bytes bucket = 1;
-    required bytes start_key = 2;
-    optional bytes end_key = 3;
-    optional bool start_incl = 4 [default = true];
-    optional bool end_incl = 5 [default = false];
-    optional bytes continuation = 6;
-    optional uint32 max_results = 7;
-    optional uint32 timeout = 8;
-    optional bytes type = 9;         // Bucket type, if not set we assume the 'default' type
+    bytes bucket = 1;
+    bytes start_key = 2;
+    bytes end_key = 3;
+    bool start_incl = 4;
+    bool end_incl = 5;
+    bytes continuation = 6;
+    uint32 max_results = 7;
+    uint32 timeout = 8;
+    bytes type = 9;         // Bucket type, if not set we assume the 'default' type
     // parallel extraction extension
-    optional bytes cover_context = 10; // chopped up coverage plan per-req
+    bytes cover_context = 10; // chopped up coverage plan per-req
 }
 
 // return for CS bucket fold
 message RpbCSBucketResp {
     repeated RpbIndexObject objects = 1;
-    optional bytes continuation = 2;
-    optional bool done = 3;
+    bytes continuation = 2;
+    bool done = 3;
 }
 
 message RpbIndexObject {
-    required bytes key = 1;
-    required RpbGetResp object = 2;
+    bytes key = 1;
+    RpbGetResp object = 2;
 }
 
 // Content message included in get/put responses
 // Holds the value and associated metadata
 message RpbContent {
-    required bytes value = 1;
-    optional bytes content_type = 2;     // the media type/format
-    optional bytes charset = 3;
-    optional bytes content_encoding = 4;
-    optional bytes vtag = 5;
+    bytes value = 1;
+    bytes content_type = 2;     // the media type/format
+    bytes charset = 3;
+    bytes content_encoding = 4;
+    bytes vtag = 5;
     repeated RpbLink links = 6;          // links to other resources
-    optional uint32 last_mod = 7;
-    optional uint32 last_mod_usecs = 8;
+    uint32 last_mod = 7;
+    uint32 last_mod_usecs = 8;
     repeated RpbPair usermeta = 9;       // user metadata stored with the object
     repeated RpbPair indexes = 10;       // user metadata stored with the object
-    optional bool deleted = 11;
+    bool deleted = 11;
 }
 
 // Link metadata
 message RpbLink {
-    optional bytes bucket = 1;
-    optional bytes key = 2;
-    optional bytes tag = 3;
+    bytes bucket = 1;
+    bytes key = 2;
+    bytes tag = 3;
 }
 
 // Counter update request
 message RpbCounterUpdateReq {
-    required bytes bucket = 1;
-    required bytes key = 2;
-    required sint64 amount = 3;
-    optional uint32 w = 4;
-    optional uint32 dw = 5;
-    optional uint32 pw = 6;
-    optional bool returnvalue = 7;
+    bytes bucket = 1;
+    bytes key = 2;
+    sint64 amount = 3;
+    uint32 w = 4;
+    uint32 dw = 5;
+    uint32 pw = 6;
+    bool returnvalue = 7;
 }
 
 // Counter update response? No message | error response
 message RpbCounterUpdateResp {
-        optional sint64 value = 1;
+        sint64 value = 1;
 }
 
 // counter value
 message RpbCounterGetReq {
-    required bytes bucket = 1;
-    required bytes key = 2;
-    optional uint32 r = 3;
-    optional uint32 pr = 4;
-    optional bool basic_quorum = 5;
-    optional bool notfound_ok = 6;
+    bytes bucket = 1;
+    bytes key = 2;
+    uint32 r = 3;
+    uint32 pr = 4;
+    bool basic_quorum = 5;
+    bool notfound_ok = 6;
 }
 
 // Counter value response
 message RpbCounterGetResp {
-    optional sint64 value = 1;
+    sint64 value = 1;
 }
 
 // Get bucket-key preflist request
 message RpbGetBucketKeyPreflistReq {
-    required bytes bucket = 1;
-    required bytes key = 2;
-    optional bytes type = 3;
+    bytes bucket = 1;
+    bytes key = 2;
+    bytes type = 3;
 }
 
 // Get bucket-key preflist response
@@ -300,18 +303,18 @@ message RpbGetBucketKeyPreflistResp {
 
 // Preflist item
 message RpbBucketKeyPreflistItem {
-    required int64 partition = 1;
-    required bytes node = 2;
-    required bool  primary = 3;
+    int64 partition = 1;
+    bytes node = 2;
+    bool  primary = 3;
 }
 
 
 // Request a segmented coverage plan for the specified bucket
 message RpbCoverageReq {
-    optional bytes type = 1;              // Bucket type, if not set we assume the 'default' type
-    required bytes bucket = 2;
-    optional uint32 min_partitions = 3;   // If undefined, we build a normal coverage plan. If <ring_size, we build a coverage plan with exactly ring_size entries, anything larger will have a power of 2 entries covering keyspaces smaller than a partition
-    optional bytes replace_cover = 4;     // For failure recovery
+    bytes type = 1;              // Bucket type, if not set we assume the 'default' type
+    bytes bucket = 2;
+    uint32 min_partitions = 3;   // If undefined, we build a normal coverage plan. If <ring_size, we build a coverage plan with exactly ring_size entries, anything larger will have a power of 2 entries covering keyspaces smaller than a partition
+    bytes replace_cover = 4;     // For failure recovery
     repeated bytes unavailable_cover = 5; // Other coverage contexts that have failed to assist Riak in deciding what nodes to avoid
 }
 
@@ -322,8 +325,8 @@ message RpbCoverageResp {
 
 // Segment of a coverage plan
 message RpbCoverageEntry {
-    required bytes ip = 1;
-    required uint32 port = 2;
-    optional bytes keyspace_desc = 3; // Some human readable description of the keyspace covered
-    required bytes cover_context = 4; // Opaque context to pass into 2I query.
+    bytes ip = 1;
+    uint32 port = 2;
+    bytes keyspace_desc = 3; // Some human readable description of the keyspace covered
+    bytes cover_context = 4; // Opaque context to pass into 2I query.
 }
