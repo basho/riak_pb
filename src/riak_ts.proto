@@ -93,6 +93,7 @@ enum TsColumnType {
   DOUBLE = 2;
   TIMESTAMP = 3;
   BOOLEAN = 4;
+  BLOB = 5;
 }
 
 message TsColumnDescription {
@@ -110,6 +111,7 @@ message TsCell {
   optional sint64 timestamp_value = 3;
   optional bool boolean_value = 4;
   optional double double_value = 5;
+  optional bytes blob_value = 6;
 }
 
 message TsListKeysReq {
