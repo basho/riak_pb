@@ -297,7 +297,7 @@ encode_fetch_response(Type, Value, Context, Mods) ->
         hll ->
             Response#dtfetchresp{value=#dtvalue{hll_value=Value}};
         gset ->
-            Response#dtfetchresp{value=#dtvalue{set_value=Value}};
+            Response#dtfetchresp{value=#dtvalue{gset_value=Value}};
         map ->
             Response#dtfetchresp{value=#dtvalue{map_value=[encode_map_entry(Entry, Mods) || Entry <- Value]}}
     end.

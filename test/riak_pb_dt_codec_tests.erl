@@ -37,11 +37,11 @@ decode_update_response/3
 -define(SET_VALUE, [<<"binarytemple">>]).
 
 operation_type_gset_test() ->
-  OpType = operation_type(#dtop{set_op = #gsetop{}}),
+  OpType = operation_type(#dtop{gset_op = #gsetop{}}),
   ?assertEqual(OpType, gset).
 
 decode_operation_gset_test() ->
-  Op = #dtop{set_op = #gsetop{adds = ?SET_VALUE}},
+  Op = #dtop{gset_op = #gsetop{adds = ?SET_VALUE}},
   OpDecode = decode_operation(Op),
   ?assertEqual(OpDecode, {add_all, ?SET_VALUE}).
 
@@ -56,14 +56,9 @@ decode_update_response_test() ->
   ?assertEqual({set, ?SET_VALUE, undefined_context}, Res).
 
 encode_fetch_response_gset_test() ->
-  Resp = encode_fetch_response(gset, #dtvalue{set_value = ?SET_VALUE}, ?CONTEXT, []),
-  ?assertEqual(Resp,
-    {dtfetchresp, ?CONTEXT, 'GSET',
-      {dtvalue, undefined,
-        {dtvalue, undefined, ?SET_VALUE, []},
-        []}}
-  )
-.
+  Resp = encode_fetch_response(gset, ?SET_VALUE, ?CONTEXT, []),
+  ?assertMatch(#dtfetchresp{context= ?CONTEXT, type= 'GSET', value= #dtvalue{gset_value= ?SET_VALUE}}, Resp).
+
 encode_update_request_gset_test() ->
   Res = encode_update_request(
     {<<"btype">>, <<"bucket">>},
@@ -76,7 +71,7 @@ encode_update_request_gset_test() ->
     type = <<"btype">>,
     key = <<"key">>,
     op = #dtop{
-      set_op = #gsetop{adds = ?SET_VALUE}
+      gset_op = #gsetop{adds = ?SET_VALUE}
     }
   }, Res),
   ok
