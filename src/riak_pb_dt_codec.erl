@@ -271,7 +271,7 @@ decode_fetch_response(#dtfetchresp{context=Context, type='HLL',
                                    value=#dtvalue{hll_value=Val}}) ->
     {hll, Val, Context};
 decode_fetch_response(#dtfetchresp{context=Context, type='GSET',
-                                   value=#dtvalue{set_value=Val}}) ->
+                                   value=#dtvalue{gset_value=Val}}) ->
     {gset, Val, Context};
 decode_fetch_response(#dtfetchresp{context=Context, type='MAP',
                                    value=#dtvalue{map_value=Val}}) ->
