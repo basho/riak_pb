@@ -46,7 +46,7 @@ decode_operation_gset_test() ->
   ?assertEqual(OpDecode, {add_all, ?SET_VALUE}).
 
 decode_fetch_response_gset_test() ->
-  Res = decode_fetch_response(#dtfetchresp{context = ?CONTEXT, type = 'GSET', value = #dtvalue{set_value = ?SET_VALUE}}),
+  Res = decode_fetch_response(#dtfetchresp{context = ?CONTEXT, type = 'GSET', value = #dtvalue{gset_value = ?SET_VALUE}}),
   ?assertEqual(Res, {gset, ?SET_VALUE, ?CONTEXT}).
 
 decode_update_response_test() ->
