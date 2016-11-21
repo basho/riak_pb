@@ -52,9 +52,9 @@
 %% Column names are binary only.
 -type tscolumnname() :: binary().
 %% Possible column type values supported and returned from the timeseries DDL.
--type tscolumntype() :: varchar | sint64 | timestamp | boolean | double.
+-type tscolumntype() :: varchar | sint64 | timestamp | boolean | double | blob.
 %% Possible column type values that protocol buffers supports for enumeration purposes.
--type tscolumntypePB() :: 'VARCHAR' | 'SINT64' | 'TIMESTAMP' | 'BOOLEAN' | 'DOUBLE'.
+-type tscolumntypePB() :: 'VARCHAR' | 'SINT64' | 'TIMESTAMP' | 'BOOLEAN' | 'DOUBLE' | 'BLOB'.
 -export_type([tscolumnname/0, tscolumntype/0, tscolumntypePB/0]).
 
 %% @doc Convert a list of column names to partial #tscolumndescription records.
@@ -67,6 +67,8 @@ encode_columnnames(ColumnNames) ->
 -spec encode_field_type(tscolumntype()) -> atom().
 encode_field_type(varchar) ->
     'VARCHAR';
+encode_field_type(blob) ->
+    'BLOB';
 encode_field_type(sint64) ->
     'SINT64';
 encode_field_type(double) ->
@@ -157,6 +159,10 @@ encode_cells_non_strict(Cells) when is_list(Cells) ->
 
 -spec encode_cell({tscolumntype(), ldbvalue()}) -> #tscell{}.
 encode_cell({varchar, V}) when is_binary(V) ->
+    #tscell{varchar_value = V};
+%% Blobs are varchars under the hood, so we leave the column headers
+%% as blob but the tscell representation as varchar
+encode_cell({blob, V}) when is_binary(V) ->
     #tscell{varchar_value = V};
 encode_cell({sint64, V}) when is_integer(V) ->
     #tscell{sint64_value = V};
