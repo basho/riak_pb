@@ -74,7 +74,7 @@
 -type set_op() :: simple_set_op() | {update, [simple_set_op()]}.
 -type hll_op() :: {add, binary()} | {add_all, [binary()]}.
 -type simple_gset_op() :: {add, binary()} | {add_all, [binary()]}.
--type gset_op() :: simple_gset_op().
+-type gset_op() :: simple_gset_op() | {update, [simple_gset_op()]}.
 -type flag_op() :: enable | disable.
 -type register_op() :: {assign, binary()}.
 -type simple_map_op() :: {remove, map_field()} | {update, map_field(), embedded_type_op()}.
@@ -354,7 +354,7 @@ encode_set_update({remove_all, Members}, #setop{removes=R}=S) when is_list(Membe
 
 
 %% @doc Decodes a GSetOp message into a gset operation.
--spec decode_gset_op(#setop{}) -> gset_op().
+-spec decode_gset_op(#gsetop{}) -> gset_op().
 decode_gset_op(#gsetop{adds=A}) ->
     {add_all, A}.
 
