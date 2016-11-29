@@ -38,7 +38,6 @@ message TsQueryReq {
   optional TsInterpolation query = 1;
   optional bool stream = 2 [default = false];
   optional bytes cover_context = 3; // chopped up coverage plan per-req
-  optional bool allow_qbuf_reuse = 4 [default = false];
 }
 
 message TsQueryResp {
