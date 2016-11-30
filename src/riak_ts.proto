@@ -93,6 +93,7 @@ enum TsColumnType {
   DOUBLE = 2;
   TIMESTAMP = 3;
   BOOLEAN = 4;
+  BLOB = 5;
 }
 
 message TsColumnDescription {
