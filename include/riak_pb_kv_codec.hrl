@@ -29,7 +29,7 @@
 -define(MD_LASTMOD,  <<"X-Riak-Last-Modified">>).
 -define(MD_USERMETA, <<"X-Riak-Meta">>).
 -define(MD_INDEX,    <<"index">>).
--define(MD_DELETED, <<"X-Riak-Deleted">>).
+-define(MD_DELETED,  <<"X-Riak-Deleted">>).
 
 %% Content-Type for Erlang term_to_binary format
 -define(CTYPE_ERLANG_BINARY, "application/x-erlang-binary").
