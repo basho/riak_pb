@@ -64,7 +64,7 @@
 %% linkfun :: {modfun, module(), function()}
 %% precommit, postcommit :: [ {struct, [{binary(), binary()}]} ]'''
 %% @end
--type modfun_property() :: {module(), function()} | {modfun, module(), function()} | {struct, [{binary(), binary()}]}.
+-type modfun_property() :: {module(), function()} | {modfun, module(), function()}.
 
 %% @type commit_hook_field().
 %%
@@ -356,8 +356,6 @@ encode_modfun({M, F}) ->
 decode_modfun(MF, linkfun) ->
     {M,F} = decode_modfun(MF, undefined),
     {modfun, M, F};
-decode_modfun(#rpbmodfun{module=Mod, function=Fun}, commit_hook) ->
-    {struct, [{<<"mod">>, Mod}, {<<"fun">>, Fun}]};
 decode_modfun(#rpbmodfun{module=Mod, function=Fun}=MF, _Prop) ->
     try
         {binary_to_existing_atom(Mod, latin1), binary_to_existing_atom(Fun, latin1)}
@@ -392,8 +390,10 @@ decode_commit_hooks(Hooks) ->
     [ decode_commit_hook(Hook) || Hook <- Hooks,
                                  Hook =/= #rpbcommithook{modfun=undefined, name=undefined} ].
 
-decode_commit_hook(#rpbcommithook{modfun = Modfun}) when Modfun =/= undefined ->
-    decode_modfun(Modfun, commit_hook);
+decode_commit_hook(#rpbcommithook{modfun = ModFun}) 
+  when ModFun =/= undefined ->
+    #rpbmodfun{module=Mod, function=Fun} = ModFun,
+    {struct, [{<<"mod">>, Mod}, {<<"fun">>, Fun}]};
 decode_commit_hook(#rpbcommithook{name = Name}) when Name =/= undefined ->
     {struct, [{<<"name">>, Name}]}.
 
@@ -431,11 +431,10 @@ decode_eq(Message, IoList, DecodeFun) ->
     decode_eq(Message, iolist_to_binary(IoList), DecodeFun).
 
 record_test() ->
-    Req =
-        #rpbgetreq{n_val=4,
-                   notfound_ok=true,
-                   bucket = <<"bucket">>,
-                   key = <<"key">>},
+    Req = #rpbgetreq{n_val=4,
+                     notfound_ok=true,
+                     bucket = <<"bucket">>,
+                     key = <<"key">>},
     decode_eq(Req, encode(Req), fun decode/2).
 
 optional_booleans_test() ->
@@ -476,18 +475,14 @@ mixed_strings_test() ->
     %% Because the network layer will invoke iolist_to_binary/1 or its
     %% equivalent, on the sending side we can get away with using
     %% strings instead of binaries in records that expect the latter
-    Req =
-        #rpbgetreq{n_val=4,
-                   notfound_ok=true,
-                   bucket = "bucket",
-                   key = <<"key">>},
-
-    DecodedReq =
-        #rpbgetreq{n_val=4,
-                   notfound_ok=true,
-                   bucket = <<"bucket">>,
-                   key = <<"key">>},
-
+    Req = #rpbgetreq{n_val=4,
+                     notfound_ok=true,
+                     bucket = "bucket",
+                     key = <<"key">>},
+    DecodedReq = #rpbgetreq{n_val=4,
+                            notfound_ok=true,
+                            bucket = <<"bucket">>,
+                            key = <<"key">>},
     decode_eq(DecodedReq, encode(Req), fun decode/2).
 
 -endif. %% TEST

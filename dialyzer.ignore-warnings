@@ -1,11 +1,15 @@
-## Generated protobuffs code
 riak_dt_pb.erl
 riak_kv_pb.erl
 riak_pb.erl
 riak_search_pb.erl
 riak_ts_pb.erl
 riak_yokozuna_pb.erl
-## Insufficient typing on record in generated code
-Invalid type specification for function riak_pb_codec:decode_commit_hooks/1. The success typing is ([any()]) -> [{atom(),atom() | [any(),...]} | {'modfun',atom(),atom() | [any(),...]}]
-## Internal calls only pass empty-list, but calls from other libraries pass proplists
-riak_pb_dt_codec.erl:187: The pattern {AtomType, _} can never match the type 'false'
+## The following things from riak_pb_codec are due to insufficient information being added to
+## generated code used by riak_pb_codec.
+## In newer than R16 versions of Erlang we can use
+## -dialyzer({nowarn_function, encode_modfun/1}).
+## next to the functions we want to ignore, thus making it explicit for single functions
+## that they miss the target.
+riak_pb_codec.erl:340: Invalid type specification for function riak_pb_codec:encode_modfun/1. The success typing is ({atom() | binary() | [byte()],atom() | binary() | maybe_improper_list()} | {'modfun',atom() | binary() | [byte()],atom() | binary() | maybe_improper_list()}) -> #rpbmodfun{module::binary(),function::binary()}
+riak_pb_codec.erl:352: Invalid type specification for function riak_pb_codec:decode_modfun/2. The success typing is (#rpbmodfun{module::binary(),function::binary()},_) -> {atom(),atom()} | {'modfun',atom(),atom()}
+riak_pb_codec.erl:385: Invalid type specification for function riak_pb_codec:decode_commit_hooks/1. The success typing is ([any()]) -> [{'struct',[any(),...]}]

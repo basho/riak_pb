@@ -95,12 +95,20 @@ encode_content({MetadataIn, ValueIn}=C) ->
 %% @doc Convert the metadata dictionary entries to protocol buffers
 -spec encode_content_meta(MetadataKey::string(), any(), tuple()) -> tuple().
 encode_content_meta(?MD_CTYPE, ContentType, PbContent) when is_list(ContentType) ->
+    PbContent#rpbcontent{content_type = list_to_binary(ContentType)};
+encode_content_meta(?MD_CTYPE, ContentType, PbContent) when is_binary(ContentType) ->
     PbContent#rpbcontent{content_type = ContentType};
 encode_content_meta(?MD_CHARSET, Charset, PbContent) when is_list(Charset) ->
+    PbContent#rpbcontent{charset = list_to_binary(Charset)};
+encode_content_meta(?MD_CHARSET, Charset, PbContent) when is_binary(Charset) ->
     PbContent#rpbcontent{charset = Charset};
 encode_content_meta(?MD_ENCODING, Encoding, PbContent) when is_list(Encoding) ->
+    PbContent#rpbcontent{content_encoding = list_to_binary(Encoding)};
+encode_content_meta(?MD_ENCODING, Encoding, PbContent) when is_binary(Encoding) ->
     PbContent#rpbcontent{content_encoding = Encoding};
 encode_content_meta(?MD_VTAG, Vtag, PbContent) when is_list(Vtag) ->
+    PbContent#rpbcontent{vtag = list_to_binary(Vtag)};
+encode_content_meta(?MD_VTAG, Vtag, PbContent) when is_binary(Vtag) ->
     PbContent#rpbcontent{vtag = Vtag};
 encode_content_meta(?MD_LINKS, Links, PbContent) when is_list(Links) ->
     PbContent#rpbcontent{links = [encode_link(E) || E <- Links]};
