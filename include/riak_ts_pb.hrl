@@ -76,7 +76,8 @@
          datatype               :: binary() | undefined, % = 26
          consistent             :: boolean() | 0 | 1 | undefined, % = 27
          write_once             :: boolean() | 0 | 1 | undefined, % = 28
-         hll_precision          :: non_neg_integer() | undefined % = 29, 32 bits
+         hll_precision          :: non_neg_integer() | undefined, % = 29, 32 bits
+         ttl                    :: non_neg_integer() | undefined % = 30, 32 bits
         }).
 -endif.
 
@@ -107,7 +108,7 @@
 -ifndef('TSCOVERAGEREQ_PB_H').
 -define('TSCOVERAGEREQ_PB_H', true).
 -record(tscoveragereq,
-        {'query'                  :: #tsinterpolation{} | undefined, % = 1
+        {query                  :: #tsinterpolation{} | undefined, % = 1
          table                  :: binary(),        % = 2
          replace_cover          :: binary() | undefined, % = 3
          unavailable_cover = [] :: [binary()]       % = 4
@@ -258,7 +259,7 @@
 -ifndef('TSQUERYREQ_PB_H').
 -define('TSQUERYREQ_PB_H', true).
 -record(tsqueryreq,
-        {'query'                  :: #tsinterpolation{} | undefined, % = 1
+        {query                  :: #tsinterpolation{} | undefined, % = 1
          stream = false         :: boolean() | 0 | 1 | undefined, % = 2
          cover_context          :: binary() | undefined % = 3
         }).

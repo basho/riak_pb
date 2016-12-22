@@ -408,7 +408,7 @@ e_msg_rpbbucketprops(#rpbbucketprops{n_val = F1,
 				     search = F23, repl = F24,
 				     search_index = F25, datatype = F26,
 				     consistent = F27, write_once = F28,
-				     hll_precision = F29},
+				     hll_precision = F29, ttl = F30},
 		     Bin, TrUserData) ->
     B1 = if F1 == undefined -> Bin;
 	    true ->
@@ -610,11 +610,18 @@ e_msg_rpbbucketprops(#rpbbucketprops{n_val = F1,
 		   e_type_bool(TrF28, <<B27/binary, 224, 1>>)
 		 end
 	  end,
-    if F29 == undefined -> B28;
+    B29 = if F29 == undefined -> B28;
+	     true ->
+		 begin
+		   TrF29 = id(F29, TrUserData),
+		   e_varint(TrF29, <<B28/binary, 232, 1>>)
+		 end
+	  end,
+    if F30 == undefined -> B29;
        true ->
 	   begin
-	     TrF29 = id(F29, TrUserData),
-	     e_varint(TrF29, <<B28/binary, 232, 1>>)
+	     TrF30 = id(F30, TrUserData),
+	     e_varint(TrF30, <<B29/binary, 240, 1>>)
 	   end
     end.
 
@@ -679,7 +686,7 @@ e_msg_tscoveragereq(Msg, TrUserData) ->
     e_msg_tscoveragereq(Msg, <<>>, TrUserData).
 
 
-e_msg_tscoveragereq(#tscoveragereq{'query' = F1,
+e_msg_tscoveragereq(#tscoveragereq{query = F1,
 				   table = F2, replace_cover = F3,
 				   unavailable_cover = F4},
 		    Bin, TrUserData) ->
@@ -1062,7 +1069,7 @@ e_msg_tsqueryreq(Msg, TrUserData) ->
     e_msg_tsqueryreq(Msg, <<>>, TrUserData).
 
 
-e_msg_tsqueryreq(#tsqueryreq{'query' = F1, stream = F2,
+e_msg_tsqueryreq(#tsqueryreq{query = F1, stream = F2,
 			     cover_context = F3},
 		 Bin, TrUserData) ->
     B1 = if F1 == undefined -> Bin;
@@ -2274,308 +2281,322 @@ d_msg_rpbbucketprops(Bin, TrUserData) ->
 				      id(undefined, TrUserData),
 				      id(undefined, TrUserData),
 				      id(undefined, TrUserData),
+				      id(undefined, TrUserData),
 				      id(undefined, TrUserData), TrUserData).
 
 dfp_read_field_def_rpbbucketprops(<<8, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_n_val(Rest, Z1, Z2, F1, F2, F3,
 				 F4, F5, F6, F7, F8, F9, F10, F11, F12, F13,
 				 F14, F15, F16, F17, F18, F19, F20, F21, F22,
-				 F23, F24, F25, F26, F27, F28, F29, TrUserData);
+				 F23, F24, F25, F26, F27, F28, F29, F30,
+				 TrUserData);
 dfp_read_field_def_rpbbucketprops(<<16, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_allow_mult(Rest, Z1, Z2, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, F26, F27, F28,
-				      F29, TrUserData);
+				      F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<24, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_last_write_wins(Rest, Z1, Z2, F1,
 					   F2, F3, F4, F5, F6, F7, F8, F9, F10,
 					   F11, F12, F13, F14, F15, F16, F17,
 					   F18, F19, F20, F21, F22, F23, F24,
-					   F25, F26, F27, F28, F29, TrUserData);
+					   F25, F26, F27, F28, F29, F30,
+					   TrUserData);
 dfp_read_field_def_rpbbucketprops(<<34, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_precommit(Rest, Z1, Z2, F1, F2,
 				     F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				     F13, F14, F15, F16, F17, F18, F19, F20,
 				     F21, F22, F23, F24, F25, F26, F27, F28,
-				     F29, TrUserData);
+				     F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<40, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_has_precommit(Rest, Z1, Z2, F1,
 					 F2, F3, F4, F5, F6, F7, F8, F9, F10,
 					 F11, F12, F13, F14, F15, F16, F17, F18,
 					 F19, F20, F21, F22, F23, F24, F25, F26,
-					 F27, F28, F29, TrUserData);
+					 F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<50, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_postcommit(Rest, Z1, Z2, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, F26, F27, F28,
-				      F29, TrUserData);
+				      F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<56, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_has_postcommit(Rest, Z1, Z2, F1,
 					  F2, F3, F4, F5, F6, F7, F8, F9, F10,
 					  F11, F12, F13, F14, F15, F16, F17,
 					  F18, F19, F20, F21, F22, F23, F24,
-					  F25, F26, F27, F28, F29, TrUserData);
+					  F25, F26, F27, F28, F29, F30,
+					  TrUserData);
 dfp_read_field_def_rpbbucketprops(<<66, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_chash_keyfun(Rest, Z1, Z2, F1,
 					F2, F3, F4, F5, F6, F7, F8, F9, F10,
 					F11, F12, F13, F14, F15, F16, F17, F18,
 					F19, F20, F21, F22, F23, F24, F25, F26,
-					F27, F28, F29, TrUserData);
+					F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<74, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_linkfun(Rest, Z1, Z2, F1, F2, F3,
 				   F4, F5, F6, F7, F8, F9, F10, F11, F12, F13,
 				   F14, F15, F16, F17, F18, F19, F20, F21, F22,
-				   F23, F24, F25, F26, F27, F28, F29,
+				   F23, F24, F25, F26, F27, F28, F29, F30,
 				   TrUserData);
 dfp_read_field_def_rpbbucketprops(<<80, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_old_vclock(Rest, Z1, Z2, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, F26, F27, F28,
-				      F29, TrUserData);
+				      F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<88, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_young_vclock(Rest, Z1, Z2, F1,
 					F2, F3, F4, F5, F6, F7, F8, F9, F10,
 					F11, F12, F13, F14, F15, F16, F17, F18,
 					F19, F20, F21, F22, F23, F24, F25, F26,
-					F27, F28, F29, TrUserData);
+					F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<96, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_big_vclock(Rest, Z1, Z2, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, F26, F27, F28,
-				      F29, TrUserData);
+				      F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<104, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_small_vclock(Rest, Z1, Z2, F1,
 					F2, F3, F4, F5, F6, F7, F8, F9, F10,
 					F11, F12, F13, F14, F15, F16, F17, F18,
 					F19, F20, F21, F22, F23, F24, F25, F26,
-					F27, F28, F29, TrUserData);
+					F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<112, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_pr(Rest, Z1, Z2, F1, F2, F3, F4,
 			      F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15,
 			      F16, F17, F18, F19, F20, F21, F22, F23, F24, F25,
-			      F26, F27, F28, F29, TrUserData);
+			      F26, F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<120, Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_r(Rest, Z1, Z2, F1, F2, F3, F4,
 			     F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15,
 			     F16, F17, F18, F19, F20, F21, F22, F23, F24, F25,
-			     F26, F27, F28, F29, TrUserData);
+			     F26, F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<128, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_w(Rest, Z1, Z2, F1, F2, F3, F4,
 			     F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15,
 			     F16, F17, F18, F19, F20, F21, F22, F23, F24, F25,
-			     F26, F27, F28, F29, TrUserData);
+			     F26, F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<136, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_pw(Rest, Z1, Z2, F1, F2, F3, F4,
 			      F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15,
 			      F16, F17, F18, F19, F20, F21, F22, F23, F24, F25,
-			      F26, F27, F28, F29, TrUserData);
+			      F26, F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<144, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_dw(Rest, Z1, Z2, F1, F2, F3, F4,
 			      F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15,
 			      F16, F17, F18, F19, F20, F21, F22, F23, F24, F25,
-			      F26, F27, F28, F29, TrUserData);
+			      F26, F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<152, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_rw(Rest, Z1, Z2, F1, F2, F3, F4,
 			      F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15,
 			      F16, F17, F18, F19, F20, F21, F22, F23, F24, F25,
-			      F26, F27, F28, F29, TrUserData);
+			      F26, F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<160, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_basic_quorum(Rest, Z1, Z2, F1,
 					F2, F3, F4, F5, F6, F7, F8, F9, F10,
 					F11, F12, F13, F14, F15, F16, F17, F18,
 					F19, F20, F21, F22, F23, F24, F25, F26,
-					F27, F28, F29, TrUserData);
+					F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<168, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_notfound_ok(Rest, Z1, Z2, F1, F2,
 				       F3, F4, F5, F6, F7, F8, F9, F10, F11,
 				       F12, F13, F14, F15, F16, F17, F18, F19,
 				       F20, F21, F22, F23, F24, F25, F26, F27,
-				       F28, F29, TrUserData);
+				       F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<178, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_backend(Rest, Z1, Z2, F1, F2, F3,
 				   F4, F5, F6, F7, F8, F9, F10, F11, F12, F13,
 				   F14, F15, F16, F17, F18, F19, F20, F21, F22,
-				   F23, F24, F25, F26, F27, F28, F29,
+				   F23, F24, F25, F26, F27, F28, F29, F30,
 				   TrUserData);
 dfp_read_field_def_rpbbucketprops(<<184, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_search(Rest, Z1, Z2, F1, F2, F3,
 				  F4, F5, F6, F7, F8, F9, F10, F11, F12, F13,
 				  F14, F15, F16, F17, F18, F19, F20, F21, F22,
-				  F23, F24, F25, F26, F27, F28, F29,
+				  F23, F24, F25, F26, F27, F28, F29, F30,
 				  TrUserData);
 dfp_read_field_def_rpbbucketprops(<<192, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_repl(Rest, Z1, Z2, F1, F2, F3,
 				F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14,
 				F15, F16, F17, F18, F19, F20, F21, F22, F23,
-				F24, F25, F26, F27, F28, F29, TrUserData);
+				F24, F25, F26, F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<202, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_search_index(Rest, Z1, Z2, F1,
 					F2, F3, F4, F5, F6, F7, F8, F9, F10,
 					F11, F12, F13, F14, F15, F16, F17, F18,
 					F19, F20, F21, F22, F23, F24, F25, F26,
-					F27, F28, F29, TrUserData);
+					F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<210, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_datatype(Rest, Z1, Z2, F1, F2,
 				    F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				    F13, F14, F15, F16, F17, F18, F19, F20, F21,
-				    F22, F23, F24, F25, F26, F27, F28, F29,
+				    F22, F23, F24, F25, F26, F27, F28, F29, F30,
 				    TrUserData);
 dfp_read_field_def_rpbbucketprops(<<216, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_consistent(Rest, Z1, Z2, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, F26, F27, F28,
-				      F29, TrUserData);
+				      F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<224, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_write_once(Rest, Z1, Z2, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, F26, F27, F28,
-				      F29, TrUserData);
+				      F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<232, 1,
 				    Rest/binary>>,
 				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     d_field_rpbbucketprops_hll_precision(Rest, Z1, Z2, F1,
 					 F2, F3, F4, F5, F6, F7, F8, F9, F10,
 					 F11, F12, F13, F14, F15, F16, F17, F18,
 					 F19, F20, F21, F22, F23, F24, F25, F26,
-					 F27, F28, F29, TrUserData);
+					 F27, F28, F29, F30, TrUserData);
+dfp_read_field_def_rpbbucketprops(<<240, 1,
+				    Rest/binary>>,
+				  Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9,
+				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
+				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
+				  F28, F29, F30, TrUserData) ->
+    d_field_rpbbucketprops_ttl(Rest, Z1, Z2, F1, F2, F3, F4,
+			       F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15,
+			       F16, F17, F18, F19, F20, F21, F22, F23, F24, F25,
+			       F26, F27, F28, F29, F30, TrUserData);
 dfp_read_field_def_rpbbucketprops(<<>>, 0, 0, F1, F2,
 				  F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				  F13, F14, F15, F16, F17, F18, F19, F20, F21,
-				  F22, F23, F24, F25, F26, F27, F28, F29,
+				  F22, F23, F24, F25, F26, F27, F28, F29, F30,
 				  TrUserData) ->
     #rpbbucketprops{n_val = F1, allow_mult = F2,
 		    last_write_wins = F3,
@@ -2588,37 +2609,37 @@ dfp_read_field_def_rpbbucketprops(<<>>, 0, 0, F1, F2,
 		    pw = F17, dw = F18, rw = F19, basic_quorum = F20,
 		    notfound_ok = F21, backend = F22, search = F23,
 		    repl = F24, search_index = F25, datatype = F26,
-		    consistent = F27, write_once = F28,
-		    hll_precision = F29};
+		    consistent = F27, write_once = F28, hll_precision = F29,
+		    ttl = F30};
 dfp_read_field_def_rpbbucketprops(Other, Z1, Z2, F1, F2,
 				  F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				  F13, F14, F15, F16, F17, F18, F19, F20, F21,
-				  F22, F23, F24, F25, F26, F27, F28, F29,
+				  F22, F23, F24, F25, F26, F27, F28, F29, F30,
 				  TrUserData) ->
     dg_read_field_def_rpbbucketprops(Other, Z1, Z2, F1, F2,
 				     F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				     F13, F14, F15, F16, F17, F18, F19, F20,
 				     F21, F22, F23, F24, F25, F26, F27, F28,
-				     F29, TrUserData).
+				     F29, F30, TrUserData).
 
 dg_read_field_def_rpbbucketprops(<<1:1, X:7,
 				   Rest/binary>>,
 				 N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				 F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				 F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				 F28, F29, TrUserData)
+				 F28, F29, F30, TrUserData)
     when N < 32 - 7 ->
     dg_read_field_def_rpbbucketprops(Rest, N + 7,
 				     X bsl N + Acc, F1, F2, F3, F4, F5, F6, F7,
 				     F8, F9, F10, F11, F12, F13, F14, F15, F16,
 				     F17, F18, F19, F20, F21, F22, F23, F24,
-				     F25, F26, F27, F28, F29, TrUserData);
+				     F25, F26, F27, F28, F29, F30, TrUserData);
 dg_read_field_def_rpbbucketprops(<<0:1, X:7,
 				   Rest/binary>>,
 				 N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				 F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				 F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				 F28, F29, TrUserData) ->
+				 F28, F29, F30, TrUserData) ->
     Key = X bsl N + Acc,
     case Key of
       8 ->
@@ -2626,13 +2647,13 @@ dg_read_field_def_rpbbucketprops(<<0:1, X:7,
 				       F5, F6, F7, F8, F9, F10, F11, F12, F13,
 				       F14, F15, F16, F17, F18, F19, F20, F21,
 				       F22, F23, F24, F25, F26, F27, F28, F29,
-				       TrUserData);
+				       F30, TrUserData);
       16 ->
 	  d_field_rpbbucketprops_allow_mult(Rest, 0, 0, F1, F2,
 					    F3, F4, F5, F6, F7, F8, F9, F10,
 					    F11, F12, F13, F14, F15, F16, F17,
 					    F18, F19, F20, F21, F22, F23, F24,
-					    F25, F26, F27, F28, F29,
+					    F25, F26, F27, F28, F29, F30,
 					    TrUserData);
       24 ->
 	  d_field_rpbbucketprops_last_write_wins(Rest, 0, 0, F1,
@@ -2640,26 +2661,26 @@ dg_read_field_def_rpbbucketprops(<<0:1, X:7,
 						 F10, F11, F12, F13, F14, F15,
 						 F16, F17, F18, F19, F20, F21,
 						 F22, F23, F24, F25, F26, F27,
-						 F28, F29, TrUserData);
+						 F28, F29, F30, TrUserData);
       34 ->
 	  d_field_rpbbucketprops_precommit(Rest, 0, 0, F1, F2, F3,
 					   F4, F5, F6, F7, F8, F9, F10, F11,
 					   F12, F13, F14, F15, F16, F17, F18,
 					   F19, F20, F21, F22, F23, F24, F25,
-					   F26, F27, F28, F29, TrUserData);
+					   F26, F27, F28, F29, F30, TrUserData);
       40 ->
 	  d_field_rpbbucketprops_has_precommit(Rest, 0, 0, F1, F2,
 					       F3, F4, F5, F6, F7, F8, F9, F10,
 					       F11, F12, F13, F14, F15, F16,
 					       F17, F18, F19, F20, F21, F22,
 					       F23, F24, F25, F26, F27, F28,
-					       F29, TrUserData);
+					       F29, F30, TrUserData);
       50 ->
 	  d_field_rpbbucketprops_postcommit(Rest, 0, 0, F1, F2,
 					    F3, F4, F5, F6, F7, F8, F9, F10,
 					    F11, F12, F13, F14, F15, F16, F17,
 					    F18, F19, F20, F21, F22, F23, F24,
-					    F25, F26, F27, F28, F29,
+					    F25, F26, F27, F28, F29, F30,
 					    TrUserData);
       56 ->
 	  d_field_rpbbucketprops_has_postcommit(Rest, 0, 0, F1,
@@ -2667,136 +2688,140 @@ dg_read_field_def_rpbbucketprops(<<0:1, X:7,
 						F10, F11, F12, F13, F14, F15,
 						F16, F17, F18, F19, F20, F21,
 						F22, F23, F24, F25, F26, F27,
-						F28, F29, TrUserData);
+						F28, F29, F30, TrUserData);
       66 ->
 	  d_field_rpbbucketprops_chash_keyfun(Rest, 0, 0, F1, F2,
 					      F3, F4, F5, F6, F7, F8, F9, F10,
 					      F11, F12, F13, F14, F15, F16, F17,
 					      F18, F19, F20, F21, F22, F23, F24,
-					      F25, F26, F27, F28, F29,
+					      F25, F26, F27, F28, F29, F30,
 					      TrUserData);
       74 ->
 	  d_field_rpbbucketprops_linkfun(Rest, 0, 0, F1, F2, F3,
 					 F4, F5, F6, F7, F8, F9, F10, F11, F12,
 					 F13, F14, F15, F16, F17, F18, F19, F20,
 					 F21, F22, F23, F24, F25, F26, F27, F28,
-					 F29, TrUserData);
+					 F29, F30, TrUserData);
       80 ->
 	  d_field_rpbbucketprops_old_vclock(Rest, 0, 0, F1, F2,
 					    F3, F4, F5, F6, F7, F8, F9, F10,
 					    F11, F12, F13, F14, F15, F16, F17,
 					    F18, F19, F20, F21, F22, F23, F24,
-					    F25, F26, F27, F28, F29,
+					    F25, F26, F27, F28, F29, F30,
 					    TrUserData);
       88 ->
 	  d_field_rpbbucketprops_young_vclock(Rest, 0, 0, F1, F2,
 					      F3, F4, F5, F6, F7, F8, F9, F10,
 					      F11, F12, F13, F14, F15, F16, F17,
 					      F18, F19, F20, F21, F22, F23, F24,
-					      F25, F26, F27, F28, F29,
+					      F25, F26, F27, F28, F29, F30,
 					      TrUserData);
       96 ->
 	  d_field_rpbbucketprops_big_vclock(Rest, 0, 0, F1, F2,
 					    F3, F4, F5, F6, F7, F8, F9, F10,
 					    F11, F12, F13, F14, F15, F16, F17,
 					    F18, F19, F20, F21, F22, F23, F24,
-					    F25, F26, F27, F28, F29,
+					    F25, F26, F27, F28, F29, F30,
 					    TrUserData);
       104 ->
 	  d_field_rpbbucketprops_small_vclock(Rest, 0, 0, F1, F2,
 					      F3, F4, F5, F6, F7, F8, F9, F10,
 					      F11, F12, F13, F14, F15, F16, F17,
 					      F18, F19, F20, F21, F22, F23, F24,
-					      F25, F26, F27, F28, F29,
+					      F25, F26, F27, F28, F29, F30,
 					      TrUserData);
       112 ->
 	  d_field_rpbbucketprops_pr(Rest, 0, 0, F1, F2, F3, F4,
 				    F5, F6, F7, F8, F9, F10, F11, F12, F13, F14,
 				    F15, F16, F17, F18, F19, F20, F21, F22, F23,
-				    F24, F25, F26, F27, F28, F29, TrUserData);
+				    F24, F25, F26, F27, F28, F29, F30,
+				    TrUserData);
       120 ->
 	  d_field_rpbbucketprops_r(Rest, 0, 0, F1, F2, F3, F4, F5,
 				   F6, F7, F8, F9, F10, F11, F12, F13, F14, F15,
 				   F16, F17, F18, F19, F20, F21, F22, F23, F24,
-				   F25, F26, F27, F28, F29, TrUserData);
+				   F25, F26, F27, F28, F29, F30, TrUserData);
       128 ->
 	  d_field_rpbbucketprops_w(Rest, 0, 0, F1, F2, F3, F4, F5,
 				   F6, F7, F8, F9, F10, F11, F12, F13, F14, F15,
 				   F16, F17, F18, F19, F20, F21, F22, F23, F24,
-				   F25, F26, F27, F28, F29, TrUserData);
+				   F25, F26, F27, F28, F29, F30, TrUserData);
       136 ->
 	  d_field_rpbbucketprops_pw(Rest, 0, 0, F1, F2, F3, F4,
 				    F5, F6, F7, F8, F9, F10, F11, F12, F13, F14,
 				    F15, F16, F17, F18, F19, F20, F21, F22, F23,
-				    F24, F25, F26, F27, F28, F29, TrUserData);
+				    F24, F25, F26, F27, F28, F29, F30,
+				    TrUserData);
       144 ->
 	  d_field_rpbbucketprops_dw(Rest, 0, 0, F1, F2, F3, F4,
 				    F5, F6, F7, F8, F9, F10, F11, F12, F13, F14,
 				    F15, F16, F17, F18, F19, F20, F21, F22, F23,
-				    F24, F25, F26, F27, F28, F29, TrUserData);
+				    F24, F25, F26, F27, F28, F29, F30,
+				    TrUserData);
       152 ->
 	  d_field_rpbbucketprops_rw(Rest, 0, 0, F1, F2, F3, F4,
 				    F5, F6, F7, F8, F9, F10, F11, F12, F13, F14,
 				    F15, F16, F17, F18, F19, F20, F21, F22, F23,
-				    F24, F25, F26, F27, F28, F29, TrUserData);
+				    F24, F25, F26, F27, F28, F29, F30,
+				    TrUserData);
       160 ->
 	  d_field_rpbbucketprops_basic_quorum(Rest, 0, 0, F1, F2,
 					      F3, F4, F5, F6, F7, F8, F9, F10,
 					      F11, F12, F13, F14, F15, F16, F17,
 					      F18, F19, F20, F21, F22, F23, F24,
-					      F25, F26, F27, F28, F29,
+					      F25, F26, F27, F28, F29, F30,
 					      TrUserData);
       168 ->
 	  d_field_rpbbucketprops_notfound_ok(Rest, 0, 0, F1, F2,
 					     F3, F4, F5, F6, F7, F8, F9, F10,
 					     F11, F12, F13, F14, F15, F16, F17,
 					     F18, F19, F20, F21, F22, F23, F24,
-					     F25, F26, F27, F28, F29,
+					     F25, F26, F27, F28, F29, F30,
 					     TrUserData);
       178 ->
 	  d_field_rpbbucketprops_backend(Rest, 0, 0, F1, F2, F3,
 					 F4, F5, F6, F7, F8, F9, F10, F11, F12,
 					 F13, F14, F15, F16, F17, F18, F19, F20,
 					 F21, F22, F23, F24, F25, F26, F27, F28,
-					 F29, TrUserData);
+					 F29, F30, TrUserData);
       184 ->
 	  d_field_rpbbucketprops_search(Rest, 0, 0, F1, F2, F3,
 					F4, F5, F6, F7, F8, F9, F10, F11, F12,
 					F13, F14, F15, F16, F17, F18, F19, F20,
 					F21, F22, F23, F24, F25, F26, F27, F28,
-					F29, TrUserData);
+					F29, F30, TrUserData);
       192 ->
 	  d_field_rpbbucketprops_repl(Rest, 0, 0, F1, F2, F3, F4,
 				      F5, F6, F7, F8, F9, F10, F11, F12, F13,
 				      F14, F15, F16, F17, F18, F19, F20, F21,
 				      F22, F23, F24, F25, F26, F27, F28, F29,
-				      TrUserData);
+				      F30, TrUserData);
       202 ->
 	  d_field_rpbbucketprops_search_index(Rest, 0, 0, F1, F2,
 					      F3, F4, F5, F6, F7, F8, F9, F10,
 					      F11, F12, F13, F14, F15, F16, F17,
 					      F18, F19, F20, F21, F22, F23, F24,
-					      F25, F26, F27, F28, F29,
+					      F25, F26, F27, F28, F29, F30,
 					      TrUserData);
       210 ->
 	  d_field_rpbbucketprops_datatype(Rest, 0, 0, F1, F2, F3,
 					  F4, F5, F6, F7, F8, F9, F10, F11, F12,
 					  F13, F14, F15, F16, F17, F18, F19,
 					  F20, F21, F22, F23, F24, F25, F26,
-					  F27, F28, F29, TrUserData);
+					  F27, F28, F29, F30, TrUserData);
       216 ->
 	  d_field_rpbbucketprops_consistent(Rest, 0, 0, F1, F2,
 					    F3, F4, F5, F6, F7, F8, F9, F10,
 					    F11, F12, F13, F14, F15, F16, F17,
 					    F18, F19, F20, F21, F22, F23, F24,
-					    F25, F26, F27, F28, F29,
+					    F25, F26, F27, F28, F29, F30,
 					    TrUserData);
       224 ->
 	  d_field_rpbbucketprops_write_once(Rest, 0, 0, F1, F2,
 					    F3, F4, F5, F6, F7, F8, F9, F10,
 					    F11, F12, F13, F14, F15, F16, F17,
 					    F18, F19, F20, F21, F22, F23, F24,
-					    F25, F26, F27, F28, F29,
+					    F25, F26, F27, F28, F29, F30,
 					    TrUserData);
       232 ->
 	  d_field_rpbbucketprops_hll_precision(Rest, 0, 0, F1, F2,
@@ -2804,7 +2829,13 @@ dg_read_field_def_rpbbucketprops(<<0:1, X:7,
 					       F11, F12, F13, F14, F15, F16,
 					       F17, F18, F19, F20, F21, F22,
 					       F23, F24, F25, F26, F27, F28,
-					       F29, TrUserData);
+					       F29, F30, TrUserData);
+      240 ->
+	  d_field_rpbbucketprops_ttl(Rest, 0, 0, F1, F2, F3, F4,
+				     F5, F6, F7, F8, F9, F10, F11, F12, F13,
+				     F14, F15, F16, F17, F18, F19, F20, F21,
+				     F22, F23, F24, F25, F26, F27, F28, F29,
+				     F30, TrUserData);
       _ ->
 	  case Key band 7 of
 	    0 ->
@@ -2812,12 +2843,12 @@ dg_read_field_def_rpbbucketprops(<<0:1, X:7,
 					   F5, F6, F7, F8, F9, F10, F11, F12,
 					   F13, F14, F15, F16, F17, F18, F19,
 					   F20, F21, F22, F23, F24, F25, F26,
-					   F27, F28, F29, TrUserData);
+					   F27, F28, F29, F30, TrUserData);
 	    1 ->
 		skip_64_rpbbucketprops(Rest, 0, 0, F1, F2, F3, F4, F5,
 				       F6, F7, F8, F9, F10, F11, F12, F13, F14,
 				       F15, F16, F17, F18, F19, F20, F21, F22,
-				       F23, F24, F25, F26, F27, F28, F29,
+				       F23, F24, F25, F26, F27, F28, F29, F30,
 				       TrUserData);
 	    2 ->
 		skip_length_delimited_rpbbucketprops(Rest, 0, 0, F1, F2,
@@ -2826,19 +2857,19 @@ dg_read_field_def_rpbbucketprops(<<0:1, X:7,
 						     F15, F16, F17, F18, F19,
 						     F20, F21, F22, F23, F24,
 						     F25, F26, F27, F28, F29,
-						     TrUserData);
+						     F30, TrUserData);
 	    5 ->
 		skip_32_rpbbucketprops(Rest, 0, 0, F1, F2, F3, F4, F5,
 				       F6, F7, F8, F9, F10, F11, F12, F13, F14,
 				       F15, F16, F17, F18, F19, F20, F21, F22,
-				       F23, F24, F25, F26, F27, F28, F29,
+				       F23, F24, F25, F26, F27, F28, F29, F30,
 				       TrUserData)
 	  end
     end;
 dg_read_field_def_rpbbucketprops(<<>>, 0, 0, F1, F2, F3,
 				 F4, F5, F6, F7, F8, F9, F10, F11, F12, F13,
 				 F14, F15, F16, F17, F18, F19, F20, F21, F22,
-				 F23, F24, F25, F26, F27, F28, F29,
+				 F23, F24, F25, F26, F27, F28, F29, F30,
 				 TrUserData) ->
     #rpbbucketprops{n_val = F1, allow_mult = F2,
 		    last_write_wins = F3,
@@ -2851,31 +2882,31 @@ dg_read_field_def_rpbbucketprops(<<>>, 0, 0, F1, F2, F3,
 		    pw = F17, dw = F18, rw = F19, basic_quorum = F20,
 		    notfound_ok = F21, backend = F22, search = F23,
 		    repl = F24, search_index = F25, datatype = F26,
-		    consistent = F27, write_once = F28,
-		    hll_precision = F29}.
+		    consistent = F27, write_once = F28, hll_precision = F29,
+		    ttl = F30}.
 
 d_field_rpbbucketprops_n_val(<<1:1, X:7, Rest/binary>>,
 			     N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 			     F11, F12, F13, F14, F15, F16, F17, F18, F19, F20,
-			     F21, F22, F23, F24, F25, F26, F27, F28, F29,
+			     F21, F22, F23, F24, F25, F26, F27, F28, F29, F30,
 			     TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_n_val(Rest, N + 7, X bsl N + Acc,
 				 F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
 				 F12, F13, F14, F15, F16, F17, F18, F19, F20,
 				 F21, F22, F23, F24, F25, F26, F27, F28, F29,
-				 TrUserData);
+				 F30, TrUserData);
 d_field_rpbbucketprops_n_val(<<0:1, X:7, Rest/binary>>,
 			     N, Acc, _, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 			     F11, F12, F13, F14, F15, F16, F17, F18, F19, F20,
-			     F21, F22, F23, F24, F25, F26, F27, F28, F29,
+			     F21, F22, F23, F24, F25, F26, F27, F28, F29, F30,
 			     TrUserData) ->
     NewFValue = X bsl N + Acc,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, NewFValue,
 				      F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
 				      F12, F13, F14, F15, F16, F17, F18, F19,
 				      F20, F21, F22, F23, F24, F25, F26, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_allow_mult(<<1:1, X:7,
@@ -2883,25 +2914,25 @@ d_field_rpbbucketprops_allow_mult(<<1:1, X:7,
 				  N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData)
+				  F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_allow_mult(Rest, N + 7,
 				      X bsl N + Acc, F1, F2, F3, F4, F5, F6, F7,
 				      F8, F9, F10, F11, F12, F13, F14, F15, F16,
 				      F17, F18, F19, F20, F21, F22, F23, F24,
-				      F25, F26, F27, F28, F29, TrUserData);
+				      F25, F26, F27, F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_allow_mult(<<0:1, X:7,
 				    Rest/binary>>,
 				  N, Acc, F1, _, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc =/= 0,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1,
 				      NewFValue, F3, F4, F5, F6, F7, F8, F9,
 				      F10, F11, F12, F13, F14, F15, F16, F17,
 				      F18, F19, F20, F21, F22, F23, F24, F25,
-				      F26, F27, F28, F29, TrUserData).
+				      F26, F27, F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_last_write_wins(<<1:1, X:7,
@@ -2909,26 +2940,27 @@ d_field_rpbbucketprops_last_write_wins(<<1:1, X:7,
 				       N, Acc, F1, F2, F3, F4, F5, F6, F7, F8,
 				       F9, F10, F11, F12, F13, F14, F15, F16,
 				       F17, F18, F19, F20, F21, F22, F23, F24,
-				       F25, F26, F27, F28, F29, TrUserData)
+				       F25, F26, F27, F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_last_write_wins(Rest, N + 7,
 					   X bsl N + Acc, F1, F2, F3, F4, F5,
 					   F6, F7, F8, F9, F10, F11, F12, F13,
 					   F14, F15, F16, F17, F18, F19, F20,
 					   F21, F22, F23, F24, F25, F26, F27,
-					   F28, F29, TrUserData);
+					   F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_last_write_wins(<<0:1, X:7,
 					 Rest/binary>>,
 				       N, Acc, F1, F2, _, F4, F5, F6, F7, F8,
 				       F9, F10, F11, F12, F13, F14, F15, F16,
 				       F17, F18, F19, F20, F21, F22, F23, F24,
-				       F25, F26, F27, F28, F29, TrUserData) ->
+				       F25, F26, F27, F28, F29, F30,
+				       TrUserData) ->
     NewFValue = X bsl N + Acc =/= 0,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      NewFValue, F4, F5, F6, F7, F8, F9, F10,
 				      F11, F12, F13, F14, F15, F16, F17, F18,
 				      F19, F20, F21, F22, F23, F24, F25, F26,
-				      F27, F28, F29, TrUserData).
+				      F27, F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_precommit(<<1:1, X:7,
@@ -2936,19 +2968,19 @@ d_field_rpbbucketprops_precommit(<<1:1, X:7,
 				 N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				 F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				 F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				 F28, F29, TrUserData)
+				 F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_precommit(Rest, N + 7,
 				     X bsl N + Acc, F1, F2, F3, F4, F5, F6, F7,
 				     F8, F9, F10, F11, F12, F13, F14, F15, F16,
 				     F17, F18, F19, F20, F21, F22, F23, F24,
-				     F25, F26, F27, F28, F29, TrUserData);
+				     F25, F26, F27, F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_precommit(<<0:1, X:7,
 				   Rest/binary>>,
 				 N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				 F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				 F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				 F28, F29, TrUserData) ->
+				 F28, F29, F30, TrUserData) ->
     Len = X bsl N + Acc,
     <<Bs:Len/binary, Rest2/binary>> = Rest,
     NewFValue = id(d_msg_rpbcommithook(Bs, TrUserData),
@@ -2957,7 +2989,7 @@ d_field_rpbbucketprops_precommit(<<0:1, X:7,
 				      F3, cons(NewFValue, F4, TrUserData), F5,
 				      F6, F7, F8, F9, F10, F11, F12, F13, F14,
 				      F15, F16, F17, F18, F19, F20, F21, F22,
-				      F23, F24, F25, F26, F27, F28, F29,
+				      F23, F24, F25, F26, F27, F28, F29, F30,
 				      TrUserData).
 
 
@@ -2966,26 +2998,26 @@ d_field_rpbbucketprops_has_precommit(<<1:1, X:7,
 				     N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				     F10, F11, F12, F13, F14, F15, F16, F17,
 				     F18, F19, F20, F21, F22, F23, F24, F25,
-				     F26, F27, F28, F29, TrUserData)
+				     F26, F27, F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_has_precommit(Rest, N + 7,
 					 X bsl N + Acc, F1, F2, F3, F4, F5, F6,
 					 F7, F8, F9, F10, F11, F12, F13, F14,
 					 F15, F16, F17, F18, F19, F20, F21, F22,
-					 F23, F24, F25, F26, F27, F28, F29,
+					 F23, F24, F25, F26, F27, F28, F29, F30,
 					 TrUserData);
 d_field_rpbbucketprops_has_precommit(<<0:1, X:7,
 				       Rest/binary>>,
 				     N, Acc, F1, F2, F3, F4, _, F6, F7, F8, F9,
 				     F10, F11, F12, F13, F14, F15, F16, F17,
 				     F18, F19, F20, F21, F22, F23, F24, F25,
-				     F26, F27, F28, F29, TrUserData) ->
+				     F26, F27, F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc =/= 0,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, NewFValue, F6, F7, F8, F9, F10,
 				      F11, F12, F13, F14, F15, F16, F17, F18,
 				      F19, F20, F21, F22, F23, F24, F25, F26,
-				      F27, F28, F29, TrUserData).
+				      F27, F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_postcommit(<<1:1, X:7,
@@ -2993,19 +3025,19 @@ d_field_rpbbucketprops_postcommit(<<1:1, X:7,
 				  N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData)
+				  F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_postcommit(Rest, N + 7,
 				      X bsl N + Acc, F1, F2, F3, F4, F5, F6, F7,
 				      F8, F9, F10, F11, F12, F13, F14, F15, F16,
 				      F17, F18, F19, F20, F21, F22, F23, F24,
-				      F25, F26, F27, F28, F29, TrUserData);
+				      F25, F26, F27, F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_postcommit(<<0:1, X:7,
 				    Rest/binary>>,
 				  N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     Len = X bsl N + Acc,
     <<Bs:Len/binary, Rest2/binary>> = Rest,
     NewFValue = id(d_msg_rpbcommithook(Bs, TrUserData),
@@ -3015,7 +3047,7 @@ d_field_rpbbucketprops_postcommit(<<0:1, X:7,
 				      cons(NewFValue, F6, TrUserData), F7, F8,
 				      F9, F10, F11, F12, F13, F14, F15, F16,
 				      F17, F18, F19, F20, F21, F22, F23, F24,
-				      F25, F26, F27, F28, F29, TrUserData).
+				      F25, F26, F27, F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_has_postcommit(<<1:1, X:7,
@@ -3023,26 +3055,26 @@ d_field_rpbbucketprops_has_postcommit(<<1:1, X:7,
 				      N, Acc, F1, F2, F3, F4, F5, F6, F7, F8,
 				      F9, F10, F11, F12, F13, F14, F15, F16,
 				      F17, F18, F19, F20, F21, F22, F23, F24,
-				      F25, F26, F27, F28, F29, TrUserData)
+				      F25, F26, F27, F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_has_postcommit(Rest, N + 7,
 					  X bsl N + Acc, F1, F2, F3, F4, F5, F6,
 					  F7, F8, F9, F10, F11, F12, F13, F14,
 					  F15, F16, F17, F18, F19, F20, F21,
 					  F22, F23, F24, F25, F26, F27, F28,
-					  F29, TrUserData);
+					  F29, F30, TrUserData);
 d_field_rpbbucketprops_has_postcommit(<<0:1, X:7,
 					Rest/binary>>,
 				      N, Acc, F1, F2, F3, F4, F5, F6, _, F8, F9,
 				      F10, F11, F12, F13, F14, F15, F16, F17,
 				      F18, F19, F20, F21, F22, F23, F24, F25,
-				      F26, F27, F28, F29, TrUserData) ->
+				      F26, F27, F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc =/= 0,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, NewFValue, F8, F9, F10,
 				      F11, F12, F13, F14, F15, F16, F17, F18,
 				      F19, F20, F21, F22, F23, F24, F25, F26,
-				      F27, F28, F29, TrUserData).
+				      F27, F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_chash_keyfun(<<1:1, X:7,
@@ -3050,20 +3082,20 @@ d_field_rpbbucketprops_chash_keyfun(<<1:1, X:7,
 				    N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				    F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				    F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				    F28, F29, TrUserData)
+				    F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_chash_keyfun(Rest, N + 7,
 					X bsl N + Acc, F1, F2, F3, F4, F5, F6,
 					F7, F8, F9, F10, F11, F12, F13, F14,
 					F15, F16, F17, F18, F19, F20, F21, F22,
-					F23, F24, F25, F26, F27, F28, F29,
+					F23, F24, F25, F26, F27, F28, F29, F30,
 					TrUserData);
 d_field_rpbbucketprops_chash_keyfun(<<0:1, X:7,
 				      Rest/binary>>,
 				    N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				    F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				    F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				    F28, F29, TrUserData) ->
+				    F28, F29, F30, TrUserData) ->
     Len = X bsl N + Acc,
     <<Bs:Len/binary, Rest2/binary>> = Rest,
     NewFValue = id(d_msg_rpbmodfun(Bs, TrUserData),
@@ -3077,26 +3109,26 @@ d_field_rpbbucketprops_chash_keyfun(<<0:1, X:7,
 				      end,
 				      F9, F10, F11, F12, F13, F14, F15, F16,
 				      F17, F18, F19, F20, F21, F22, F23, F24,
-				      F25, F26, F27, F28, F29, TrUserData).
+				      F25, F26, F27, F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_linkfun(<<1:1, X:7,
 				 Rest/binary>>,
 			       N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 			       F11, F12, F13, F14, F15, F16, F17, F18, F19, F20,
-			       F21, F22, F23, F24, F25, F26, F27, F28, F29,
+			       F21, F22, F23, F24, F25, F26, F27, F28, F29, F30,
 			       TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_linkfun(Rest, N + 7,
 				   X bsl N + Acc, F1, F2, F3, F4, F5, F6, F7,
 				   F8, F9, F10, F11, F12, F13, F14, F15, F16,
 				   F17, F18, F19, F20, F21, F22, F23, F24, F25,
-				   F26, F27, F28, F29, TrUserData);
+				   F26, F27, F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_linkfun(<<0:1, X:7,
 				 Rest/binary>>,
 			       N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 			       F11, F12, F13, F14, F15, F16, F17, F18, F19, F20,
-			       F21, F22, F23, F24, F25, F26, F27, F28, F29,
+			       F21, F22, F23, F24, F25, F26, F27, F28, F29, F30,
 			       TrUserData) ->
     Len = X bsl N + Acc,
     <<Bs:Len/binary, Rest2/binary>> = Rest,
@@ -3111,7 +3143,7 @@ d_field_rpbbucketprops_linkfun(<<0:1, X:7,
 				      end,
 				      F10, F11, F12, F13, F14, F15, F16, F17,
 				      F18, F19, F20, F21, F22, F23, F24, F25,
-				      F26, F27, F28, F29, TrUserData).
+				      F26, F27, F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_old_vclock(<<1:1, X:7,
@@ -3119,25 +3151,25 @@ d_field_rpbbucketprops_old_vclock(<<1:1, X:7,
 				  N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData)
+				  F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_old_vclock(Rest, N + 7,
 				      X bsl N + Acc, F1, F2, F3, F4, F5, F6, F7,
 				      F8, F9, F10, F11, F12, F13, F14, F15, F16,
 				      F17, F18, F19, F20, F21, F22, F23, F24,
-				      F25, F26, F27, F28, F29, TrUserData);
+				      F25, F26, F27, F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_old_vclock(<<0:1, X:7,
 				    Rest/binary>>,
 				  N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, _,
 				  F11, F12, F13, F14, F15, F16, F17, F18, F19,
 				  F20, F21, F22, F23, F24, F25, F26, F27, F28,
-				  F29, TrUserData) ->
+				  F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, NewFValue,
 				      F11, F12, F13, F14, F15, F16, F17, F18,
 				      F19, F20, F21, F22, F23, F24, F25, F26,
-				      F27, F28, F29, TrUserData).
+				      F27, F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_young_vclock(<<1:1, X:7,
@@ -3145,26 +3177,26 @@ d_field_rpbbucketprops_young_vclock(<<1:1, X:7,
 				    N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				    F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				    F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				    F28, F29, TrUserData)
+				    F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_young_vclock(Rest, N + 7,
 					X bsl N + Acc, F1, F2, F3, F4, F5, F6,
 					F7, F8, F9, F10, F11, F12, F13, F14,
 					F15, F16, F17, F18, F19, F20, F21, F22,
-					F23, F24, F25, F26, F27, F28, F29,
+					F23, F24, F25, F26, F27, F28, F29, F30,
 					TrUserData);
 d_field_rpbbucketprops_young_vclock(<<0:1, X:7,
 				      Rest/binary>>,
 				    N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				    F10, _, F12, F13, F14, F15, F16, F17, F18,
 				    F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				    F28, F29, TrUserData) ->
+				    F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10,
 				      NewFValue, F12, F13, F14, F15, F16, F17,
 				      F18, F19, F20, F21, F22, F23, F24, F25,
-				      F26, F27, F28, F29, TrUserData).
+				      F26, F27, F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_big_vclock(<<1:1, X:7,
@@ -3172,25 +3204,25 @@ d_field_rpbbucketprops_big_vclock(<<1:1, X:7,
 				  N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData)
+				  F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_big_vclock(Rest, N + 7,
 				      X bsl N + Acc, F1, F2, F3, F4, F5, F6, F7,
 				      F8, F9, F10, F11, F12, F13, F14, F15, F16,
 				      F17, F18, F19, F20, F21, F22, F23, F24,
-				      F25, F26, F27, F28, F29, TrUserData);
+				      F25, F26, F27, F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_big_vclock(<<0:1, X:7,
 				    Rest/binary>>,
 				  N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, _, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11,
 				      NewFValue, F13, F14, F15, F16, F17, F18,
 				      F19, F20, F21, F22, F23, F24, F25, F26,
-				      F27, F28, F29, TrUserData).
+				      F27, F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_small_vclock(<<1:1, X:7,
@@ -3198,152 +3230,156 @@ d_field_rpbbucketprops_small_vclock(<<1:1, X:7,
 				    N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				    F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				    F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				    F28, F29, TrUserData)
+				    F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_small_vclock(Rest, N + 7,
 					X bsl N + Acc, F1, F2, F3, F4, F5, F6,
 					F7, F8, F9, F10, F11, F12, F13, F14,
 					F15, F16, F17, F18, F19, F20, F21, F22,
-					F23, F24, F25, F26, F27, F28, F29,
+					F23, F24, F25, F26, F27, F28, F29, F30,
 					TrUserData);
 d_field_rpbbucketprops_small_vclock(<<0:1, X:7,
 				      Rest/binary>>,
 				    N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				    F10, F11, F12, _, F14, F15, F16, F17, F18,
 				    F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				    F28, F29, TrUserData) ->
+				    F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      NewFValue, F14, F15, F16, F17, F18, F19,
 				      F20, F21, F22, F23, F24, F25, F26, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_pr(<<1:1, X:7, Rest/binary>>, N,
 			  Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
 			  F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22,
-			  F23, F24, F25, F26, F27, F28, F29, TrUserData)
+			  F23, F24, F25, F26, F27, F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_pr(Rest, N + 7, X bsl N + Acc,
 			      F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 			      F13, F14, F15, F16, F17, F18, F19, F20, F21, F22,
-			      F23, F24, F25, F26, F27, F28, F29, TrUserData);
+			      F23, F24, F25, F26, F27, F28, F29, F30,
+			      TrUserData);
 d_field_rpbbucketprops_pr(<<0:1, X:7, Rest/binary>>, N,
 			  Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
 			  F12, F13, _, F15, F16, F17, F18, F19, F20, F21, F22,
-			  F23, F24, F25, F26, F27, F28, F29, TrUserData) ->
+			  F23, F24, F25, F26, F27, F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, NewFValue, F15, F16, F17, F18, F19,
 				      F20, F21, F22, F23, F24, F25, F26, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_r(<<1:1, X:7, Rest/binary>>, N,
 			 Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 			 F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23,
-			 F24, F25, F26, F27, F28, F29, TrUserData)
+			 F24, F25, F26, F27, F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_r(Rest, N + 7, X bsl N + Acc, F1,
 			     F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13,
 			     F14, F15, F16, F17, F18, F19, F20, F21, F22, F23,
-			     F24, F25, F26, F27, F28, F29, TrUserData);
+			     F24, F25, F26, F27, F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_r(<<0:1, X:7, Rest/binary>>, N,
 			 Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 			 F13, F14, _, F16, F17, F18, F19, F20, F21, F22, F23,
-			 F24, F25, F26, F27, F28, F29, TrUserData) ->
+			 F24, F25, F26, F27, F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, NewFValue, F16, F17, F18, F19,
 				      F20, F21, F22, F23, F24, F25, F26, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_w(<<1:1, X:7, Rest/binary>>, N,
 			 Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 			 F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23,
-			 F24, F25, F26, F27, F28, F29, TrUserData)
+			 F24, F25, F26, F27, F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_w(Rest, N + 7, X bsl N + Acc, F1,
 			     F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13,
 			     F14, F15, F16, F17, F18, F19, F20, F21, F22, F23,
-			     F24, F25, F26, F27, F28, F29, TrUserData);
+			     F24, F25, F26, F27, F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_w(<<0:1, X:7, Rest/binary>>, N,
 			 Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 			 F13, F14, F15, _, F17, F18, F19, F20, F21, F22, F23,
-			 F24, F25, F26, F27, F28, F29, TrUserData) ->
+			 F24, F25, F26, F27, F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, NewFValue, F17, F18, F19,
 				      F20, F21, F22, F23, F24, F25, F26, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_pw(<<1:1, X:7, Rest/binary>>, N,
 			  Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
 			  F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22,
-			  F23, F24, F25, F26, F27, F28, F29, TrUserData)
+			  F23, F24, F25, F26, F27, F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_pw(Rest, N + 7, X bsl N + Acc,
 			      F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 			      F13, F14, F15, F16, F17, F18, F19, F20, F21, F22,
-			      F23, F24, F25, F26, F27, F28, F29, TrUserData);
+			      F23, F24, F25, F26, F27, F28, F29, F30,
+			      TrUserData);
 d_field_rpbbucketprops_pw(<<0:1, X:7, Rest/binary>>, N,
 			  Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
 			  F12, F13, F14, F15, F16, _, F18, F19, F20, F21, F22,
-			  F23, F24, F25, F26, F27, F28, F29, TrUserData) ->
+			  F23, F24, F25, F26, F27, F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, NewFValue, F18, F19,
 				      F20, F21, F22, F23, F24, F25, F26, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_dw(<<1:1, X:7, Rest/binary>>, N,
 			  Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
 			  F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22,
-			  F23, F24, F25, F26, F27, F28, F29, TrUserData)
+			  F23, F24, F25, F26, F27, F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_dw(Rest, N + 7, X bsl N + Acc,
 			      F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 			      F13, F14, F15, F16, F17, F18, F19, F20, F21, F22,
-			      F23, F24, F25, F26, F27, F28, F29, TrUserData);
+			      F23, F24, F25, F26, F27, F28, F29, F30,
+			      TrUserData);
 d_field_rpbbucketprops_dw(<<0:1, X:7, Rest/binary>>, N,
 			  Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
 			  F12, F13, F14, F15, F16, F17, _, F19, F20, F21, F22,
-			  F23, F24, F25, F26, F27, F28, F29, TrUserData) ->
+			  F23, F24, F25, F26, F27, F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, NewFValue, F19,
 				      F20, F21, F22, F23, F24, F25, F26, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_rw(<<1:1, X:7, Rest/binary>>, N,
 			  Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
 			  F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22,
-			  F23, F24, F25, F26, F27, F28, F29, TrUserData)
+			  F23, F24, F25, F26, F27, F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_rw(Rest, N + 7, X bsl N + Acc,
 			      F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 			      F13, F14, F15, F16, F17, F18, F19, F20, F21, F22,
-			      F23, F24, F25, F26, F27, F28, F29, TrUserData);
+			      F23, F24, F25, F26, F27, F28, F29, F30,
+			      TrUserData);
 d_field_rpbbucketprops_rw(<<0:1, X:7, Rest/binary>>, N,
 			  Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
 			  F12, F13, F14, F15, F16, F17, F18, _, F20, F21, F22,
-			  F23, F24, F25, F26, F27, F28, F29, TrUserData) ->
+			  F23, F24, F25, F26, F27, F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, NewFValue,
 				      F20, F21, F22, F23, F24, F25, F26, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_basic_quorum(<<1:1, X:7,
@@ -3351,26 +3387,26 @@ d_field_rpbbucketprops_basic_quorum(<<1:1, X:7,
 				    N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				    F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				    F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				    F28, F29, TrUserData)
+				    F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_basic_quorum(Rest, N + 7,
 					X bsl N + Acc, F1, F2, F3, F4, F5, F6,
 					F7, F8, F9, F10, F11, F12, F13, F14,
 					F15, F16, F17, F18, F19, F20, F21, F22,
-					F23, F24, F25, F26, F27, F28, F29,
+					F23, F24, F25, F26, F27, F28, F29, F30,
 					TrUserData);
 d_field_rpbbucketprops_basic_quorum(<<0:1, X:7,
 				      Rest/binary>>,
 				    N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				    F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				    F19, _, F21, F22, F23, F24, F25, F26, F27,
-				    F28, F29, TrUserData) ->
+				    F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc =/= 0,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19,
 				      NewFValue, F21, F22, F23, F24, F25, F26,
-				      F27, F28, F29, TrUserData).
+				      F27, F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_notfound_ok(<<1:1, X:7,
@@ -3378,45 +3414,45 @@ d_field_rpbbucketprops_notfound_ok(<<1:1, X:7,
 				   N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				   F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				   F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				   F28, F29, TrUserData)
+				   F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_notfound_ok(Rest, N + 7,
 				       X bsl N + Acc, F1, F2, F3, F4, F5, F6,
 				       F7, F8, F9, F10, F11, F12, F13, F14, F15,
 				       F16, F17, F18, F19, F20, F21, F22, F23,
-				       F24, F25, F26, F27, F28, F29,
+				       F24, F25, F26, F27, F28, F29, F30,
 				       TrUserData);
 d_field_rpbbucketprops_notfound_ok(<<0:1, X:7,
 				     Rest/binary>>,
 				   N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				   F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				   F19, F20, _, F22, F23, F24, F25, F26, F27,
-				   F28, F29, TrUserData) ->
+				   F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc =/= 0,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      NewFValue, F22, F23, F24, F25, F26, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_backend(<<1:1, X:7,
 				 Rest/binary>>,
 			       N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 			       F11, F12, F13, F14, F15, F16, F17, F18, F19, F20,
-			       F21, F22, F23, F24, F25, F26, F27, F28, F29,
+			       F21, F22, F23, F24, F25, F26, F27, F28, F29, F30,
 			       TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_backend(Rest, N + 7,
 				   X bsl N + Acc, F1, F2, F3, F4, F5, F6, F7,
 				   F8, F9, F10, F11, F12, F13, F14, F15, F16,
 				   F17, F18, F19, F20, F21, F22, F23, F24, F25,
-				   F26, F27, F28, F29, TrUserData);
+				   F26, F27, F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_backend(<<0:1, X:7,
 				 Rest/binary>>,
 			       N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 			       F11, F12, F13, F14, F15, F16, F17, F18, F19, F20,
-			       F21, _, F23, F24, F25, F26, F27, F28, F29,
+			       F21, _, F23, F24, F25, F26, F27, F28, F29, F30,
 			       TrUserData) ->
     Len = X bsl N + Acc,
     <<Bytes:Len/binary, Rest2/binary>> = Rest,
@@ -3425,48 +3461,48 @@ d_field_rpbbucketprops_backend(<<0:1, X:7,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, NewFValue, F23, F24, F25, F26, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_search(<<1:1, X:7, Rest/binary>>,
 			      N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 			      F11, F12, F13, F14, F15, F16, F17, F18, F19, F20,
-			      F21, F22, F23, F24, F25, F26, F27, F28, F29,
+			      F21, F22, F23, F24, F25, F26, F27, F28, F29, F30,
 			      TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_search(Rest, N + 7,
 				  X bsl N + Acc, F1, F2, F3, F4, F5, F6, F7, F8,
 				  F9, F10, F11, F12, F13, F14, F15, F16, F17,
 				  F18, F19, F20, F21, F22, F23, F24, F25, F26,
-				  F27, F28, F29, TrUserData);
+				  F27, F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_search(<<0:1, X:7, Rest/binary>>,
 			      N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 			      F11, F12, F13, F14, F15, F16, F17, F18, F19, F20,
-			      F21, F22, _, F24, F25, F26, F27, F28, F29,
+			      F21, F22, _, F24, F25, F26, F27, F28, F29, F30,
 			      TrUserData) ->
     NewFValue = X bsl N + Acc =/= 0,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, NewFValue, F24, F25, F26, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_repl(<<1:1, X:7, Rest/binary>>,
 			    N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 			    F11, F12, F13, F14, F15, F16, F17, F18, F19, F20,
-			    F21, F22, F23, F24, F25, F26, F27, F28, F29,
+			    F21, F22, F23, F24, F25, F26, F27, F28, F29, F30,
 			    TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_repl(Rest, N + 7, X bsl N + Acc,
 				F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
 				F12, F13, F14, F15, F16, F17, F18, F19, F20,
 				F21, F22, F23, F24, F25, F26, F27, F28, F29,
-				TrUserData);
+				F30, TrUserData);
 d_field_rpbbucketprops_repl(<<0:1, X:7, Rest/binary>>,
 			    N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 			    F11, F12, F13, F14, F15, F16, F17, F18, F19, F20,
-			    F21, F22, F23, _, F25, F26, F27, F28, F29,
+			    F21, F22, F23, _, F25, F26, F27, F28, F29, F30,
 			    TrUserData) ->
     <<Tmp:32/signed-native>> = <<(X bsl N +
 				    Acc):32/unsigned-native>>,
@@ -3475,7 +3511,7 @@ d_field_rpbbucketprops_repl(<<0:1, X:7, Rest/binary>>,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, NewFValue, F25, F26, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_search_index(<<1:1, X:7,
@@ -3483,20 +3519,20 @@ d_field_rpbbucketprops_search_index(<<1:1, X:7,
 				    N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				    F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				    F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				    F28, F29, TrUserData)
+				    F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_search_index(Rest, N + 7,
 					X bsl N + Acc, F1, F2, F3, F4, F5, F6,
 					F7, F8, F9, F10, F11, F12, F13, F14,
 					F15, F16, F17, F18, F19, F20, F21, F22,
-					F23, F24, F25, F26, F27, F28, F29,
+					F23, F24, F25, F26, F27, F28, F29, F30,
 					TrUserData);
 d_field_rpbbucketprops_search_index(<<0:1, X:7,
 				      Rest/binary>>,
 				    N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				    F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				    F19, F20, F21, F22, F23, F24, _, F26, F27,
-				    F28, F29, TrUserData) ->
+				    F28, F29, F30, TrUserData) ->
     Len = X bsl N + Acc,
     <<Bytes:Len/binary, Rest2/binary>> = Rest,
     NewFValue = binary:copy(Bytes),
@@ -3504,7 +3540,7 @@ d_field_rpbbucketprops_search_index(<<0:1, X:7,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, NewFValue, F26, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_datatype(<<1:1, X:7,
@@ -3512,19 +3548,19 @@ d_field_rpbbucketprops_datatype(<<1:1, X:7,
 				N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 				F11, F12, F13, F14, F15, F16, F17, F18, F19,
 				F20, F21, F22, F23, F24, F25, F26, F27, F28,
-				F29, TrUserData)
+				F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_datatype(Rest, N + 7,
 				    X bsl N + Acc, F1, F2, F3, F4, F5, F6, F7,
 				    F8, F9, F10, F11, F12, F13, F14, F15, F16,
 				    F17, F18, F19, F20, F21, F22, F23, F24, F25,
-				    F26, F27, F28, F29, TrUserData);
+				    F26, F27, F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_datatype(<<0:1, X:7,
 				  Rest/binary>>,
 				N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 				F11, F12, F13, F14, F15, F16, F17, F18, F19,
 				F20, F21, F22, F23, F24, F25, _, F27, F28, F29,
-				TrUserData) ->
+				F30, TrUserData) ->
     Len = X bsl N + Acc,
     <<Bytes:Len/binary, Rest2/binary>> = Rest,
     NewFValue = binary:copy(Bytes),
@@ -3532,7 +3568,7 @@ d_field_rpbbucketprops_datatype(<<0:1, X:7,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, NewFValue, F27,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_consistent(<<1:1, X:7,
@@ -3540,25 +3576,25 @@ d_field_rpbbucketprops_consistent(<<1:1, X:7,
 				  N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData)
+				  F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_consistent(Rest, N + 7,
 				      X bsl N + Acc, F1, F2, F3, F4, F5, F6, F7,
 				      F8, F9, F10, F11, F12, F13, F14, F15, F16,
 				      F17, F18, F19, F20, F21, F22, F23, F24,
-				      F25, F26, F27, F28, F29, TrUserData);
+				      F25, F26, F27, F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_consistent(<<0:1, X:7,
 				    Rest/binary>>,
 				  N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, _,
-				  F28, F29, TrUserData) ->
+				  F28, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc =/= 0,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, F26, NewFValue,
-				      F28, F29, TrUserData).
+				      F28, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_write_once(<<1:1, X:7,
@@ -3566,25 +3602,25 @@ d_field_rpbbucketprops_write_once(<<1:1, X:7,
 				  N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  F28, F29, TrUserData)
+				  F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_write_once(Rest, N + 7,
 				      X bsl N + Acc, F1, F2, F3, F4, F5, F6, F7,
 				      F8, F9, F10, F11, F12, F13, F14, F15, F16,
 				      F17, F18, F19, F20, F21, F22, F23, F24,
-				      F25, F26, F27, F28, F29, TrUserData);
+				      F25, F26, F27, F28, F29, F30, TrUserData);
 d_field_rpbbucketprops_write_once(<<0:1, X:7,
 				    Rest/binary>>,
 				  N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				  F10, F11, F12, F13, F14, F15, F16, F17, F18,
 				  F19, F20, F21, F22, F23, F24, F25, F26, F27,
-				  _, F29, TrUserData) ->
+				  _, F29, F30, TrUserData) ->
     NewFValue = X bsl N + Acc =/= 0,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, F26, F27,
-				      NewFValue, F29, TrUserData).
+				      NewFValue, F29, F30, TrUserData).
 
 
 d_field_rpbbucketprops_hll_precision(<<1:1, X:7,
@@ -3592,47 +3628,71 @@ d_field_rpbbucketprops_hll_precision(<<1:1, X:7,
 				     N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				     F10, F11, F12, F13, F14, F15, F16, F17,
 				     F18, F19, F20, F21, F22, F23, F24, F25,
-				     F26, F27, F28, F29, TrUserData)
+				     F26, F27, F28, F29, F30, TrUserData)
     when N < 57 ->
     d_field_rpbbucketprops_hll_precision(Rest, N + 7,
 					 X bsl N + Acc, F1, F2, F3, F4, F5, F6,
 					 F7, F8, F9, F10, F11, F12, F13, F14,
 					 F15, F16, F17, F18, F19, F20, F21, F22,
-					 F23, F24, F25, F26, F27, F28, F29,
+					 F23, F24, F25, F26, F27, F28, F29, F30,
 					 TrUserData);
 d_field_rpbbucketprops_hll_precision(<<0:1, X:7,
 				       Rest/binary>>,
 				     N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				     F10, F11, F12, F13, F14, F15, F16, F17,
 				     F18, F19, F20, F21, F22, F23, F24, F25,
-				     F26, F27, F28, _, TrUserData) ->
+				     F26, F27, F28, _, F30, TrUserData) ->
     NewFValue = X bsl N + Acc,
     dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, F26, F27, F28,
-				      NewFValue, TrUserData).
+				      NewFValue, F30, TrUserData).
+
+
+d_field_rpbbucketprops_ttl(<<1:1, X:7, Rest/binary>>, N,
+			   Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
+			   F12, F13, F14, F15, F16, F17, F18, F19, F20, F21,
+			   F22, F23, F24, F25, F26, F27, F28, F29, F30,
+			   TrUserData)
+    when N < 57 ->
+    d_field_rpbbucketprops_ttl(Rest, N + 7, X bsl N + Acc,
+			       F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
+			       F12, F13, F14, F15, F16, F17, F18, F19, F20, F21,
+			       F22, F23, F24, F25, F26, F27, F28, F29, F30,
+			       TrUserData);
+d_field_rpbbucketprops_ttl(<<0:1, X:7, Rest/binary>>, N,
+			   Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
+			   F12, F13, F14, F15, F16, F17, F18, F19, F20, F21,
+			   F22, F23, F24, F25, F26, F27, F28, F29, _,
+			   TrUserData) ->
+    NewFValue = X bsl N + Acc,
+    dfp_read_field_def_rpbbucketprops(Rest, 0, 0, F1, F2,
+				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
+				      F13, F14, F15, F16, F17, F18, F19, F20,
+				      F21, F22, F23, F24, F25, F26, F27, F28,
+				      F29, NewFValue, TrUserData).
 
 
 skip_varint_rpbbucketprops(<<1:1, _:7, Rest/binary>>,
 			   Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
 			   F12, F13, F14, F15, F16, F17, F18, F19, F20, F21,
-			   F22, F23, F24, F25, F26, F27, F28, F29,
+			   F22, F23, F24, F25, F26, F27, F28, F29, F30,
 			   TrUserData) ->
     skip_varint_rpbbucketprops(Rest, Z1, Z2, F1, F2, F3, F4,
 			       F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15,
 			       F16, F17, F18, F19, F20, F21, F22, F23, F24, F25,
-			       F26, F27, F28, F29, TrUserData);
+			       F26, F27, F28, F29, F30, TrUserData);
 skip_varint_rpbbucketprops(<<0:1, _:7, Rest/binary>>,
 			   Z1, Z2, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11,
 			   F12, F13, F14, F15, F16, F17, F18, F19, F20, F21,
-			   F22, F23, F24, F25, F26, F27, F28, F29,
+			   F22, F23, F24, F25, F26, F27, F28, F29, F30,
 			   TrUserData) ->
     dfp_read_field_def_rpbbucketprops(Rest, Z1, Z2, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, F26, F27, F28,
-				      F29, TrUserData).
+				      F29, F30, TrUserData).
 
 
 skip_length_delimited_rpbbucketprops(<<1:1, X:7,
@@ -3640,49 +3700,49 @@ skip_length_delimited_rpbbucketprops(<<1:1, X:7,
 				     N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				     F10, F11, F12, F13, F14, F15, F16, F17,
 				     F18, F19, F20, F21, F22, F23, F24, F25,
-				     F26, F27, F28, F29, TrUserData)
+				     F26, F27, F28, F29, F30, TrUserData)
     when N < 57 ->
     skip_length_delimited_rpbbucketprops(Rest, N + 7,
 					 X bsl N + Acc, F1, F2, F3, F4, F5, F6,
 					 F7, F8, F9, F10, F11, F12, F13, F14,
 					 F15, F16, F17, F18, F19, F20, F21, F22,
-					 F23, F24, F25, F26, F27, F28, F29,
+					 F23, F24, F25, F26, F27, F28, F29, F30,
 					 TrUserData);
 skip_length_delimited_rpbbucketprops(<<0:1, X:7,
 				       Rest/binary>>,
 				     N, Acc, F1, F2, F3, F4, F5, F6, F7, F8, F9,
 				     F10, F11, F12, F13, F14, F15, F16, F17,
 				     F18, F19, F20, F21, F22, F23, F24, F25,
-				     F26, F27, F28, F29, TrUserData) ->
+				     F26, F27, F28, F29, F30, TrUserData) ->
     Length = X bsl N + Acc,
     <<_:Length/binary, Rest2/binary>> = Rest,
     dfp_read_field_def_rpbbucketprops(Rest2, 0, 0, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, F26, F27, F28,
-				      F29, TrUserData).
+				      F29, F30, TrUserData).
 
 
 skip_32_rpbbucketprops(<<_:32, Rest/binary>>, Z1, Z2,
 		       F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13,
 		       F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24,
-		       F25, F26, F27, F28, F29, TrUserData) ->
+		       F25, F26, F27, F28, F29, F30, TrUserData) ->
     dfp_read_field_def_rpbbucketprops(Rest, Z1, Z2, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, F26, F27, F28,
-				      F29, TrUserData).
+				      F29, F30, TrUserData).
 
 
 skip_64_rpbbucketprops(<<_:64, Rest/binary>>, Z1, Z2,
 		       F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13,
 		       F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24,
-		       F25, F26, F27, F28, F29, TrUserData) ->
+		       F25, F26, F27, F28, F29, F30, TrUserData) ->
     dfp_read_field_def_rpbbucketprops(Rest, Z1, Z2, F1, F2,
 				      F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
 				      F13, F14, F15, F16, F17, F18, F19, F20,
 				      F21, F22, F23, F24, F25, F26, F27, F28,
-				      F29, TrUserData).
+				      F29, F30, TrUserData).
 
 
 d_msg_rpbpair(Bin, TrUserData) ->
@@ -4073,7 +4133,7 @@ dfp_read_field_def_tscoveragereq(<<34, Rest/binary>>,
 					    F1, F2, F3, F4, TrUserData);
 dfp_read_field_def_tscoveragereq(<<>>, 0, 0, F1, F2, F3,
 				 F4, TrUserData) ->
-    #tscoveragereq{'query' = F1, table = F2,
+    #tscoveragereq{query = F1, table = F2,
 		   replace_cover = F3,
 		   unavailable_cover = lists_reverse(F4, TrUserData)};
 dfp_read_field_def_tscoveragereq(Other, Z1, Z2, F1, F2,
@@ -4122,7 +4182,7 @@ dg_read_field_def_tscoveragereq(<<0:1, X:7,
     end;
 dg_read_field_def_tscoveragereq(<<>>, 0, 0, F1, F2, F3,
 				F4, TrUserData) ->
-    #tscoveragereq{'query' = F1, table = F2,
+    #tscoveragereq{query = F1, table = F2,
 		   replace_cover = F3,
 		   unavailable_cover = lists_reverse(F4, TrUserData)}.
 
@@ -6436,7 +6496,7 @@ dfp_read_field_def_tsqueryreq(<<26, Rest/binary>>, Z1,
 				     F3, TrUserData);
 dfp_read_field_def_tsqueryreq(<<>>, 0, 0, F1, F2, F3,
 			      _) ->
-    #tsqueryreq{'query' = F1, stream = F2,
+    #tsqueryreq{query = F1, stream = F2,
 		cover_context = F3};
 dfp_read_field_def_tsqueryreq(Other, Z1, Z2, F1, F2, F3,
 			      TrUserData) ->
@@ -6477,7 +6537,7 @@ dg_read_field_def_tsqueryreq(<<0:1, X:7, Rest/binary>>,
     end;
 dg_read_field_def_tsqueryreq(<<>>, 0, 0, F1, F2, F3,
 			     _) ->
-    #tsqueryreq{'query' = F1, stream = F2,
+    #tsqueryreq{query = F1, stream = F2,
 		cover_context = F3}.
 
 d_field_tsqueryreq_query(<<1:1, X:7, Rest/binary>>, N,
@@ -7132,7 +7192,8 @@ merge_msg_rpbbucketprops(#rpbbucketprops{n_val =
 					 datatype = PFdatatype,
 					 consistent = PFconsistent,
 					 write_once = PFwrite_once,
-					 hll_precision = PFhll_precision},
+					 hll_precision = PFhll_precision,
+					 ttl = PFttl},
 			 #rpbbucketprops{n_val = NFn_val,
 					 allow_mult = NFallow_mult,
 					 last_write_wins = NFlast_write_wins,
@@ -7156,7 +7217,8 @@ merge_msg_rpbbucketprops(#rpbbucketprops{n_val =
 					 datatype = NFdatatype,
 					 consistent = NFconsistent,
 					 write_once = NFwrite_once,
-					 hll_precision = NFhll_precision},
+					 hll_precision = NFhll_precision,
+					 ttl = NFttl},
 			 TrUserData) ->
     #rpbbucketprops{n_val =
 			if NFn_val =:= undefined -> PFn_val;
@@ -7276,6 +7338,10 @@ merge_msg_rpbbucketprops(#rpbbucketprops{n_val =
 		    hll_precision =
 			if NFhll_precision =:= undefined -> PFhll_precision;
 			   true -> NFhll_precision
+			end,
+		    ttl =
+			if NFttl =:= undefined -> PFttl;
+			   true -> NFttl
 			end}.
 
 merge_msg_rpbpair(#rpbpair{value = PFvalue},
@@ -7307,14 +7373,14 @@ merge_msg_tsinterpolation(#tsinterpolation{interpolations
 			 'erlang_++'(PFinterpolations, NFinterpolations,
 				     TrUserData)}.
 
-merge_msg_tscoveragereq(#tscoveragereq{'query' = PFquery,
+merge_msg_tscoveragereq(#tscoveragereq{query = PFquery,
 				       replace_cover = PFreplace_cover,
 				       unavailable_cover = PFunavailable_cover},
-			#tscoveragereq{'query' = NFquery, table = NFtable,
+			#tscoveragereq{query = NFquery, table = NFtable,
 				       replace_cover = NFreplace_cover,
 				       unavailable_cover = NFunavailable_cover},
 			TrUserData) ->
-    #tscoveragereq{'query' =
+    #tscoveragereq{query =
 		       if PFquery /= undefined, NFquery /= undefined ->
 			      merge_msg_tsinterpolation(PFquery, NFquery,
 							TrUserData);
@@ -7519,13 +7585,13 @@ merge_msg_rpbauthreq(#rpbauthreq{},
 		     #rpbauthreq{user = NFuser, password = NFpassword}, _) ->
     #rpbauthreq{user = NFuser, password = NFpassword}.
 
-merge_msg_tsqueryreq(#tsqueryreq{'query' = PFquery,
+merge_msg_tsqueryreq(#tsqueryreq{query = PFquery,
 				 stream = PFstream,
 				 cover_context = PFcover_context},
-		     #tsqueryreq{'query' = NFquery, stream = NFstream,
+		     #tsqueryreq{query = NFquery, stream = NFstream,
 				 cover_context = NFcover_context},
 		     TrUserData) ->
-    #tsqueryreq{'query' =
+    #tsqueryreq{query =
 		    if PFquery /= undefined, NFquery /= undefined ->
 			   merge_msg_tsinterpolation(PFquery, NFquery,
 						     TrUserData);
@@ -7712,7 +7778,7 @@ v_msg_rpbbucketprops(#rpbbucketprops{n_val = F1,
 				     search = F23, repl = F24,
 				     search_index = F25, datatype = F26,
 				     consistent = F27, write_once = F28,
-				     hll_precision = F29},
+				     hll_precision = F29, ttl = F30},
 		     Path, TrUserData) ->
     if F1 == undefined -> ok;
        true -> v_type_uint32(F1, [n_val | Path])
@@ -7816,6 +7882,9 @@ v_msg_rpbbucketprops(#rpbbucketprops{n_val = F1,
     if F29 == undefined -> ok;
        true -> v_type_uint32(F29, [hll_precision | Path])
     end,
+    if F30 == undefined -> ok;
+       true -> v_type_uint32(F30, [ttl | Path])
+    end,
     ok;
 v_msg_rpbbucketprops(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbbucketprops}, X, Path).
@@ -7856,13 +7925,13 @@ v_msg_tsinterpolation(#tsinterpolation{base = F1,
 v_msg_tsinterpolation(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, tsinterpolation}, X, Path).
 
-v_msg_tscoveragereq(#tscoveragereq{'query' = F1,
+v_msg_tscoveragereq(#tscoveragereq{query = F1,
 				   table = F2, replace_cover = F3,
 				   unavailable_cover = F4},
 		    Path, TrUserData) ->
     if F1 == undefined -> ok;
        true ->
-	   v_msg_tsinterpolation(F1, ['query' | Path], TrUserData)
+	   v_msg_tsinterpolation(F1, [query | Path], TrUserData)
     end,
     v_type_bytes(F2, [table | Path]),
     if F3 == undefined -> ok;
@@ -8104,12 +8173,12 @@ v_msg_rpbauthreq(#rpbauthreq{user = F1, password = F2},
     v_type_bytes(F2, [password | Path]),
     ok.
 
-v_msg_tsqueryreq(#tsqueryreq{'query' = F1, stream = F2,
+v_msg_tsqueryreq(#tsqueryreq{query = F1, stream = F2,
 			     cover_context = F3},
 		 Path, TrUserData) ->
     if F1 == undefined -> ok;
        true ->
-	   v_msg_tsinterpolation(F1, ['query' | Path], TrUserData)
+	   v_msg_tsinterpolation(F1, [query | Path], TrUserData)
     end,
     if F2 == undefined -> ok;
        true -> v_type_bool(F2, [stream | Path])
@@ -8362,7 +8431,9 @@ get_msg_defs() ->
        [{name, write_once}, {fnum, 28}, {rnum, 29},
 	{type, bool}, {occurrence, optional}, {opts, []}],
        [{name, hll_precision}, {fnum, 29}, {rnum, 30},
-	{type, uint32}, {occurrence, optional}, {opts, []}]]},
+	{type, uint32}, {occurrence, optional}, {opts, []}],
+       [{name, ttl}, {fnum, 30}, {rnum, 31}, {type, uint32},
+	{occurrence, optional}, {opts, []}]]},
      {{msg, rpbpair},
       [[{name, key}, {fnum, 1}, {rnum, 2}, {type, bytes},
 	{occurrence, required}, {opts, []}],
@@ -8380,7 +8451,7 @@ get_msg_defs() ->
 	{type, {msg, rpbpair}}, {occurrence, repeated},
 	{opts, []}]]},
      {{msg, tscoveragereq},
-      [[{name, 'query'}, {fnum, 1}, {rnum, 2},
+      [[{name, query}, {fnum, 1}, {rnum, 2},
 	{type, {msg, tsinterpolation}}, {occurrence, optional},
 	{opts, []}],
        [{name, table}, {fnum, 2}, {rnum, 3}, {type, bytes},
@@ -8496,7 +8567,7 @@ get_msg_defs() ->
        [{name, password}, {fnum, 2}, {rnum, 3}, {type, bytes},
 	{occurrence, required}, {opts, []}]]},
      {{msg, tsqueryreq},
-      [[{name, 'query'}, {fnum, 1}, {rnum, 2},
+      [[{name, query}, {fnum, 1}, {rnum, 2},
 	{type, {msg, tsinterpolation}}, {occurrence, optional},
 	{opts, []}],
        [{name, stream}, {fnum, 2}, {rnum, 3}, {type, bool},
@@ -8650,7 +8721,9 @@ find_msg_def(rpbbucketprops) ->
      [{name, write_once}, {fnum, 28}, {rnum, 29},
       {type, bool}, {occurrence, optional}, {opts, []}],
      [{name, hll_precision}, {fnum, 29}, {rnum, 30},
-      {type, uint32}, {occurrence, optional}, {opts, []}]];
+      {type, uint32}, {occurrence, optional}, {opts, []}],
+     [{name, ttl}, {fnum, 30}, {rnum, 31}, {type, uint32},
+      {occurrence, optional}, {opts, []}]];
 find_msg_def(rpbpair) ->
     [[{name, key}, {fnum, 1}, {rnum, 2}, {type, bytes},
       {occurrence, required}, {opts, []}],
@@ -8668,7 +8741,7 @@ find_msg_def(tsinterpolation) ->
       {type, {msg, rpbpair}}, {occurrence, repeated},
       {opts, []}]];
 find_msg_def(tscoveragereq) ->
-    [[{name, 'query'}, {fnum, 1}, {rnum, 2},
+    [[{name, query}, {fnum, 1}, {rnum, 2},
       {type, {msg, tsinterpolation}}, {occurrence, optional},
       {opts, []}],
      [{name, table}, {fnum, 2}, {rnum, 3}, {type, bytes},
@@ -8784,7 +8857,7 @@ find_msg_def(rpbauthreq) ->
      [{name, password}, {fnum, 2}, {rnum, 3}, {type, bytes},
       {occurrence, required}, {opts, []}]];
 find_msg_def(tsqueryreq) ->
-    [[{name, 'query'}, {fnum, 1}, {rnum, 2},
+    [[{name, query}, {fnum, 1}, {rnum, 2},
       {type, {msg, tsinterpolation}}, {occurrence, optional},
       {opts, []}],
      [{name, stream}, {fnum, 2}, {rnum, 3}, {type, bool},

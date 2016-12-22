@@ -37,7 +37,8 @@
          last_mod_usecs         :: non_neg_integer() | undefined, % = 8, 32 bits
          usermeta = []          :: [#rpbpair{}],    % = 9
          indexes = []           :: [#rpbpair{}],    % = 10
-         deleted                :: boolean() | 0 | 1 | undefined % = 11
+         deleted                :: boolean() | 0 | 1 | undefined, % = 11
+         ttl                    :: non_neg_integer() | undefined % = 12, 32 bits
         }).
 -endif.
 
@@ -105,7 +106,8 @@
          datatype               :: binary() | undefined, % = 26
          consistent             :: boolean() | 0 | 1 | undefined, % = 27
          write_once             :: boolean() | 0 | 1 | undefined, % = 28
-         hll_precision          :: non_neg_integer() | undefined % = 29, 32 bits
+         hll_precision          :: non_neg_integer() | undefined, % = 29, 32 bits
+         ttl                    :: non_neg_integer() | undefined % = 30, 32 bits
         }).
 -endif.
 
