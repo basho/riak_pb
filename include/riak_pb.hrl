@@ -54,7 +54,8 @@
          datatype               :: binary() | undefined, % = 26
          consistent             :: boolean() | 0 | 1 | undefined, % = 27
          write_once             :: boolean() | 0 | 1 | undefined, % = 28
-         hll_precision          :: non_neg_integer() | undefined % = 29, 32 bits
+         hll_precision          :: non_neg_integer() | undefined, % = 29, 32 bits
+         ttl                    :: non_neg_integer() | undefined % = 30, 32 bits
         }).
 -endif.
 

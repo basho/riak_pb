@@ -224,11 +224,12 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
                                     datatype=Datatype,
                                     consistent=Consistent,
                                     write_once=WriteOnce,
+                                    ttl=TTL,
                                     hll_precision=HllPrecision
                                    }) ->
     %% Extract numerical properties
     [ {P,V} || {P,V} <- [{n_val, N}, {old_vclock, Old}, {young_vclock, Young},
-                       {big_vclock, Big}, {small_vclock, Small},
+                       {big_vclock, Big}, {small_vclock, Small}, {ttl, TTL},
                        {hll_precision, HllPrecision}],
               V /= undefined ] ++
     %% Extract booleans
@@ -330,6 +331,8 @@ encode_bucket_props([{consistent, S}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{consistent = encode_bool(S)});
 encode_bucket_props([{write_once, S}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{write_once = encode_bool(S)});
+encode_bucket_props([{ttl, Num}|Rest], Pb) ->
+    encode_bucket_props(Rest, Pb#rpbbucketprops{ttl = Num});
 encode_bucket_props([{hll_precision, Num}|Rest], Pb) ->
     encode_bucket_props(Rest, Pb#rpbbucketprops{hll_precision = Num});
 encode_bucket_props([_Ignore|Rest], Pb) ->

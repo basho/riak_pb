@@ -30,6 +30,7 @@
 -define(MD_USERMETA, <<"X-Riak-Meta">>).
 -define(MD_INDEX,    <<"index">>).
 -define(MD_DELETED,  <<"X-Riak-Deleted">>).
+-define(MD_TTL,      <<"X-Riak-TTL">>).
 
 %% Content-Type for Erlang term_to_binary format
 -define(CTYPE_ERLANG_BINARY, "application/x-erlang-binary").
