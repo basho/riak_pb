@@ -191,15 +191,15 @@ decode_content_meta(ttl, TTLVal, _Pb) ->
 -spec decode_content(PBContent::tuple()) -> {metadata(), binary()}.
 decode_content(PbC) ->
     MD = decode_content_meta(content_type, PbC#rpbcontent.content_type, PbC) ++
-         decode_content_meta(charset,  PbC#rpbcontent.charset, PbC) ++
-         decode_content_meta(encoding, PbC#rpbcontent.content_encoding, PbC) ++
-         decode_content_meta(vtag,     PbC#rpbcontent.vtag, PbC) ++
-         decode_content_meta(links,    PbC#rpbcontent.links, PbC) ++
-         decode_content_meta(last_mod, PbC#rpbcontent.last_mod, PbC) ++
-         decode_content_meta(usermeta, PbC#rpbcontent.usermeta, PbC) ++
-         decode_content_meta(indexes,  PbC#rpbcontent.indexes, PbC) ++
-         decode_content_meta(deleted,  PbC#rpbcontent.deleted, PbC) ++
-         decode_content_meta(ttl,      PbC#rpbcontent.ttl, PbC),
+         decode_content_meta(charset,      PbC#rpbcontent.charset, PbC) ++
+         decode_content_meta(encoding,     PbC#rpbcontent.content_encoding, PbC) ++
+         decode_content_meta(vtag,         PbC#rpbcontent.vtag, PbC) ++
+         decode_content_meta(links,        PbC#rpbcontent.links, PbC) ++
+         decode_content_meta(last_mod,     PbC#rpbcontent.last_mod, PbC) ++
+         decode_content_meta(usermeta,     PbC#rpbcontent.usermeta, PbC) ++
+         decode_content_meta(indexes,      PbC#rpbcontent.indexes, PbC) ++
+         decode_content_meta(deleted,      PbC#rpbcontent.deleted, PbC) ++
+         decode_content_meta(ttl,          PbC#rpbcontent.ttl, PbC),
 
 
     {dict:from_list(MD), PbC#rpbcontent.value}.
