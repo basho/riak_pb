@@ -564,8 +564,10 @@ encode_update_response(counter, Value, Key, Context, _Mods) ->
     #dtupdateresp{key=Key, context=Context, counter_value=Value};
 encode_update_response(set, Value, Key, Context, _Mods) ->
     #dtupdateresp{key=Key, context=Context, set_value=Value};
-encode_update_response(hll, Value, Key, Context, _Mods) ->
-    #dtupdateresp{key=Key, context=Context, hll_value=Value};
+encode_update_response(gset, Value, Key, _Context, _Mods) ->
+    #dtupdateresp{key=Key, context=_Context, gset_value=Value};
+encode_update_response(hll, Value, Key, _Context, _Mods) ->
+    #dtupdateresp{key=Key, context=_Context, hll_value=Value};
 encode_update_response(map, Value, Key, Context, Mods) when is_list(Value) ->
     #dtupdateresp{key=Key, context=Context,
                   map_value=[encode_map_entry(Entry, Mods)
