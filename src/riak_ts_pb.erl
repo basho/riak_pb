@@ -7715,6 +7715,7 @@ verify_msg(Msg, Opts) ->
     end.
 
 
+-dialyzer({nowarn_function,v_msg_tsrange/3}).
 v_msg_tsrange(#tsrange{field_name = F1,
 		       lower_bound = F2, lower_bound_inclusive = F3,
 		       upper_bound = F4, upper_bound_inclusive = F5,
@@ -7730,6 +7731,7 @@ v_msg_tsrange(#tsrange{field_name = F1,
 v_msg_tsrange(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, tsrange}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_tscoverageentry/3}).
 v_msg_tscoverageentry(#tscoverageentry{ip = F1,
 				       port = F2, cover_context = F3,
 				       range = F4},
@@ -7744,6 +7746,7 @@ v_msg_tscoverageentry(#tscoverageentry{ip = F1,
 v_msg_tscoverageentry(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, tscoverageentry}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbmodfun/3}).
 v_msg_rpbmodfun(#rpbmodfun{module = F1, function = F2},
 		Path, _) ->
     v_type_bytes(F1, [module | Path]),
@@ -7752,6 +7755,7 @@ v_msg_rpbmodfun(#rpbmodfun{module = F1, function = F2},
 v_msg_rpbmodfun(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbmodfun}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbcommithook/3}).
 v_msg_rpbcommithook(#rpbcommithook{modfun = F1,
 				   name = F2},
 		    Path, TrUserData) ->
@@ -7765,6 +7769,7 @@ v_msg_rpbcommithook(#rpbcommithook{modfun = F1,
 v_msg_rpbcommithook(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbcommithook}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbbucketprops/3}).
 v_msg_rpbbucketprops(#rpbbucketprops{n_val = F1,
 				     allow_mult = F2, last_write_wins = F3,
 				     precommit = F4, has_precommit = F5,
@@ -7889,6 +7894,7 @@ v_msg_rpbbucketprops(#rpbbucketprops{n_val = F1,
 v_msg_rpbbucketprops(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbbucketprops}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbpair/3}).
 v_msg_rpbpair(#rpbpair{key = F1, value = F2}, Path,
 	      _) ->
     v_type_bytes(F1, [key | Path]),
@@ -7899,6 +7905,7 @@ v_msg_rpbpair(#rpbpair{key = F1, value = F2}, Path,
 v_msg_rpbpair(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbpair}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbresetbucketreq/3}).
 v_msg_rpbresetbucketreq(#rpbresetbucketreq{bucket = F1,
 					   type = F2},
 			Path, _) ->
@@ -7908,6 +7915,7 @@ v_msg_rpbresetbucketreq(#rpbresetbucketreq{bucket = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_tsinterpolation/3}).
 v_msg_tsinterpolation(#tsinterpolation{base = F1,
 				       interpolations = F2},
 		      Path, TrUserData) ->
@@ -7925,6 +7933,7 @@ v_msg_tsinterpolation(#tsinterpolation{base = F1,
 v_msg_tsinterpolation(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, tsinterpolation}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_tscoveragereq/3}).
 v_msg_tscoveragereq(#tscoveragereq{query = F1,
 				   table = F2, replace_cover = F3,
 				   unavailable_cover = F4},
@@ -7946,6 +7955,7 @@ v_msg_tscoveragereq(#tscoveragereq{query = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_tscell/3}).
 v_msg_tscell(#tscell{varchar_value = F1,
 		     sint64_value = F2, timestamp_value = F3,
 		     boolean_value = F4, double_value = F5},
@@ -7969,6 +7979,7 @@ v_msg_tscell(#tscell{varchar_value = F1,
 v_msg_tscell(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, tscell}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_tsdelreq/3}).
 v_msg_tsdelreq(#tsdelreq{table = F1, key = F2,
 			 vclock = F3, timeout = F4},
 	       Path, TrUserData) ->
@@ -7989,6 +8000,7 @@ v_msg_tsdelreq(#tsdelreq{table = F1, key = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_tsrow/3}).
 v_msg_tsrow(#tsrow{cells = F1}, Path, TrUserData) ->
     if is_list(F1) ->
 	   _ = [v_msg_tscell(Elem, [cells | Path], TrUserData)
@@ -8002,6 +8014,7 @@ v_msg_tsrow(#tsrow{cells = F1}, Path, TrUserData) ->
 v_msg_tsrow(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, tsrow}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_tscolumndescription/3}).
 v_msg_tscolumndescription(#tscolumndescription{name =
 						   F1,
 					       type = F2},
@@ -8013,6 +8026,7 @@ v_msg_tscolumndescription(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, tscolumndescription}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_msg_tsputreq/3}).
 v_msg_tsputreq(#tsputreq{table = F1, columns = F2,
 			 rows = F3},
 	       Path, TrUserData) ->
@@ -8036,6 +8050,7 @@ v_msg_tsputreq(#tsputreq{table = F1, columns = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_tsgetreq/3}).
 v_msg_tsgetreq(#tsgetreq{table = F1, key = F2,
 			 timeout = F3},
 	       Path, TrUserData) ->
@@ -8053,8 +8068,10 @@ v_msg_tsgetreq(#tsgetreq{table = F1, key = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_tsdelresp/3}).
 v_msg_tsdelresp(#tsdelresp{}, _Path, _) -> ok.
 
+-dialyzer({nowarn_function,v_msg_tsgetresp/3}).
 v_msg_tsgetresp(#tsgetresp{columns = F1, rows = F2},
 		Path, TrUserData) ->
     if is_list(F1) ->
@@ -8076,6 +8093,7 @@ v_msg_tsgetresp(#tsgetresp{columns = F1, rows = F2},
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbsetbuckettypereq/3}).
 v_msg_rpbsetbuckettypereq(#rpbsetbuckettypereq{type =
 						   F1,
 					       props = F2},
@@ -8084,11 +8102,13 @@ v_msg_rpbsetbuckettypereq(#rpbsetbuckettypereq{type =
     v_msg_rpbbucketprops(F2, [props | Path], TrUserData),
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetbuckettypereq/3}).
 v_msg_rpbgetbuckettypereq(#rpbgetbuckettypereq{type =
 						   F1},
 			  Path, _) ->
     v_type_bytes(F1, [type | Path]), ok.
 
+-dialyzer({nowarn_function,v_msg_tslistkeysreq/3}).
 v_msg_tslistkeysreq(#tslistkeysreq{table = F1,
 				   timeout = F2},
 		    Path, _) ->
@@ -8098,6 +8118,7 @@ v_msg_tslistkeysreq(#tslistkeysreq{table = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetserverinforesp/3}).
 v_msg_rpbgetserverinforesp(#rpbgetserverinforesp{node =
 						     F1,
 						 server_version = F2},
@@ -8110,6 +8131,7 @@ v_msg_rpbgetserverinforesp(#rpbgetserverinforesp{node =
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbsetbucketreq/3}).
 v_msg_rpbsetbucketreq(#rpbsetbucketreq{bucket = F1,
 				       props = F2, type = F3},
 		      Path, TrUserData) ->
@@ -8120,6 +8142,7 @@ v_msg_rpbsetbucketreq(#rpbsetbucketreq{bucket = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetbucketreq/3}).
 v_msg_rpbgetbucketreq(#rpbgetbucketreq{bucket = F1,
 				       type = F2},
 		      Path, _) ->
@@ -8129,6 +8152,7 @@ v_msg_rpbgetbucketreq(#rpbgetbucketreq{bucket = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_tscoverageresp/3}).
 v_msg_tscoverageresp(#tscoverageresp{entries = F1},
 		     Path, TrUserData) ->
     if is_list(F1) ->
@@ -8142,6 +8166,7 @@ v_msg_tscoverageresp(#tscoverageresp{entries = F1},
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_tsqueryresp/3}).
 v_msg_tsqueryresp(#tsqueryresp{columns = F1, rows = F2,
 			       done = F3},
 		  Path, TrUserData) ->
@@ -8167,12 +8192,14 @@ v_msg_tsqueryresp(#tsqueryresp{columns = F1, rows = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbauthreq/3}).
 v_msg_rpbauthreq(#rpbauthreq{user = F1, password = F2},
 		 Path, _) ->
     v_type_bytes(F1, [user | Path]),
     v_type_bytes(F2, [password | Path]),
     ok.
 
+-dialyzer({nowarn_function,v_msg_tsqueryreq/3}).
 v_msg_tsqueryreq(#tsqueryreq{query = F1, stream = F2,
 			     cover_context = F3},
 		 Path, TrUserData) ->
@@ -8188,11 +8215,13 @@ v_msg_tsqueryreq(#tsqueryreq{query = F1, stream = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetbucketresp/3}).
 v_msg_rpbgetbucketresp(#rpbgetbucketresp{props = F1},
 		       Path, TrUserData) ->
     v_msg_rpbbucketprops(F1, [props | Path], TrUserData),
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpberrorresp/3}).
 v_msg_rpberrorresp(#rpberrorresp{errmsg = F1,
 				 errcode = F2},
 		   Path, _) ->
@@ -8200,6 +8229,7 @@ v_msg_rpberrorresp(#rpberrorresp{errmsg = F1,
     v_type_uint32(F2, [errcode | Path]),
     ok.
 
+-dialyzer({nowarn_function,v_msg_tslistkeysresp/3}).
 v_msg_tslistkeysresp(#tslistkeysresp{keys = F1,
 				     done = F2},
 		     Path, TrUserData) ->
@@ -8215,8 +8245,10 @@ v_msg_tslistkeysresp(#tslistkeysresp{keys = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_tsputresp/3}).
 v_msg_tsputresp(#tsputresp{}, _Path, _) -> ok.
 
+-dialyzer({nowarn_function,v_enum_TsColumnType/2}).
 v_enum_TsColumnType('VARCHAR', _Path) -> ok;
 v_enum_TsColumnType('SINT64', _Path) -> ok;
 v_enum_TsColumnType('DOUBLE', _Path) -> ok;
@@ -8228,6 +8260,7 @@ v_enum_TsColumnType(V, Path) when is_integer(V) ->
 v_enum_TsColumnType(X, Path) ->
     mk_type_error({invalid_enum, 'TsColumnType'}, X, Path).
 
+-dialyzer({nowarn_function,'v_enum_RpbBucketProps.RpbReplMode'/2}).
 'v_enum_RpbBucketProps.RpbReplMode'('FALSE', _Path) ->
     ok;
 'v_enum_RpbBucketProps.RpbReplMode'('REALTIME',
@@ -8246,6 +8279,7 @@ v_enum_TsColumnType(X, Path) ->
 		   'RpbBucketProps.RpbReplMode'},
 		  X, Path).
 
+-dialyzer({nowarn_function,v_type_sint32/2}).
 v_type_sint32(N, _Path)
     when -2147483648 =< N, N =< 2147483647 ->
     ok;
@@ -8256,6 +8290,7 @@ v_type_sint32(X, Path) ->
     mk_type_error({bad_integer, sint32, signed, 32}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_sint64/2}).
 v_type_sint64(N, _Path)
     when -9223372036854775808 =< N,
 	 N =< 9223372036854775807 ->
@@ -8267,6 +8302,7 @@ v_type_sint64(X, Path) ->
     mk_type_error({bad_integer, sint64, signed, 64}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_uint32/2}).
 v_type_uint32(N, _Path) when 0 =< N, N =< 4294967295 ->
     ok;
 v_type_uint32(N, Path) when is_integer(N) ->
@@ -8277,6 +8313,7 @@ v_type_uint32(X, Path) ->
     mk_type_error({bad_integer, uint32, unsigned, 32}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_bool/2}).
 v_type_bool(false, _Path) -> ok;
 v_type_bool(true, _Path) -> ok;
 v_type_bool(0, _Path) -> ok;
@@ -8284,6 +8321,7 @@ v_type_bool(1, _Path) -> ok;
 v_type_bool(X, Path) ->
     mk_type_error(bad_boolean_value, X, Path).
 
+-dialyzer({nowarn_function,v_type_double/2}).
 v_type_double(N, _Path) when is_float(N) -> ok;
 v_type_double(N, _Path) when is_integer(N) -> ok;
 v_type_double(infinity, _Path) -> ok;
@@ -8292,6 +8330,7 @@ v_type_double(nan, _Path) -> ok;
 v_type_double(X, Path) ->
     mk_type_error(bad_double_value, X, Path).
 
+-dialyzer({nowarn_function,v_type_bytes/2}).
 v_type_bytes(B, _Path) when is_binary(B) -> ok;
 v_type_bytes(B, _Path) when is_list(B) -> ok;
 v_type_bytes(X, Path) ->
