@@ -108,7 +108,7 @@
 -ifndef('TSCOVERAGEREQ_PB_H').
 -define('TSCOVERAGEREQ_PB_H', true).
 -record(tscoveragereq,
-        {query                  :: #tsinterpolation{} | undefined, % = 1
+        {'query'                :: #tsinterpolation{} | undefined, % = 1
          table                  :: binary(),        % = 2
          replace_cover          :: binary() | undefined, % = 3
          unavailable_cover = [] :: [binary()]       % = 4
@@ -259,7 +259,7 @@
 -ifndef('TSQUERYREQ_PB_H').
 -define('TSQUERYREQ_PB_H', true).
 -record(tsqueryreq,
-        {query                  :: #tsinterpolation{} | undefined, % = 1
+        {'query'                :: #tsinterpolation{} | undefined, % = 1
          stream = false         :: boolean() | 0 | 1 | undefined, % = 2
          cover_context          :: binary() | undefined % = 3
         }).

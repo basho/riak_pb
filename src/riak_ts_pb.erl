@@ -686,7 +686,7 @@ e_msg_tscoveragereq(Msg, TrUserData) ->
     e_msg_tscoveragereq(Msg, <<>>, TrUserData).
 
 
-e_msg_tscoveragereq(#tscoveragereq{query = F1,
+e_msg_tscoveragereq(#tscoveragereq{'query' = F1,
 				   table = F2, replace_cover = F3,
 				   unavailable_cover = F4},
 		    Bin, TrUserData) ->
@@ -1069,7 +1069,7 @@ e_msg_tsqueryreq(Msg, TrUserData) ->
     e_msg_tsqueryreq(Msg, <<>>, TrUserData).
 
 
-e_msg_tsqueryreq(#tsqueryreq{query = F1, stream = F2,
+e_msg_tsqueryreq(#tsqueryreq{'query' = F1, stream = F2,
 			     cover_context = F3},
 		 Bin, TrUserData) ->
     B1 = if F1 == undefined -> Bin;
@@ -4133,7 +4133,7 @@ dfp_read_field_def_tscoveragereq(<<34, Rest/binary>>,
 					    F1, F2, F3, F4, TrUserData);
 dfp_read_field_def_tscoveragereq(<<>>, 0, 0, F1, F2, F3,
 				 F4, TrUserData) ->
-    #tscoveragereq{query = F1, table = F2,
+    #tscoveragereq{'query' = F1, table = F2,
 		   replace_cover = F3,
 		   unavailable_cover = lists_reverse(F4, TrUserData)};
 dfp_read_field_def_tscoveragereq(Other, Z1, Z2, F1, F2,
@@ -4182,7 +4182,7 @@ dg_read_field_def_tscoveragereq(<<0:1, X:7,
     end;
 dg_read_field_def_tscoveragereq(<<>>, 0, 0, F1, F2, F3,
 				F4, TrUserData) ->
-    #tscoveragereq{query = F1, table = F2,
+    #tscoveragereq{'query' = F1, table = F2,
 		   replace_cover = F3,
 		   unavailable_cover = lists_reverse(F4, TrUserData)}.
 
@@ -6496,7 +6496,7 @@ dfp_read_field_def_tsqueryreq(<<26, Rest/binary>>, Z1,
 				     F3, TrUserData);
 dfp_read_field_def_tsqueryreq(<<>>, 0, 0, F1, F2, F3,
 			      _) ->
-    #tsqueryreq{query = F1, stream = F2,
+    #tsqueryreq{'query' = F1, stream = F2,
 		cover_context = F3};
 dfp_read_field_def_tsqueryreq(Other, Z1, Z2, F1, F2, F3,
 			      TrUserData) ->
@@ -6537,7 +6537,7 @@ dg_read_field_def_tsqueryreq(<<0:1, X:7, Rest/binary>>,
     end;
 dg_read_field_def_tsqueryreq(<<>>, 0, 0, F1, F2, F3,
 			     _) ->
-    #tsqueryreq{query = F1, stream = F2,
+    #tsqueryreq{'query' = F1, stream = F2,
 		cover_context = F3}.
 
 d_field_tsqueryreq_query(<<1:1, X:7, Rest/binary>>, N,
@@ -7373,14 +7373,14 @@ merge_msg_tsinterpolation(#tsinterpolation{interpolations
 			 'erlang_++'(PFinterpolations, NFinterpolations,
 				     TrUserData)}.
 
-merge_msg_tscoveragereq(#tscoveragereq{query = PFquery,
+merge_msg_tscoveragereq(#tscoveragereq{'query' = PFquery,
 				       replace_cover = PFreplace_cover,
 				       unavailable_cover = PFunavailable_cover},
-			#tscoveragereq{query = NFquery, table = NFtable,
+			#tscoveragereq{'query' = NFquery, table = NFtable,
 				       replace_cover = NFreplace_cover,
 				       unavailable_cover = NFunavailable_cover},
 			TrUserData) ->
-    #tscoveragereq{query =
+    #tscoveragereq{'query' =
 		       if PFquery /= undefined, NFquery /= undefined ->
 			      merge_msg_tsinterpolation(PFquery, NFquery,
 							TrUserData);
@@ -7585,13 +7585,13 @@ merge_msg_rpbauthreq(#rpbauthreq{},
 		     #rpbauthreq{user = NFuser, password = NFpassword}, _) ->
     #rpbauthreq{user = NFuser, password = NFpassword}.
 
-merge_msg_tsqueryreq(#tsqueryreq{query = PFquery,
+merge_msg_tsqueryreq(#tsqueryreq{'query' = PFquery,
 				 stream = PFstream,
 				 cover_context = PFcover_context},
-		     #tsqueryreq{query = NFquery, stream = NFstream,
+		     #tsqueryreq{'query' = NFquery, stream = NFstream,
 				 cover_context = NFcover_context},
 		     TrUserData) ->
-    #tsqueryreq{query =
+    #tsqueryreq{'query' =
 		    if PFquery /= undefined, NFquery /= undefined ->
 			   merge_msg_tsinterpolation(PFquery, NFquery,
 						     TrUserData);
@@ -7925,13 +7925,13 @@ v_msg_tsinterpolation(#tsinterpolation{base = F1,
 v_msg_tsinterpolation(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, tsinterpolation}, X, Path).
 
-v_msg_tscoveragereq(#tscoveragereq{query = F1,
+v_msg_tscoveragereq(#tscoveragereq{'query' = F1,
 				   table = F2, replace_cover = F3,
 				   unavailable_cover = F4},
 		    Path, TrUserData) ->
     if F1 == undefined -> ok;
        true ->
-	   v_msg_tsinterpolation(F1, [query | Path], TrUserData)
+	   v_msg_tsinterpolation(F1, ['query' | Path], TrUserData)
     end,
     v_type_bytes(F2, [table | Path]),
     if F3 == undefined -> ok;
@@ -8173,12 +8173,12 @@ v_msg_rpbauthreq(#rpbauthreq{user = F1, password = F2},
     v_type_bytes(F2, [password | Path]),
     ok.
 
-v_msg_tsqueryreq(#tsqueryreq{query = F1, stream = F2,
+v_msg_tsqueryreq(#tsqueryreq{'query' = F1, stream = F2,
 			     cover_context = F3},
 		 Path, TrUserData) ->
     if F1 == undefined -> ok;
        true ->
-	   v_msg_tsinterpolation(F1, [query | Path], TrUserData)
+	   v_msg_tsinterpolation(F1, ['query' | Path], TrUserData)
     end,
     if F2 == undefined -> ok;
        true -> v_type_bool(F2, [stream | Path])
@@ -8451,7 +8451,7 @@ get_msg_defs() ->
 	{type, {msg, rpbpair}}, {occurrence, repeated},
 	{opts, []}]]},
      {{msg, tscoveragereq},
-      [[{name, query}, {fnum, 1}, {rnum, 2},
+      [[{name, 'query'}, {fnum, 1}, {rnum, 2},
 	{type, {msg, tsinterpolation}}, {occurrence, optional},
 	{opts, []}],
        [{name, table}, {fnum, 2}, {rnum, 3}, {type, bytes},
@@ -8567,7 +8567,7 @@ get_msg_defs() ->
        [{name, password}, {fnum, 2}, {rnum, 3}, {type, bytes},
 	{occurrence, required}, {opts, []}]]},
      {{msg, tsqueryreq},
-      [[{name, query}, {fnum, 1}, {rnum, 2},
+      [[{name, 'query'}, {fnum, 1}, {rnum, 2},
 	{type, {msg, tsinterpolation}}, {occurrence, optional},
 	{opts, []}],
        [{name, stream}, {fnum, 2}, {rnum, 3}, {type, bool},
@@ -8741,7 +8741,7 @@ find_msg_def(tsinterpolation) ->
       {type, {msg, rpbpair}}, {occurrence, repeated},
       {opts, []}]];
 find_msg_def(tscoveragereq) ->
-    [[{name, query}, {fnum, 1}, {rnum, 2},
+    [[{name, 'query'}, {fnum, 1}, {rnum, 2},
       {type, {msg, tsinterpolation}}, {occurrence, optional},
       {opts, []}],
      [{name, table}, {fnum, 2}, {rnum, 3}, {type, bytes},
@@ -8857,7 +8857,7 @@ find_msg_def(rpbauthreq) ->
      [{name, password}, {fnum, 2}, {rnum, 3}, {type, bytes},
       {occurrence, required}, {opts, []}]];
 find_msg_def(tsqueryreq) ->
-    [[{name, query}, {fnum, 1}, {rnum, 2},
+    [[{name, 'query'}, {fnum, 1}, {rnum, 2},
       {type, {msg, tsinterpolation}}, {occurrence, optional},
       {opts, []}],
      [{name, stream}, {fnum, 2}, {rnum, 3}, {type, bool},
