@@ -30,10 +30,12 @@ operation_type/1,
 decode_fetch_response/1,
 encode_fetch_response/4,
 encode_update_request/4,
-decode_update_response/3
+decode_update_response/3,
+encode_update_response/5
 ]).
 
 -define(CONTEXT, undefined_context).
+-define(SET_KEY, <<"amoore">>).
 -define(SET_VALUE, [<<"binarytemple">>]).
 
 operation_type_gset_test() ->
@@ -76,3 +78,13 @@ encode_update_request_gset_test() ->
   }, Res),
   ok
 .
+
+encode_update_response_gset_test() ->
+  Resp = encode_update_response(gset, ?SET_VALUE, ?SET_KEY, undefined, []),
+  ?assertMatch(
+    #dtupdateresp{
+      key = ?SET_KEY,
+      context = undefined,
+      gset_value = ?SET_VALUE
+    },
+    Resp).
