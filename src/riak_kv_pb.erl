@@ -13506,6 +13506,7 @@ verify_msg(Msg, Opts) ->
     end.
 
 
+-dialyzer({nowarn_function,v_msg_rpblink/3}).
 v_msg_rpblink(#rpblink{bucket = F1, key = F2, tag = F3},
 	      Path, _) ->
     if F1 == undefined -> ok;
@@ -13521,6 +13522,7 @@ v_msg_rpblink(#rpblink{bucket = F1, key = F2, tag = F3},
 v_msg_rpblink(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpblink}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbpair/3}).
 v_msg_rpbpair(#rpbpair{key = F1, value = F2}, Path,
 	      _) ->
     v_type_bytes(F1, [key | Path]),
@@ -13531,6 +13533,7 @@ v_msg_rpbpair(#rpbpair{key = F1, value = F2}, Path,
 v_msg_rpbpair(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbpair}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbcontent/3}).
 v_msg_rpbcontent(#rpbcontent{value = F1,
 			     content_type = F2, charset = F3,
 			     content_encoding = F4, vtag = F5, links = F6,
@@ -13590,6 +13593,7 @@ v_msg_rpbcontent(#rpbcontent{value = F1,
 v_msg_rpbcontent(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbcontent}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbgetresp/3}).
 v_msg_rpbgetresp(#rpbgetresp{content = F1, vclock = F2,
 			     unchanged = F3},
 		 Path, TrUserData) ->
@@ -13612,6 +13616,7 @@ v_msg_rpbgetresp(#rpbgetresp{content = F1, vclock = F2,
 v_msg_rpbgetresp(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbgetresp}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbindexobject/3}).
 v_msg_rpbindexobject(#rpbindexobject{key = F1,
 				     object = F2},
 		     Path, TrUserData) ->
@@ -13621,6 +13626,7 @@ v_msg_rpbindexobject(#rpbindexobject{key = F1,
 v_msg_rpbindexobject(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbindexobject}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbmodfun/3}).
 v_msg_rpbmodfun(#rpbmodfun{module = F1, function = F2},
 		Path, _) ->
     v_type_bytes(F1, [module | Path]),
@@ -13629,6 +13635,7 @@ v_msg_rpbmodfun(#rpbmodfun{module = F1, function = F2},
 v_msg_rpbmodfun(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbmodfun}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbcommithook/3}).
 v_msg_rpbcommithook(#rpbcommithook{modfun = F1,
 				   name = F2},
 		    Path, TrUserData) ->
@@ -13642,6 +13649,7 @@ v_msg_rpbcommithook(#rpbcommithook{modfun = F1,
 v_msg_rpbcommithook(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbcommithook}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbbucketprops/3}).
 v_msg_rpbbucketprops(#rpbbucketprops{n_val = F1,
 				     allow_mult = F2, last_write_wins = F3,
 				     precommit = F4, has_precommit = F5,
@@ -13766,6 +13774,7 @@ v_msg_rpbbucketprops(#rpbbucketprops{n_val = F1,
 v_msg_rpbbucketprops(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbbucketprops}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbresetbucketreq/3}).
 v_msg_rpbresetbucketreq(#rpbresetbucketreq{bucket = F1,
 					   type = F2},
 			Path, _) ->
@@ -13775,6 +13784,7 @@ v_msg_rpbresetbucketreq(#rpbresetbucketreq{bucket = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbcsbucketreq/3}).
 v_msg_rpbcsbucketreq(#rpbcsbucketreq{bucket = F1,
 				     start_key = F2, end_key = F3,
 				     start_incl = F4, end_incl = F5,
@@ -13810,11 +13820,13 @@ v_msg_rpbcsbucketreq(#rpbcsbucketreq{bucket = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbsetclientidreq/3}).
 v_msg_rpbsetclientidreq(#rpbsetclientidreq{client_id =
 					       F1},
 			Path, _) ->
     v_type_bytes(F1, [client_id | Path]), ok.
 
+-dialyzer({nowarn_function,v_msg_rpbcounterupdatereq/3}).
 v_msg_rpbcounterupdatereq(#rpbcounterupdatereq{bucket =
 						   F1,
 					       key = F2, amount = F3, w = F4,
@@ -13838,6 +13850,7 @@ v_msg_rpbcounterupdatereq(#rpbcounterupdatereq{bucket =
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpblistbucketsreq/3}).
 v_msg_rpblistbucketsreq(#rpblistbucketsreq{timeout = F1,
 					   stream = F2, type = F3},
 			Path, _) ->
@@ -13852,6 +13865,7 @@ v_msg_rpblistbucketsreq(#rpblistbucketsreq{timeout = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbbucketkeypreflistitem/3}).
 v_msg_rpbbucketkeypreflistitem(#rpbbucketkeypreflistitem{partition
 							     = F1,
 							 node = F2,
@@ -13865,6 +13879,7 @@ v_msg_rpbbucketkeypreflistitem(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbbucketkeypreflistitem},
 		  X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbgetbucketkeypreflistresp/3}).
 v_msg_rpbgetbucketkeypreflistresp(#rpbgetbucketkeypreflistresp{preflist
 								   = F1},
 				  Path, TrUserData) ->
@@ -13880,6 +13895,7 @@ v_msg_rpbgetbucketkeypreflistresp(#rpbgetbucketkeypreflistresp{preflist
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpblistbucketsresp/3}).
 v_msg_rpblistbucketsresp(#rpblistbucketsresp{buckets =
 						 F1,
 					     done = F2},
@@ -13896,6 +13912,7 @@ v_msg_rpblistbucketsresp(#rpblistbucketsresp{buckets =
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbputresp/3}).
 v_msg_rpbputresp(#rpbputresp{content = F1, vclock = F2,
 			     key = F3},
 		 Path, TrUserData) ->
@@ -13916,11 +13933,13 @@ v_msg_rpbputresp(#rpbputresp{content = F1, vclock = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetclientidresp/3}).
 v_msg_rpbgetclientidresp(#rpbgetclientidresp{client_id =
 						 F1},
 			 Path, _) ->
     v_type_bytes(F1, [client_id | Path]), ok.
 
+-dialyzer({nowarn_function,v_msg_rpbcoverageentry/3}).
 v_msg_rpbcoverageentry(#rpbcoverageentry{ip = F1,
 					 port = F2, keyspace_desc = F3,
 					 cover_context = F4},
@@ -13936,6 +13955,7 @@ v_msg_rpbcoverageentry(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbcoverageentry}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_msg_rpbsetbuckettypereq/3}).
 v_msg_rpbsetbuckettypereq(#rpbsetbuckettypereq{type =
 						   F1,
 					       props = F2},
@@ -13944,11 +13964,13 @@ v_msg_rpbsetbuckettypereq(#rpbsetbuckettypereq{type =
     v_msg_rpbbucketprops(F2, [props | Path], TrUserData),
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetbuckettypereq/3}).
 v_msg_rpbgetbuckettypereq(#rpbgetbuckettypereq{type =
 						   F1},
 			  Path, _) ->
     v_type_bytes(F1, [type | Path]), ok.
 
+-dialyzer({nowarn_function,v_msg_rpbdelreq/3}).
 v_msg_rpbdelreq(#rpbdelreq{bucket = F1, key = F2,
 			   rw = F3, vclock = F4, r = F5, w = F6, pr = F7,
 			   pw = F8, dw = F9, timeout = F10, sloppy_quorum = F11,
@@ -13991,6 +14013,7 @@ v_msg_rpbdelreq(#rpbdelreq{bucket = F1, key = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbputreq/3}).
 v_msg_rpbputreq(#rpbputreq{bucket = F1, key = F2,
 			   vclock = F3, content = F4, w = F5, dw = F6,
 			   return_body = F7, pw = F8, if_not_modified = F9,
@@ -14044,6 +14067,7 @@ v_msg_rpbputreq(#rpbputreq{bucket = F1, key = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetreq/3}).
 v_msg_rpbgetreq(#rpbgetreq{bucket = F1, key = F2,
 			   r = F3, pr = F4, basic_quorum = F5, notfound_ok = F6,
 			   if_modified = F7, head = F8, deletedvclock = F9,
@@ -14087,6 +14111,7 @@ v_msg_rpbgetreq(#rpbgetreq{bucket = F1, key = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetbucketkeypreflistreq/3}).
 v_msg_rpbgetbucketkeypreflistreq(#rpbgetbucketkeypreflistreq{bucket
 								 = F1,
 							     key = F2,
@@ -14099,6 +14124,7 @@ v_msg_rpbgetbucketkeypreflistreq(#rpbgetbucketkeypreflistreq{bucket
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbindexresp/3}).
 v_msg_rpbindexresp(#rpbindexresp{keys = F1,
 				 results = F2, continuation = F3, done = F4},
 		   Path, TrUserData) ->
@@ -14124,6 +14150,7 @@ v_msg_rpbindexresp(#rpbindexresp{keys = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetserverinforesp/3}).
 v_msg_rpbgetserverinforesp(#rpbgetserverinforesp{node =
 						     F1,
 						 server_version = F2},
@@ -14136,6 +14163,7 @@ v_msg_rpbgetserverinforesp(#rpbgetserverinforesp{node =
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbcsbucketresp/3}).
 v_msg_rpbcsbucketresp(#rpbcsbucketresp{objects = F1,
 				       continuation = F2, done = F3},
 		      Path, TrUserData) ->
@@ -14156,6 +14184,7 @@ v_msg_rpbcsbucketresp(#rpbcsbucketresp{objects = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbmapredresp/3}).
 v_msg_rpbmapredresp(#rpbmapredresp{phase = F1,
 				   response = F2, done = F3},
 		    Path, _) ->
@@ -14170,6 +14199,7 @@ v_msg_rpbmapredresp(#rpbmapredresp{phase = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbcoveragereq/3}).
 v_msg_rpbcoveragereq(#rpbcoveragereq{type = F1,
 				     bucket = F2, min_partitions = F3,
 				     replace_cover = F4,
@@ -14194,6 +14224,7 @@ v_msg_rpbcoveragereq(#rpbcoveragereq{type = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbsetbucketreq/3}).
 v_msg_rpbsetbucketreq(#rpbsetbucketreq{bucket = F1,
 				       props = F2, type = F3},
 		      Path, TrUserData) ->
@@ -14204,6 +14235,7 @@ v_msg_rpbsetbucketreq(#rpbsetbucketreq{bucket = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetbucketreq/3}).
 v_msg_rpbgetbucketreq(#rpbgetbucketreq{bucket = F1,
 				       type = F2},
 		      Path, _) ->
@@ -14213,6 +14245,7 @@ v_msg_rpbgetbucketreq(#rpbgetbucketreq{bucket = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpblistkeysresp/3}).
 v_msg_rpblistkeysresp(#rpblistkeysresp{keys = F1,
 				       done = F2},
 		      Path, _) ->
@@ -14227,6 +14260,7 @@ v_msg_rpblistkeysresp(#rpblistkeysresp{keys = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbindexreq/3}).
 v_msg_rpbindexreq(#rpbindexreq{bucket = F1, index = F2,
 			       qtype = F3, key = F4, range_min = F5,
 			       range_max = F6, return_terms = F7, stream = F8,
@@ -14279,6 +14313,7 @@ v_msg_rpbindexreq(#rpbindexreq{bucket = F1, index = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbcountergetreq/3}).
 v_msg_rpbcountergetreq(#rpbcountergetreq{bucket = F1,
 					 key = F2, r = F3, pr = F4,
 					 basic_quorum = F5, notfound_ok = F6},
@@ -14299,6 +14334,7 @@ v_msg_rpbcountergetreq(#rpbcountergetreq{bucket = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpblistkeysreq/3}).
 v_msg_rpblistkeysreq(#rpblistkeysreq{bucket = F1,
 				     timeout = F2, type = F3},
 		     Path, _) ->
@@ -14311,12 +14347,14 @@ v_msg_rpblistkeysreq(#rpblistkeysreq{bucket = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbauthreq/3}).
 v_msg_rpbauthreq(#rpbauthreq{user = F1, password = F2},
 		 Path, _) ->
     v_type_bytes(F1, [user | Path]),
     v_type_bytes(F2, [password | Path]),
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbmapredreq/3}).
 v_msg_rpbmapredreq(#rpbmapredreq{request = F1,
 				 content_type = F2},
 		   Path, _) ->
@@ -14324,6 +14362,7 @@ v_msg_rpbmapredreq(#rpbmapredreq{request = F1,
     v_type_bytes(F2, [content_type | Path]),
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbcounterupdateresp/3}).
 v_msg_rpbcounterupdateresp(#rpbcounterupdateresp{value =
 						     F1},
 			   Path, _) ->
@@ -14332,11 +14371,13 @@ v_msg_rpbcounterupdateresp(#rpbcounterupdateresp{value =
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetbucketresp/3}).
 v_msg_rpbgetbucketresp(#rpbgetbucketresp{props = F1},
 		       Path, TrUserData) ->
     v_msg_rpbbucketprops(F1, [props | Path], TrUserData),
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbcountergetresp/3}).
 v_msg_rpbcountergetresp(#rpbcountergetresp{value = F1},
 			Path, _) ->
     if F1 == undefined -> ok;
@@ -14344,6 +14385,7 @@ v_msg_rpbcountergetresp(#rpbcountergetresp{value = F1},
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbindexbodyresp/3}).
 v_msg_rpbindexbodyresp(#rpbindexbodyresp{objects = F1,
 					 continuation = F2, done = F3},
 		       Path, TrUserData) ->
@@ -14364,6 +14406,7 @@ v_msg_rpbindexbodyresp(#rpbindexbodyresp{objects = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbcoverageresp/3}).
 v_msg_rpbcoverageresp(#rpbcoverageresp{entries = F1},
 		      Path, TrUserData) ->
     if is_list(F1) ->
@@ -14378,6 +14421,7 @@ v_msg_rpbcoverageresp(#rpbcoverageresp{entries = F1},
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpberrorresp/3}).
 v_msg_rpberrorresp(#rpberrorresp{errmsg = F1,
 				 errcode = F2},
 		   Path, _) ->
@@ -14385,6 +14429,7 @@ v_msg_rpberrorresp(#rpberrorresp{errmsg = F1,
     v_type_uint32(F2, [errcode | Path]),
     ok.
 
+-dialyzer({nowarn_function,'v_enum_RpbIndexReq.IndexQueryType'/2}).
 'v_enum_RpbIndexReq.IndexQueryType'(eq, _Path) -> ok;
 'v_enum_RpbIndexReq.IndexQueryType'(range, _Path) -> ok;
 'v_enum_RpbIndexReq.IndexQueryType'(V, Path)
@@ -14395,6 +14440,7 @@ v_msg_rpberrorresp(#rpberrorresp{errmsg = F1,
 		   'RpbIndexReq.IndexQueryType'},
 		  X, Path).
 
+-dialyzer({nowarn_function,'v_enum_RpbBucketProps.RpbReplMode'/2}).
 'v_enum_RpbBucketProps.RpbReplMode'('FALSE', _Path) ->
     ok;
 'v_enum_RpbBucketProps.RpbReplMode'('REALTIME',
@@ -14413,6 +14459,7 @@ v_msg_rpberrorresp(#rpberrorresp{errmsg = F1,
 		   'RpbBucketProps.RpbReplMode'},
 		  X, Path).
 
+-dialyzer({nowarn_function,v_type_sint32/2}).
 v_type_sint32(N, _Path)
     when -2147483648 =< N, N =< 2147483647 ->
     ok;
@@ -14423,6 +14470,7 @@ v_type_sint32(X, Path) ->
     mk_type_error({bad_integer, sint32, signed, 32}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_sint64/2}).
 v_type_sint64(N, _Path)
     when -9223372036854775808 =< N,
 	 N =< 9223372036854775807 ->
@@ -14434,6 +14482,7 @@ v_type_sint64(X, Path) ->
     mk_type_error({bad_integer, sint64, signed, 64}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_int64/2}).
 v_type_int64(N, _Path)
     when -9223372036854775808 =< N,
 	 N =< 9223372036854775807 ->
@@ -14445,6 +14494,7 @@ v_type_int64(X, Path) ->
     mk_type_error({bad_integer, int64, signed, 64}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_uint32/2}).
 v_type_uint32(N, _Path) when 0 =< N, N =< 4294967295 ->
     ok;
 v_type_uint32(N, Path) when is_integer(N) ->
@@ -14455,6 +14505,7 @@ v_type_uint32(X, Path) ->
     mk_type_error({bad_integer, uint32, unsigned, 32}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_bool/2}).
 v_type_bool(false, _Path) -> ok;
 v_type_bool(true, _Path) -> ok;
 v_type_bool(0, _Path) -> ok;
@@ -14462,6 +14513,7 @@ v_type_bool(1, _Path) -> ok;
 v_type_bool(X, Path) ->
     mk_type_error(bad_boolean_value, X, Path).
 
+-dialyzer({nowarn_function,v_type_bytes/2}).
 v_type_bytes(B, _Path) when is_binary(B) -> ok;
 v_type_bytes(B, _Path) when is_list(B) -> ok;
 v_type_bytes(X, Path) ->

@@ -4130,6 +4130,7 @@ verify_msg(Msg, Opts) ->
     end.
 
 
+-dialyzer({nowarn_function,v_msg_rpbmodfun/3}).
 v_msg_rpbmodfun(#rpbmodfun{module = F1, function = F2},
 		Path, _) ->
     v_type_bytes(F1, [module | Path]),
@@ -4138,6 +4139,7 @@ v_msg_rpbmodfun(#rpbmodfun{module = F1, function = F2},
 v_msg_rpbmodfun(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbmodfun}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbcommithook/3}).
 v_msg_rpbcommithook(#rpbcommithook{modfun = F1,
 				   name = F2},
 		    Path, TrUserData) ->
@@ -4151,6 +4153,7 @@ v_msg_rpbcommithook(#rpbcommithook{modfun = F1,
 v_msg_rpbcommithook(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbcommithook}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbbucketprops/3}).
 v_msg_rpbbucketprops(#rpbbucketprops{n_val = F1,
 				     allow_mult = F2, last_write_wins = F3,
 				     precommit = F4, has_precommit = F5,
@@ -4275,6 +4278,7 @@ v_msg_rpbbucketprops(#rpbbucketprops{n_val = F1,
 v_msg_rpbbucketprops(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbbucketprops}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_rpbpair/3}).
 v_msg_rpbpair(#rpbpair{key = F1, value = F2}, Path,
 	      _) ->
     v_type_bytes(F1, [key | Path]),
@@ -4283,6 +4287,7 @@ v_msg_rpbpair(#rpbpair{key = F1, value = F2}, Path,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbresetbucketreq/3}).
 v_msg_rpbresetbucketreq(#rpbresetbucketreq{bucket = F1,
 					   type = F2},
 			Path, _) ->
@@ -4292,6 +4297,7 @@ v_msg_rpbresetbucketreq(#rpbresetbucketreq{bucket = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbsetbuckettypereq/3}).
 v_msg_rpbsetbuckettypereq(#rpbsetbuckettypereq{type =
 						   F1,
 					       props = F2},
@@ -4300,11 +4306,13 @@ v_msg_rpbsetbuckettypereq(#rpbsetbuckettypereq{type =
     v_msg_rpbbucketprops(F2, [props | Path], TrUserData),
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetbuckettypereq/3}).
 v_msg_rpbgetbuckettypereq(#rpbgetbuckettypereq{type =
 						   F1},
 			  Path, _) ->
     v_type_bytes(F1, [type | Path]), ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetserverinforesp/3}).
 v_msg_rpbgetserverinforesp(#rpbgetserverinforesp{node =
 						     F1,
 						 server_version = F2},
@@ -4317,6 +4325,7 @@ v_msg_rpbgetserverinforesp(#rpbgetserverinforesp{node =
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbsetbucketreq/3}).
 v_msg_rpbsetbucketreq(#rpbsetbucketreq{bucket = F1,
 				       props = F2, type = F3},
 		      Path, TrUserData) ->
@@ -4327,6 +4336,7 @@ v_msg_rpbsetbucketreq(#rpbsetbucketreq{bucket = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetbucketreq/3}).
 v_msg_rpbgetbucketreq(#rpbgetbucketreq{bucket = F1,
 				       type = F2},
 		      Path, _) ->
@@ -4336,17 +4346,20 @@ v_msg_rpbgetbucketreq(#rpbgetbucketreq{bucket = F1,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbauthreq/3}).
 v_msg_rpbauthreq(#rpbauthreq{user = F1, password = F2},
 		 Path, _) ->
     v_type_bytes(F1, [user | Path]),
     v_type_bytes(F2, [password | Path]),
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbgetbucketresp/3}).
 v_msg_rpbgetbucketresp(#rpbgetbucketresp{props = F1},
 		       Path, TrUserData) ->
     v_msg_rpbbucketprops(F1, [props | Path], TrUserData),
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpberrorresp/3}).
 v_msg_rpberrorresp(#rpberrorresp{errmsg = F1,
 				 errcode = F2},
 		   Path, _) ->
@@ -4354,6 +4367,7 @@ v_msg_rpberrorresp(#rpberrorresp{errmsg = F1,
     v_type_uint32(F2, [errcode | Path]),
     ok.
 
+-dialyzer({nowarn_function,'v_enum_RpbBucketProps.RpbReplMode'/2}).
 'v_enum_RpbBucketProps.RpbReplMode'('FALSE', _Path) ->
     ok;
 'v_enum_RpbBucketProps.RpbReplMode'('REALTIME',
@@ -4372,6 +4386,7 @@ v_msg_rpberrorresp(#rpberrorresp{errmsg = F1,
 		   'RpbBucketProps.RpbReplMode'},
 		  X, Path).
 
+-dialyzer({nowarn_function,v_type_sint32/2}).
 v_type_sint32(N, _Path)
     when -2147483648 =< N, N =< 2147483647 ->
     ok;
@@ -4382,6 +4397,7 @@ v_type_sint32(X, Path) ->
     mk_type_error({bad_integer, sint32, signed, 32}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_uint32/2}).
 v_type_uint32(N, _Path) when 0 =< N, N =< 4294967295 ->
     ok;
 v_type_uint32(N, Path) when is_integer(N) ->
@@ -4392,6 +4408,7 @@ v_type_uint32(X, Path) ->
     mk_type_error({bad_integer, uint32, unsigned, 32}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_bool/2}).
 v_type_bool(false, _Path) -> ok;
 v_type_bool(true, _Path) -> ok;
 v_type_bool(0, _Path) -> ok;
@@ -4399,6 +4416,7 @@ v_type_bool(1, _Path) -> ok;
 v_type_bool(X, Path) ->
     mk_type_error(bad_boolean_value, X, Path).
 
+-dialyzer({nowarn_function,v_type_bytes/2}).
 v_type_bytes(B, _Path) when is_binary(B) -> ok;
 v_type_bytes(B, _Path) when is_list(B) -> ok;
 v_type_bytes(X, Path) ->

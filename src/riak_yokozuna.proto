@@ -12,6 +12,8 @@
  * git add -A; git commit -m 'Update erlang code from .proto files'
  */
 
+syntax = "proto2";
+
 // java package specifiers
 option java_package = "com.basho.riak.protobuf";
 option java_outer_classname = "RiakYokozunaPB";

@@ -1653,11 +1653,13 @@ verify_msg(Msg, Opts) ->
     end.
 
 
+-dialyzer({nowarn_function,v_msg_rpbyokozunaschemagetreq/3}).
 v_msg_rpbyokozunaschemagetreq(#rpbyokozunaschemagetreq{name
 							   = F1},
 			      Path, _) ->
     v_type_bytes(F1, [name | Path]), ok.
 
+-dialyzer({nowarn_function,v_msg_rpbyokozunaschema/3}).
 v_msg_rpbyokozunaschema(#rpbyokozunaschema{name = F1,
 					   content = F2},
 			Path, _) ->
@@ -1670,6 +1672,7 @@ v_msg_rpbyokozunaschema(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbyokozunaschema}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_msg_rpbyokozunaschemaputreq/3}).
 v_msg_rpbyokozunaschemaputreq(#rpbyokozunaschemaputreq{schema
 							   = F1},
 			      Path, TrUserData) ->
@@ -1677,6 +1680,7 @@ v_msg_rpbyokozunaschemaputreq(#rpbyokozunaschemaputreq{schema
 			    TrUserData),
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbyokozunaschemagetresp/3}).
 v_msg_rpbyokozunaschemagetresp(#rpbyokozunaschemagetresp{schema
 							     = F1},
 			       Path, TrUserData) ->
@@ -1684,6 +1688,7 @@ v_msg_rpbyokozunaschemagetresp(#rpbyokozunaschemagetresp{schema
 			    TrUserData),
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbyokozunaindex/3}).
 v_msg_rpbyokozunaindex(#rpbyokozunaindex{name = F1,
 					 schema = F2, n_val = F3},
 		       Path, _) ->
@@ -1699,6 +1704,7 @@ v_msg_rpbyokozunaindex(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, rpbyokozunaindex}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_msg_rpbyokozunaindexputreq/3}).
 v_msg_rpbyokozunaindexputreq(#rpbyokozunaindexputreq{index
 							 = F1,
 						     timeout = F2},
@@ -1709,6 +1715,7 @@ v_msg_rpbyokozunaindexputreq(#rpbyokozunaindexputreq{index
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbyokozunaindexgetreq/3}).
 v_msg_rpbyokozunaindexgetreq(#rpbyokozunaindexgetreq{name
 							 = F1},
 			     Path, _) ->
@@ -1717,11 +1724,13 @@ v_msg_rpbyokozunaindexgetreq(#rpbyokozunaindexgetreq{name
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_rpbyokozunaindexdeletereq/3}).
 v_msg_rpbyokozunaindexdeletereq(#rpbyokozunaindexdeletereq{name
 							       = F1},
 				Path, _) ->
     v_type_bytes(F1, [name | Path]), ok.
 
+-dialyzer({nowarn_function,v_msg_rpbyokozunaindexgetresp/3}).
 v_msg_rpbyokozunaindexgetresp(#rpbyokozunaindexgetresp{index
 							   = F1},
 			      Path, TrUserData) ->
@@ -1737,6 +1746,7 @@ v_msg_rpbyokozunaindexgetresp(#rpbyokozunaindexgetresp{index
     end,
     ok.
 
+-dialyzer({nowarn_function,v_type_uint32/2}).
 v_type_uint32(N, _Path) when 0 =< N, N =< 4294967295 ->
     ok;
 v_type_uint32(N, Path) when is_integer(N) ->
@@ -1747,6 +1757,7 @@ v_type_uint32(X, Path) ->
     mk_type_error({bad_integer, uint32, unsigned, 32}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_bytes/2}).
 v_type_bytes(B, _Path) when is_binary(B) -> ok;
 v_type_bytes(B, _Path) when is_list(B) -> ok;
 v_type_bytes(X, Path) ->

@@ -4145,6 +4145,7 @@ verify_msg(Msg, Opts) ->
     end.
 
 
+-dialyzer({nowarn_function,v_msg_mapfield/3}).
 v_msg_mapfield(#mapfield{name = F1, type = F2}, Path,
 	       _) ->
     v_type_bytes(F1, [name | Path]),
@@ -4153,6 +4154,7 @@ v_msg_mapfield(#mapfield{name = F1, type = F2}, Path,
 v_msg_mapfield(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, mapfield}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_mapentry/3}).
 v_msg_mapentry(#mapentry{field = F1, counter_value = F2,
 			 set_value = F3, register_value = F4, flag_value = F5,
 			 map_value = F6},
@@ -4187,6 +4189,7 @@ v_msg_mapentry(#mapentry{field = F1, counter_value = F2,
 v_msg_mapentry(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, mapentry}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_dtfetchreq/3}).
 v_msg_dtfetchreq(#dtfetchreq{bucket = F1, key = F2,
 			     type = F3, r = F4, pr = F5, basic_quorum = F6,
 			     notfound_ok = F7, timeout = F8, sloppy_quorum = F9,
@@ -4221,6 +4224,7 @@ v_msg_dtfetchreq(#dtfetchreq{bucket = F1, key = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_dtvalue/3}).
 v_msg_dtvalue(#dtvalue{counter_value = F1,
 		       set_value = F2, map_value = F3, hll_value = F4,
 		       gset_value = F5},
@@ -4258,6 +4262,7 @@ v_msg_dtvalue(#dtvalue{counter_value = F1,
 v_msg_dtvalue(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, dtvalue}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_dtfetchresp/3}).
 v_msg_dtfetchresp(#dtfetchresp{context = F1, type = F2,
 			       value = F3},
 		  Path, TrUserData) ->
@@ -4270,6 +4275,7 @@ v_msg_dtfetchresp(#dtfetchresp{context = F1, type = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_counterop/3}).
 v_msg_counterop(#counterop{increment = F1}, Path, _) ->
     if F1 == undefined -> ok;
        true -> v_type_sint64(F1, [increment | Path])
@@ -4278,6 +4284,7 @@ v_msg_counterop(#counterop{increment = F1}, Path, _) ->
 v_msg_counterop(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, counterop}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_setop/3}).
 v_msg_setop(#setop{adds = F1, removes = F2}, Path, _) ->
     if is_list(F1) ->
 	   _ = [v_type_bytes(Elem, [adds | Path]) || Elem <- F1],
@@ -4296,6 +4303,7 @@ v_msg_setop(#setop{adds = F1, removes = F2}, Path, _) ->
 v_msg_setop(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, setop}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_gsetop/3}).
 v_msg_gsetop(#gsetop{adds = F1}, Path, _) ->
     if is_list(F1) ->
 	   _ = [v_type_bytes(Elem, [adds | Path]) || Elem <- F1],
@@ -4307,6 +4315,7 @@ v_msg_gsetop(#gsetop{adds = F1}, Path, _) ->
 v_msg_gsetop(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, gsetop}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_hllop/3}).
 v_msg_hllop(#hllop{adds = F1}, Path, _) ->
     if is_list(F1) ->
 	   _ = [v_type_bytes(Elem, [adds | Path]) || Elem <- F1],
@@ -4318,6 +4327,7 @@ v_msg_hllop(#hllop{adds = F1}, Path, _) ->
 v_msg_hllop(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, hllop}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_mapupdate/3}).
 v_msg_mapupdate(#mapupdate{field = F1, counter_op = F2,
 			   set_op = F3, register_op = F4, flag_op = F5,
 			   map_op = F6},
@@ -4343,6 +4353,7 @@ v_msg_mapupdate(#mapupdate{field = F1, counter_op = F2,
 v_msg_mapupdate(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, mapupdate}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_mapop/3}).
 v_msg_mapop(#mapop{removes = F1, updates = F2}, Path,
 	    TrUserData) ->
     if is_list(F1) ->
@@ -4365,6 +4376,7 @@ v_msg_mapop(#mapop{removes = F1, updates = F2}, Path,
 v_msg_mapop(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, mapop}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_dtop/3}).
 v_msg_dtop(#dtop{counter_op = F1, set_op = F2,
 		 map_op = F3, hll_op = F4, gset_op = F5},
 	   Path, TrUserData) ->
@@ -4388,6 +4400,7 @@ v_msg_dtop(#dtop{counter_op = F1, set_op = F2,
 v_msg_dtop(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, dtop}, X, Path).
 
+-dialyzer({nowarn_function,v_msg_dtupdatereq/3}).
 v_msg_dtupdatereq(#dtupdatereq{bucket = F1, key = F2,
 			       type = F3, context = F4, op = F5, w = F6,
 			       dw = F7, pw = F8, return_body = F9,
@@ -4429,6 +4442,7 @@ v_msg_dtupdatereq(#dtupdatereq{bucket = F1, key = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,v_msg_dtupdateresp/3}).
 v_msg_dtupdateresp(#dtupdateresp{key = F1, context = F2,
 				 counter_value = F3, set_value = F4,
 				 map_value = F5, hll_value = F6,
@@ -4471,6 +4485,7 @@ v_msg_dtupdateresp(#dtupdateresp{key = F1, context = F2,
     end,
     ok.
 
+-dialyzer({nowarn_function,'v_enum_MapField.MapFieldType'/2}).
 'v_enum_MapField.MapFieldType'('COUNTER', _Path) -> ok;
 'v_enum_MapField.MapFieldType'('SET', _Path) -> ok;
 'v_enum_MapField.MapFieldType'('REGISTER', _Path) -> ok;
@@ -4483,6 +4498,7 @@ v_msg_dtupdateresp(#dtupdateresp{key = F1, context = F2,
     mk_type_error({invalid_enum, 'MapField.MapFieldType'},
 		  X, Path).
 
+-dialyzer({nowarn_function,'v_enum_DtFetchResp.DataType'/2}).
 'v_enum_DtFetchResp.DataType'('COUNTER', _Path) -> ok;
 'v_enum_DtFetchResp.DataType'('SET', _Path) -> ok;
 'v_enum_DtFetchResp.DataType'('MAP', _Path) -> ok;
@@ -4495,6 +4511,7 @@ v_msg_dtupdateresp(#dtupdateresp{key = F1, context = F2,
     mk_type_error({invalid_enum, 'DtFetchResp.DataType'}, X,
 		  Path).
 
+-dialyzer({nowarn_function,'v_enum_MapUpdate.FlagOp'/2}).
 'v_enum_MapUpdate.FlagOp'('ENABLE', _Path) -> ok;
 'v_enum_MapUpdate.FlagOp'('DISABLE', _Path) -> ok;
 'v_enum_MapUpdate.FlagOp'(V, Path) when is_integer(V) ->
@@ -4503,6 +4520,7 @@ v_msg_dtupdateresp(#dtupdateresp{key = F1, context = F2,
     mk_type_error({invalid_enum, 'MapUpdate.FlagOp'}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_sint32/2}).
 v_type_sint32(N, _Path)
     when -2147483648 =< N, N =< 2147483647 ->
     ok;
@@ -4513,6 +4531,7 @@ v_type_sint32(X, Path) ->
     mk_type_error({bad_integer, sint32, signed, 32}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_sint64/2}).
 v_type_sint64(N, _Path)
     when -9223372036854775808 =< N,
 	 N =< 9223372036854775807 ->
@@ -4524,6 +4543,7 @@ v_type_sint64(X, Path) ->
     mk_type_error({bad_integer, sint64, signed, 64}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_uint32/2}).
 v_type_uint32(N, _Path) when 0 =< N, N =< 4294967295 ->
     ok;
 v_type_uint32(N, Path) when is_integer(N) ->
@@ -4534,6 +4554,7 @@ v_type_uint32(X, Path) ->
     mk_type_error({bad_integer, uint32, unsigned, 32}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_uint64/2}).
 v_type_uint64(N, _Path)
     when 0 =< N, N =< 18446744073709551615 ->
     ok;
@@ -4545,6 +4566,7 @@ v_type_uint64(X, Path) ->
     mk_type_error({bad_integer, uint64, unsigned, 64}, X,
 		  Path).
 
+-dialyzer({nowarn_function,v_type_bool/2}).
 v_type_bool(false, _Path) -> ok;
 v_type_bool(true, _Path) -> ok;
 v_type_bool(0, _Path) -> ok;
@@ -4552,6 +4574,7 @@ v_type_bool(1, _Path) -> ok;
 v_type_bool(X, Path) ->
     mk_type_error(bad_boolean_value, X, Path).
 
+-dialyzer({nowarn_function,v_type_bytes/2}).
 v_type_bytes(B, _Path) when is_binary(B) -> ok;
 v_type_bytes(B, _Path) when is_list(B) -> ok;
 v_type_bytes(X, Path) ->
