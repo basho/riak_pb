@@ -52,9 +52,9 @@
 %% Column names are binary only.
 -type tscolumnname() :: binary().
 %% Possible column type values supported and returned from the timeseries DDL.
--type tscolumntype() :: varchar | sint64 | timestamp | boolean | double.
+-type tscolumntype() :: varchar | sint64 | timestamp | boolean | double | blob.
 %% Possible column type values that protocol buffers supports for enumeration purposes.
--type tscolumntypePB() :: 'VARCHAR' | 'SINT64' | 'TIMESTAMP' | 'BOOLEAN' | 'DOUBLE'.
+-type tscolumntypePB() :: 'VARCHAR' | 'SINT64' | 'TIMESTAMP' | 'BOOLEAN' | 'DOUBLE' | 'BLOB'.
 -export_type([tscolumnname/0, tscolumntype/0, tscolumntypePB/0]).
 
 %% @doc Convert a list of column names to partial #tscolumndescription records.
@@ -67,6 +67,8 @@ encode_columnnames(ColumnNames) ->
 -spec encode_field_type(tscolumntype()) -> atom().
 encode_field_type(varchar) ->
     'VARCHAR';
+encode_field_type(blob) ->
+    'BLOB';
 encode_field_type(sint64) ->
     'SINT64';
 encode_field_type(double) ->
@@ -157,6 +159,10 @@ encode_cells_non_strict(Cells) when is_list(Cells) ->
 
 -spec encode_cell({tscolumntype(), ldbvalue()}) -> #tscell{}.
 encode_cell({varchar, V}) when is_binary(V) ->
+    #tscell{varchar_value = V};
+%% Blobs are varchars under the hood, so we leave the column headers
+%% as blob but the tscell representation as varchar
+encode_cell({blob, V}) when is_binary(V) ->
     #tscell{varchar_value = V};
 encode_cell({sint64, V}) when is_integer(V) ->
     #tscell{sint64_value = V};
@@ -301,6 +307,7 @@ decode_ts_range(#tsrange{field_name            = FieldName,
 encode_cells_test() ->
     %% Correct cells
     ?assertEqual(#tscell{varchar_value = <<"Foo">>}, encode_cell({varchar, <<"Foo">>})),
+    ?assertEqual(#tscell{varchar_value = <<0,1,2,3>>}, encode_cell({blob, <<0,1,2,3>>})),
     ?assertEqual(#tscell{sint64_value = 64}, encode_cell({sint64, 64})),
     ?assertEqual(#tscell{timestamp_value = 64}, encode_cell({timestamp, 64})),
     ?assertEqual(#tscell{boolean_value = true}, encode_cell({boolean, true})),
@@ -309,6 +316,7 @@ encode_cells_test() ->
 
     %% Null Cells
     ?assertEqual(#tscell{}, encode_cell({varchar, []})),
+    ?assertEqual(#tscell{}, encode_cell({blob, []})),
     ?assertEqual(#tscell{}, encode_cell({sint64, []})),
     ?assertEqual(#tscell{}, encode_cell({timestamp, []})),
     ?assertEqual(#tscell{}, encode_cell({boolean, []})),
@@ -326,6 +334,7 @@ encode_row_test() ->
     ?assertEqual(
         #tsrow{cells = [
             #tscell{varchar_value = <<"Foo">>},
+            #tscell{varchar_value = <<0,1,2,3>>},
             #tscell{sint64_value = 64},
             #tscell{timestamp_value = 42},
             #tscell{boolean_value = false},
@@ -333,11 +342,11 @@ encode_row_test() ->
             #tscell{}
         ]},
         encode_row(
-            [varchar, sint64, timestamp, boolean, double, varchar],
-            [<<"Foo">>, 64, 42, false, 42.2, []]
+            [varchar, blob, sint64, timestamp, boolean, double, varchar],
+            [<<"Foo">>, <<0,1,2,3>>, 64, 42, false, 42.2, []]
         )),
-    ?assertError(function_clause, encode_row([], [<<"Foo">>, 64, 42, false, 42.2, []])),
-    ?assertError(function_clause, encode_row([varchar, sint64, timestamp], [<<"Foo">>, 64, 42, false, 42.2, []])).
+    ?assertError(function_clause, encode_row([], [<<"Foo">>, <<0,1,2,3>>, 64, 42, false, 42.2, []])),
+    ?assertError(function_clause, encode_row([varchar, sint64, timestamp], [<<"Foo">>, <<0,1,2,3>>, 64, 42, false, 42.2, []])).
 
 encode_rows_test() ->
     ?assertEqual(
@@ -358,6 +367,7 @@ encode_rows_test() ->
 
 encode_field_type_test() ->
     ?assertEqual('VARCHAR', encode_field_type(varchar)),
+    ?assertEqual('BLOB', encode_field_type(blob)),
     ?assertEqual('SINT64',encode_field_type(sint64)),
     ?assertEqual('TIMESTAMP',encode_field_type(timestamp)),
     ?assertEqual('BOOLEAN',encode_field_type(boolean)),
@@ -365,6 +375,7 @@ encode_field_type_test() ->
 
 decode_cell_test() ->
     ?assertEqual([<<"Foo">>], decode_cells([#tscell{varchar_value = <<"Foo">>}],[])),
+    ?assertEqual([<<0,1,2,3>>], decode_cells([#tscell{varchar_value = <<0,1,2,3>>}],[])),
     ?assertEqual([42],      decode_cells([#tscell{sint64_value = 42}],[])),
     ?assertEqual([64],      decode_cells([#tscell{timestamp_value = 64}],[])),
     ?assertEqual([false],   decode_cells([#tscell{boolean_value = false}],[])),

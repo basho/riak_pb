@@ -25,3 +25,10 @@ riak_pb.iml
 
 # C
 c/*
+
+# Python
+__pycache__/
+python/
+python3/
+version.pyc
+msgcodegen.pyc
