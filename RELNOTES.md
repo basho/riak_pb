@@ -1,6 +1,9 @@
 Release Notes
 =============
 
+* [`2.3.0.0`](https://github.com/basho/riak_pb/compare/2.2.0.2...2.3.0.0)
+  * Object TTL support for Riak TS
+  * Use `gpb` library instead of `erlang_protobuffs`
 * [`2.2.0.2`](https://github.com/basho/riak_pb/compare/2.2.0.1...2.2.0.2)
   * Add gset support.
   * Add blob support.
