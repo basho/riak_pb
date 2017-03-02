@@ -1,5 +1,9 @@
 .PHONY: deps
 
+PROJDIR := $(realpath $(CURDIR))
+MIX_VERSION := $(shell mix -v)
+REBAR ?= $(PROJDIR)/rebar
+
 all: deps compile_all
 
 deps: erl_deps
@@ -16,18 +20,18 @@ DIALYZER_APPS = kernel stdlib erts crypto compiler hipe syntax_tools
 include tools.mk
 
 erl_deps:
-	@${REBAR} get-deps
+	$(REBAR) get-deps
 
 erl_compile:
-	@${REBAR} compile
+	$(REBAR) compile
 
 erl_clean:
-	@${REBAR} clean
+	$(REBAR) clean
 
 erl_protogen:
-	@${REBAR} --config protogen.config clean
-	@${REBAR} --config protogen.config get-deps
-	@${REBAR} --config protogen.config compile
+	$(REBAR) --config protogen.config clean
+	$(REBAR) --config protogen.config get-deps
+	$(REBAR) --config protogen.config compile
 
 compile: erl_compile # Hack for tools.mk
 
@@ -38,11 +42,20 @@ endif
 ifeq ($(RELEASE_GPG_KEYNAME),)
 	$(error RELEASE_GPG_KEYNAME must be set to build a release and deploy this package)
 endif
-	@echo "==> Tagging version $(VERSION)"
-	@bash ./build/publish $(VERSION) validate
-	@git tag --sign -a "$(VERSION)" -m "riak_pb $(VERSION)" --local-user "$(RELEASE_GPG_KEYNAME)"
-	@git push --tags
-	@bash ./build/publish $(VERSION)
+ifeq ($(MIX_VERSION),)
+	$(error The mix command is required to publish to hex.pm)
+endif
+	echo "==> Tagging version $(VERSION)"
+	$(PROJDIR)/build/publish $(VERSION) validate
+	echo -n "$(VERSION)" > VERSION
+	git add --force VERSION
+	git commit --message="riak_pb $(VERSION)"
+	git push
+	git tag --sign -a "$(VERSION)" -m "riak_pb $(VERSION)" --local-user "$(RELEASE_GPG_KEYNAME)"
+	git push --tags
+	$(PROJDIR)/build/publish $(VERSION)
+	mix deps.get
+	mix hex.publish
 
 # C specific build steps
 PROTOC	 = protoc-c
