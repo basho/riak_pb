@@ -1,7 +1,10 @@
 Release Notes
 =============
 
+* `2.3.2`
+  * Updated `hamcrest` dependency to `0.4.1`
 * [`2.3.1`](https://github.com/basho/riak_pb/milestone/16)
+  * *NOTE:* deprecated version, hamcrest dependency causes `reltool` to fail.
   * *NOTE:* moving to `X.Y.Z` versioning scheme.
   * Publish to `hex.pm`
 * [`2.3.0.0`](https://github.com/basho/riak_pb/compare/2.2.0.2...2.3.0.0)

@@ -29,7 +29,7 @@ defmodule RiakPb.Mixfile do
 
   defp deps do
     [
-      {:hamcrest, "~> 0.4.0", hex: :basho_hamcrest},
+      {:hamcrest, "~> 0.4.1", hex: :basho_hamcrest},
       {:ex_doc, ">= 0.0.0", only: :dev}
     ]
   end
