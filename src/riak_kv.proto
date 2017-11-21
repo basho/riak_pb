@@ -57,6 +57,7 @@ message RpbGetReq {
     optional bool sloppy_quorum = 11;   // Experimental, may change/disappear
     optional uint32 n_val = 12;         // Experimental, may change/disappear
     optional bytes type = 13;           // Bucket type, if not set we assume the 'default' type
+    optional bool coord_get = 14;
 }
 
 // Get Response - if the record was not found there will be no content/vclock
