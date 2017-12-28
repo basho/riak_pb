@@ -1,5 +1,6 @@
 -module(encoding_test).
 -compile([export_all]).
+-compile(nowarn_export_all).
 -include_lib("eunit/include/eunit.hrl").
 -include("riak_pb_kv_codec.hrl").
 -include("riak_dt_pb.hrl").
