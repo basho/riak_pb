@@ -30,7 +30,6 @@
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
--compile(export_all).
 -endif.
 
 -export([encode/1,      %% riakc_pb:encode
@@ -91,7 +90,7 @@ encode({Msg}) when is_atom(Msg) ->
 encode(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
-    [msg_code(MsgType) | Encoder:encode(Msg)].
+    [msg_code(MsgType) | Encoder:encode_msg(Msg)].
 
 %% ------------------------------------------------------------
 %% Encode a message when no content body is present (message atom
@@ -107,10 +106,10 @@ encode_msg_no_body(MsgCode, _Msg) ->
 
 %% @doc Convert a property list to an RpbBucketProps message
 %% @private
-post_decode(Msg=#tsgetreq{key=K}) ->
-    Msg#tsgetreq{key=riak_pb_ts_codec:decode_cells(K)};
-post_decode(Msg=#tsputreq{rows=R}) ->
-    Msg#tsputreq{rows=riak_pb_ts_codec:decode_rows(R)};
+post_decode(Msg=#'TsGetReq'{key=K}) ->
+    Msg#'TsGetReq'{key=riak_pb_ts_codec:decode_cells(K)};
+post_decode(Msg=#'TsPutReq'{rows=R}) ->
+    Msg#'TsPutReq'{rows=riak_pb_ts_codec:decode_rows(R)};
 post_decode(Msg) ->
     Msg.
 
@@ -121,7 +120,7 @@ decode(MsgCode, <<>>) ->
     msg_type(MsgCode);
 decode(MsgCode, MsgData) ->
     Decoder = decoder_for(MsgCode),
-    Decoded = Decoder:decode(msg_type(MsgCode), MsgData),
+    Decoded = Decoder:decode_msg(MsgData, msg_type(MsgCode)),
     post_decode(Decoded).
 
 %% @doc Converts a message code into the symbolic message
@@ -186,21 +185,21 @@ to_list(V) when is_integer(V) ->
     integer_to_list(V).
 
 %% @doc Convert {K,V} tuple to protocol buffers
--spec encode_pair({Key::binary(), Value::any()}) -> #rpbpair{}.
+-spec encode_pair({Key::binary(), Value::any()}) -> #'RpbPair'{}.
 encode_pair({K,V}) ->
-    #rpbpair{key = to_binary(K), value = to_binary(V)}.
+    #'RpbPair'{key = to_binary(K), value = to_binary(V)}.
 
 %% @doc Convert RpbPair PB message to erlang {K,V} tuple
--spec decode_pair(#rpbpair{}) -> {binary(), binary()}.
-decode_pair(#rpbpair{key = K, value = V}) ->
+-spec decode_pair(#'RpbPair'{}) -> {binary(), binary()}.
+decode_pair(#'RpbPair'{key = K, value = V}) ->
     {K, V}.
 
 
 %% @doc Convert an RpbBucketProps message to a property list
--spec decode_bucket_props(PBProps::#rpbbucketprops{} | undefined) -> [proplists:property()].
+-spec decode_bucket_props(PBProps::#'RpbBucketProps'{} | undefined) -> [proplists:property()].
 decode_bucket_props(undefined) ->
     [];
-decode_bucket_props(#rpbbucketprops{n_val=N,
+decode_bucket_props(#'RpbBucketProps'{n_val=N,
                                     allow_mult=AM,
                                     last_write_wins=LWW,
                                     precommit=Pre,
@@ -267,77 +266,77 @@ decode_bucket_props(#rpbbucketprops{n_val=N,
 
 
 %% @doc Convert a property list to an RpbBucketProps message
--spec encode_bucket_props([proplists:property()]) -> PBProps::#rpbbucketprops{}.
+-spec encode_bucket_props([proplists:property()]) -> PBProps::#'RpbBucketProps'{}.
 encode_bucket_props(Props) ->
-    encode_bucket_props(Props, #rpbbucketprops{}).
+    encode_bucket_props(Props, #'RpbBucketProps'{}).
 
 %% @doc Convert a property list to an RpbBucketProps message
 %% @private
--spec encode_bucket_props([proplists:property()], PBPropsIn::#rpbbucketprops{}) -> PBPropsOut::#rpbbucketprops{}.
+-spec encode_bucket_props([proplists:property()], PBPropsIn::#'RpbBucketProps'{}) -> PBPropsOut::#'RpbBucketProps'{}.
 encode_bucket_props([], Pb) ->
     Pb;
 encode_bucket_props([{n_val, Nval} | Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{n_val = Nval});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{n_val = Nval});
 encode_bucket_props([{allow_mult, Flag} | Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{allow_mult = encode_bool(Flag)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{allow_mult = encode_bool(Flag)});
 encode_bucket_props([{last_write_wins, LWW}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{last_write_wins = encode_bool(LWW)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{last_write_wins = encode_bool(LWW)});
 encode_bucket_props([{precommit, Precommit}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{precommit = encode_commit_hooks(Precommit),
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{precommit = encode_commit_hooks(Precommit),
                                                 has_precommit = true});
 encode_bucket_props([{postcommit, Postcommit}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{postcommit = encode_commit_hooks(Postcommit),
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{postcommit = encode_commit_hooks(Postcommit),
                                                 has_postcommit = true});
 encode_bucket_props([{chash_keyfun, ModFun}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{chash_keyfun = encode_modfun(ModFun)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{chash_keyfun = encode_modfun(ModFun)});
 encode_bucket_props([{linkfun, ModFun}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{linkfun = encode_modfun(ModFun)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{linkfun = encode_modfun(ModFun)});
 encode_bucket_props([{old_vclock, Num}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{old_vclock = Num});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{old_vclock = Num});
 encode_bucket_props([{young_vclock, Num}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{young_vclock = Num});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{young_vclock = Num});
 encode_bucket_props([{big_vclock, Num}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{big_vclock = Num});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{big_vclock = Num});
 encode_bucket_props([{small_vclock, Num}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{small_vclock = Num});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{small_vclock = Num});
 encode_bucket_props([{pr, Q}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{pr = riak_pb_kv_codec:encode_quorum(Q)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{pr = riak_pb_kv_codec:encode_quorum(Q)});
 encode_bucket_props([{r, Q}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{r = riak_pb_kv_codec:encode_quorum(Q)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{r = riak_pb_kv_codec:encode_quorum(Q)});
 encode_bucket_props([{w, Q}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{w = riak_pb_kv_codec:encode_quorum(Q)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{w = riak_pb_kv_codec:encode_quorum(Q)});
 encode_bucket_props([{pw, Q}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{pw = riak_pb_kv_codec:encode_quorum(Q)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{pw = riak_pb_kv_codec:encode_quorum(Q)});
 encode_bucket_props([{dw, Q}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{dw = riak_pb_kv_codec:encode_quorum(Q)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{dw = riak_pb_kv_codec:encode_quorum(Q)});
 encode_bucket_props([{rw, Q}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{rw = riak_pb_kv_codec:encode_quorum(Q)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{rw = riak_pb_kv_codec:encode_quorum(Q)});
 encode_bucket_props([{basic_quorum, BQ}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{basic_quorum = encode_bool(BQ)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{basic_quorum = encode_bool(BQ)});
 encode_bucket_props([{notfound_ok, NFOK}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{notfound_ok = encode_bool(NFOK)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{notfound_ok = encode_bool(NFOK)});
 encode_bucket_props([{backend, B}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{backend = to_binary(B)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{backend = to_binary(B)});
 encode_bucket_props([{search, S}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{search = encode_bool(S)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{search = encode_bool(S)});
 encode_bucket_props([{repl, Atom}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{repl = encode_repl(Atom)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{repl = encode_repl(Atom)});
 encode_bucket_props([{search_index, B}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{search_index = to_binary(B)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{search_index = to_binary(B)});
 encode_bucket_props([{datatype, D}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{datatype = to_binary(D)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{datatype = to_binary(D)});
 encode_bucket_props([{consistent, S}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{consistent = encode_bool(S)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{consistent = encode_bool(S)});
 encode_bucket_props([{write_once, S}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{write_once = encode_bool(S)});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{write_once = encode_bool(S)});
 encode_bucket_props([{hll_precision, Num}|Rest], Pb) ->
-    encode_bucket_props(Rest, Pb#rpbbucketprops{hll_precision = Num});
+    encode_bucket_props(Rest, Pb#'RpbBucketProps'{hll_precision = Num});
 encode_bucket_props([_Ignore|Rest], Pb) ->
     %% Ignore any properties not explicitly part of the PB message
     encode_bucket_props(Rest, Pb).
 
 %% @doc Converts a module-function specification into a RpbModFun message.
--spec encode_modfun(modfun_property()) -> #rpbmodfun{}.
+-spec encode_modfun(modfun_property()) -> #'RpbModFun'{}.
 encode_modfun({struct, Props}) ->
     {<<"mod">>, Mod} = lists:keyfind(<<"mod">>, 1, Props),
     {<<"fun">>, Fun} = lists:keyfind(<<"fun">>, 1, Props),
@@ -345,17 +344,17 @@ encode_modfun({struct, Props}) ->
 encode_modfun({modfun, M, F}) ->
     encode_modfun({M, F});
 encode_modfun({M, F}) ->
-    #rpbmodfun{module=to_binary(M), function=to_binary(F)}.
+    #'RpbModFun'{module=to_binary(M), function=to_binary(F)}.
 
 %% @doc Converts an RpbModFun message into the appropriate format for
 %% the given property.
--spec decode_modfun(#rpbmodfun{}, atom()) -> modfun_property().
+-spec decode_modfun(#'RpbModFun'{}, atom()) -> modfun_property().
 decode_modfun(MF, linkfun) ->
     {M,F} = decode_modfun(MF, undefined),
     {modfun, M, F};
-decode_modfun(#rpbmodfun{module=Mod, function=Fun}, commit_hook) ->
+decode_modfun(#'RpbModFun'{module=Mod, function=Fun}, commit_hook) ->
     {struct, [{<<"mod">>, Mod}, {<<"fun">>, Fun}]};
-decode_modfun(#rpbmodfun{module=Mod, function=Fun}=MF, _Prop) ->
+decode_modfun(#'RpbModFun'{module=Mod, function=Fun}=MF, _Prop) ->
     try
         {binary_to_existing_atom(Mod, latin1), binary_to_existing_atom(Fun, latin1)}
     catch
@@ -366,7 +365,7 @@ decode_modfun(#rpbmodfun{module=Mod, function=Fun}=MF, _Prop) ->
 
 %% @doc Converts a list of commit hooks into a list of RpbCommitHook
 %% messages.
--spec encode_commit_hooks([commit_hook_property()]) -> [ #rpbcommithook{} ].
+-spec encode_commit_hooks([commit_hook_property()]) -> [ #'RpbCommitHook'{} ].
 encode_commit_hooks(Hooks) ->
     [ encode_commit_hook(Hook) || Hook <- Hooks ].
 
@@ -375,23 +374,23 @@ encode_commit_hook({struct, Props}=Hook) ->
                      Field <- [<<"mod">>, <<"fun">>, <<"name">>]],
     case FoundProps of
         [true, true, _] ->
-            #rpbcommithook{modfun=encode_modfun(Hook)};
+            #'RpbCommitHook'{modfun=encode_modfun(Hook)};
         [false, false, true] ->
             {<<"name">>, Name} = lists:keyfind(<<"name">>, 1, Props),
-            #rpbcommithook{name=to_binary(Name)};
+            #'RpbCommitHook'{name=to_binary(Name)};
         _ ->
             erlang:error(badarg, [Hook])
     end.
 
 %% @doc Converts a list of RpbCommitHook messages into commit hooks.
--spec decode_commit_hooks([ #rpbcommithook{} ]) -> [ commit_hook_property() ].
+-spec decode_commit_hooks([ #'RpbCommitHook'{} ]) -> [ commit_hook_property() ].
 decode_commit_hooks(Hooks) ->
     [ decode_commit_hook(Hook) || Hook <- Hooks,
-                                 Hook =/= #rpbcommithook{modfun=undefined, name=undefined} ].
+                                 Hook =/= #'RpbCommitHook'{modfun=undefined, name=undefined} ].
 
-decode_commit_hook(#rpbcommithook{modfun = Modfun}) when Modfun =/= undefined ->
+decode_commit_hook(#'RpbCommitHook'{modfun = Modfun}) when Modfun =/= undefined ->
     decode_modfun(Modfun, commit_hook);
-decode_commit_hook(#rpbcommithook{name = Name}) when Name =/= undefined ->
+decode_commit_hook(#'RpbCommitHook'{name = Name}) when Name =/= undefined ->
     {struct, [{<<"name">>, Name}]}.
 
 encode_repl(Bin) when is_binary(Bin) -> encode_repl(binary_to_existing_atom(Bin, latin1));
@@ -429,25 +428,25 @@ decode_eq(Message, IoList, DecodeFun) ->
 
 record_test() ->
     Req =
-        #rpbgetreq{n_val=4,
+        #'RpbGetReq'{n_val=4,
                    notfound_ok=true,
                    bucket = <<"bucket">>,
                    key = <<"key">>},
     decode_eq(Req, encode(Req), fun decode/2).
 
 optional_booleans_test() ->
-    Req = #dtfetchreq{bucket = "bucket",
+    Req = #'DtFetchReq'{bucket = "bucket",
                       key = <<"key">>,
                       type = <<"type">>},
-    ?assertEqual(undefined, Req#dtfetchreq.r),
-    ?assertEqual(undefined, Req#dtfetchreq.pr),
-    ?assertEqual(undefined, Req#dtfetchreq.basic_quorum),
-    ?assertEqual(undefined, Req#dtfetchreq.notfound_ok),
-    ?assertEqual(undefined, Req#dtfetchreq.timeout),
-    ?assertEqual(undefined, Req#dtfetchreq.sloppy_quorum),
-    ?assertEqual(undefined, Req#dtfetchreq.n_val),
-    ?assertEqual(true, Req#dtfetchreq.include_context),
-    DecodedReq = #dtfetchreq{bucket = <<"bucket">>,
+    ?assertEqual(undefined, Req#'DtFetchReq'.r),
+    ?assertEqual(undefined, Req#'DtFetchReq'.pr),
+    ?assertEqual(undefined, Req#'DtFetchReq'.basic_quorum),
+    ?assertEqual(undefined, Req#'DtFetchReq'.notfound_ok),
+    ?assertEqual(undefined, Req#'DtFetchReq'.timeout),
+    ?assertEqual(undefined, Req#'DtFetchReq'.sloppy_quorum),
+    ?assertEqual(undefined, Req#'DtFetchReq'.n_val),
+    ?assertEqual(true, Req#'DtFetchReq'.include_context),
+    DecodedReq = #'DtFetchReq'{bucket = <<"bucket">>,
                              key = <<"key">>,
                              type = <<"type">>,
                              r = undefined,
@@ -465,7 +464,7 @@ empty_atoms_test() ->
     %% whether the .proto file defines the message as an empty record
     %% or ignores it. On the receiving end they are all atoms.
 
-    Resp = tsdelresp,  %% .proto defines as empty record
+    Resp = 'TsDelResp',  %% .proto defines as empty record
 
     decode_eq(Resp, encode(Resp), fun decode/2).
 
@@ -474,13 +473,13 @@ mixed_strings_test() ->
     %% equivalent, on the sending side we can get away with using
     %% strings instead of binaries in records that expect the latter
     Req =
-        #rpbgetreq{n_val=4,
+        #'RpbGetReq'{n_val=4,
                    notfound_ok=true,
                    bucket = "bucket",
                    key = <<"key">>},
 
     DecodedReq =
-        #rpbgetreq{n_val=4,
+        #'RpbGetReq'{n_val=4,
                    notfound_ok=true,
                    bucket = <<"bucket">>,
                    key = <<"key">>},

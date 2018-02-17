@@ -36,12 +36,12 @@
 
 %% @doc Encodes a property-list of indexed-document fields into a
 %% search-doc Protocol Buffers message.
--spec encode_search_doc([{binary(), binary()}]) -> #rpbsearchdoc{}.
+-spec encode_search_doc([{binary(), binary()}]) -> #'RpbSearchDoc'{}.
 encode_search_doc(PList) ->
-    #rpbsearchdoc{fields=[ encode_pair(Pair) || Pair <- PList]}.
+    #'RpbSearchDoc'{fields=[ encode_pair(Pair) || Pair <- PList]}.
 
 %% @doc Decodes a Protocol Buffers message search-doc into proplist of
 %% document fields and values.
--spec decode_search_doc(#rpbsearchdoc{}) -> [{binary(), binary()}].
-decode_search_doc(#rpbsearchdoc{fields=Fields}) -> 
+-spec decode_search_doc(#'RpbSearchDoc'{}) -> [{binary(), binary()}].
+decode_search_doc(#'RpbSearchDoc'{fields=Fields}) -> 
     [ decode_pair(Pair) || Pair <- Fields ].
