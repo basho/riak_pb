@@ -491,6 +491,8 @@ encode_update_options(Update, [{dw,DW}|Tail]) ->
     encode_update_options(Update#dtupdatereq{dw=encode_quorum(DW)},Tail);
 encode_update_options(Update, [{pw,PW}|Tail]) ->
     encode_update_options(Update#dtupdatereq{pw=encode_quorum(PW)},Tail);
+encode_update_options(Update, [{node_confirms,NodeConfirms}|Tail]) ->
+    encode_update_options(Update#dtupdatereq{node_confirms=encode_quorum(NodeConfirms)},Tail);
 encode_update_options(Update, [return_body|Tail]) ->
     encode_update_options(Update, [{return_body, true}|Tail]);
 encode_update_options(Update, [{return_body, RB}|Tail]) ->

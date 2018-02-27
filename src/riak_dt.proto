@@ -253,6 +253,7 @@ message DtUpdateReq {
     optional bool   sloppy_quorum   = 11;  // Experimental, may change/disappear
     optional uint32 n_val           = 12;  // Experimental, may change/disappear
     optional bool   include_context = 13 [default=true]; // When return_body is true, should the context be returned too?
+    optional uint32 node_confirms = 14; // Distinct phycical node quorum
 }
 
 
