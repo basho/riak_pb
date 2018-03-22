@@ -107,11 +107,11 @@ message DtValue {
     optional sint64   counter_value = 1;
     repeated bytes    set_value     = 2;
     repeated MapEntry map_value     = 3;
-
     /* We return an estimated cardinality of the Hyperloglog set
      * on fetch.
      */
     optional uint64   hll_value     = 4;
+    repeated bytes    gset_value    = 5;
 }
 
 
@@ -130,6 +130,7 @@ message DtFetchResp {
         SET     = 2;
         MAP     = 3;
         HLL     = 4;
+        GSET    = 5;
     }
 
     optional bytes    context = 1;
@@ -158,6 +159,15 @@ message CounterOp {
 message SetOp {
     repeated bytes adds    = 1;
     repeated bytes removes = 2;
+}
+
+/*
+ * An operation to update a GSet, on its own.
+ * GSet members are opaque binary values, you can only add
+ * them to a Set.
+ */
+message GSetOp {
+    repeated bytes adds    = 1;
 }
 
 /*
@@ -195,6 +205,7 @@ message MapUpdate {
     optional bytes     register_op = 4;
     optional FlagOp    flag_op     = 5;
     optional MapOp     map_op      = 6;
+
 }
 
 /*
@@ -219,11 +230,11 @@ message DtOp {
     optional CounterOp counter_op = 1;
     optional SetOp     set_op     = 2;
     optional MapOp     map_op     = 3;
-
     /* Adding values to a hyperloglog (set) is just like adding values
      * to a set.
      */
     optional HllOp     hll_op     = 4;
+    optional GSetOp    gset_op    = 5;
 }
 
 /*
@@ -272,4 +283,5 @@ message DtUpdateResp {
     repeated bytes    set_value     = 4;
     repeated MapEntry map_value     = 5;
     optional uint64   hll_value     = 6;
+    repeated bytes    gset_value    = 7;
 }
