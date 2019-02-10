@@ -86,6 +86,7 @@ message RpbPutReq {
     optional bool sloppy_quorum = 14; // Experimental, may change/disappear
     optional uint32 n_val = 15;       // Experimental, may change/disappear
     optional bytes type = 16;         // Bucket type, if not set we assume the 'default' type
+    optional uint32 node_confirms = 17; // Distinct phycical node quorum
 }
 
 // Put response - same as get response with optional key if one was generated
@@ -264,6 +265,7 @@ message RpbCounterUpdateReq {
     optional uint32 dw = 5;
     optional uint32 pw = 6;
     optional bool returnvalue = 7;
+    optional uint32 node_confirms = 8; // Distinct phycical node quorum
 }
 
 // Counter update response? No message | error response
