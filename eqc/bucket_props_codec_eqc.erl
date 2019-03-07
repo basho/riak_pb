@@ -22,7 +22,7 @@
 -include_lib("eqc/include/eqc.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--compile(export_all).
+-compile([export_all, nowarn_export_all]).
 
 -define(QC_OUT(P), eqc:on_output(fun(F,TL) ->
                                          io:format(user, F, TL)
@@ -47,9 +47,10 @@ prop_codec() ->
                       end,
                       begin
                           Props2 = riak_pb_codec:decode_bucket_props(
-                                     riak_pb:decode_rpbbucketprops(
-                                       iolist_to_binary(riak_pb:encode_rpbbucketprops(
-                                                          riak_pb_codec:encode_bucket_props(Props))))),
+                                     riak_pb:decode_msg(
+                                       iolist_to_binary(riak_pb:encode_msg(
+                                                          riak_pb_codec:encode_bucket_props(Props))),
+                                       rpbbucketprops)),
                           Props =:= lists:sort(Props2)
                       end)).
 
