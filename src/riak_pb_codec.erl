@@ -91,7 +91,7 @@ encode({Msg}) when is_atom(Msg) ->
 encode(Msg) when is_tuple(Msg) ->
     MsgType = element(1, Msg),
     Encoder = encoder_for(MsgType),
-    [msg_code(MsgType) | Encoder:encode(Msg)].
+    [msg_code(MsgType) | Encoder:encode_msg(Msg)].
 
 %% ------------------------------------------------------------
 %% Encode a message when no content body is present (message atom
@@ -121,7 +121,7 @@ decode(MsgCode, <<>>) ->
     msg_type(MsgCode);
 decode(MsgCode, MsgData) ->
     Decoder = decoder_for(MsgCode),
-    Decoded = Decoder:decode(msg_type(MsgCode), MsgData),
+    Decoded = Decoder:decode_msg(MsgData, msg_type(MsgCode)),
     post_decode(Decoded).
 
 %% @doc Converts a message code into the symbolic message
