@@ -29,8 +29,8 @@ pb_test_() ->
                  RpbContentBin = iolist_to_binary(RpbContentEnc),
                  RpbContent2 = riak_kv_pb:decode_msg(RpbContentBin, rpbcontent),
                  {MetaData2, Value2} = riak_pb_kv_codec:decode_content(RpbContent2),
-                 MD1 = lists:sort(dict:to_list(MetaData)), 
-                 MD2 = lists:sort(dict:to_list(MetaData2)), 
+                 MD1 = lists:sort(dict:to_list(MetaData)),
+                 MD2 = lists:sort(dict:to_list(MetaData2)),
                  ?assertEqual(length(MD1), length(MD2)),
                  [ ?assertEqual(Want, Got) || {Want, Got} <- lists:zip(MD1, MD2)],
                  ?assertEqual(Value, Value2)

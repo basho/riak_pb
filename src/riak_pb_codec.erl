@@ -390,7 +390,7 @@ decode_commit_hooks(Hooks) ->
     [ decode_commit_hook(Hook) || Hook <- Hooks,
                                  Hook =/= #rpbcommithook{modfun=undefined, name=undefined} ].
 
-decode_commit_hook(#rpbcommithook{modfun = ModFun}) 
+decode_commit_hook(#rpbcommithook{modfun = ModFun})
   when ModFun =/= undefined ->
     #rpbmodfun{module=Mod, function=Fun} = ModFun,
     {struct, [{<<"mod">>, Mod}, {<<"fun">>, Fun}]};
