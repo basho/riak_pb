@@ -1,4 +1,5 @@
 -module(encoding_test).
+-compile([export_all]).
 -include_lib("eunit/include/eunit.hrl").
 -include("riak_pb_kv_codec.hrl").
 -include("riak_dt_pb.hrl").
@@ -24,11 +25,9 @@ pb_test_() ->
                               ]),
                  Value = <<"test value">>,
                  {MetaData2, Value2} = riak_pb_kv_codec:decode_content(
-                                         riak_kv_pb:decode_msg(
-                                           iolist_to_binary(riak_kv_pb:encode_msg(
-                                             riak_pb_kv_codec:encode_content({MetaData,
-                                                                              Value}))),
-                                          'RpbContent')),
+                                         riak_kv_pb:decode_rpbcontent(
+                                           iolist_to_binary(riak_kv_pb:encode_rpbcontent(
+                                             riak_pb_kv_codec:encode_content({MetaData, Value}))))),
                  ?assertEqual(lists:sort(dict:to_list(MetaData)), lists:sort(dict:to_list(MetaData2))),
                  ?assertEqual(Value, Value2)
              end)},
@@ -39,11 +38,9 @@ pb_test_() ->
                  Value = <<"test value">>,
                  {OutputMD, _} = lists:unzip(
                                    [riak_pb_kv_codec:decode_content(
-                                      riak_kv_pb:decode_msg(
-                                        iolist_to_binary(riak_kv_pb:encode_msg(
-                                          riak_pb_kv_codec:encode_content({MD,
-                                                                           Value}))),
-                                       'RpbContent')) ||
+                                      riak_kv_pb:decode_rpbcontent(
+                                        iolist_to_binary(riak_kv_pb:encode_rpbcontent(
+                                          riak_pb_kv_codec:encode_content({MD, Value}))))) ||
                                        MD <- InputMD]),
                  MdSame1 = (lists:sort(dict:to_list(lists:nth(1, OutputMD))) =:=
                                 lists:sort(dict:to_list(lists:nth(2, OutputMD)))),
@@ -60,11 +57,9 @@ pb_test_() ->
                                             {<<"index_int">>, <<"10">>}]}],
                  Value = <<"test value">>,
                  {OutputMD, _} = riak_pb_kv_codec:decode_content(
-                                         riak_kv_pb:decode_msg(
-                                           iolist_to_binary(riak_kv_pb:encode_msg(
-                                             riak_pb_kv_codec:encode_content({InputMD,
-                                                                              Value}))),
-                                          'RpbContent')),
+                                         riak_kv_pb:decode_rpbcontent(
+                                           iolist_to_binary(riak_kv_pb:encode_rpbcontent(
+                                             riak_pb_kv_codec:encode_content({InputMD, Value}))))),
                  ?assertEqual(ExpectedMD, dict:to_list(OutputMD))
              end)},
      {"empty content encode decode",
@@ -72,11 +67,9 @@ pb_test_() ->
                  MetaData = dict:new(),
                  Value = <<"test value">>,
                  {MetaData2, Value2} = riak_pb_kv_codec:decode_content(
-                                         riak_kv_pb:decode_msg(
-                                           iolist_to_binary(riak_kv_pb:encode_msg(
-                                             riak_pb_kv_codec:encode_content({MetaData,
-                                                                              Value}))),
-                                          'RpbContent')),
+                                         riak_kv_pb:decode_rpbcontent(
+                                           iolist_to_binary(riak_kv_pb:encode_rpbcontent(
+                                             riak_pb_kv_codec:encode_content({MetaData, Value}))))),
                  ?assertEqual([], dict:to_list(MetaData2)),
                  ?assertEqual(Value, Value2)
              end)},
@@ -85,29 +78,27 @@ pb_test_() ->
                  MetaData = dict:from_list([{?MD_LINKS, []}, {?MD_USERMETA, []}, {?MD_INDEX, []}]),
                  Value = <<"test value">>,
                  {MetaData2, Value2} = riak_pb_kv_codec:decode_content(
-                                         riak_kv_pb:decode_msg(
-                                           iolist_to_binary(riak_kv_pb:encode_msg(
-                                             riak_pb_kv_codec:encode_content({MetaData,
-                                                                              Value}))),
-                                          'RpbContent')),
+                                         riak_kv_pb:decode_rpbcontent(
+                                           iolist_to_binary(riak_kv_pb:encode_rpbcontent(
+                                             riak_pb_kv_codec:encode_content({MetaData, Value}))))),
                  ?assertEqual([], dict:to_list(MetaData2)),
                  ?assertEqual(Value, Value2)
              end)},
      {"riak_dt-dtfetchreq-encode-decode",
       ?_test(begin
                  RBin = <<10,1,97,18,1,97,26,1,97>>,
-                 R = riak_dt_pb:decode_msg(RBin, 'DtFetchReq'),
-                 ?assertEqual(<<"a">>, R#'DtFetchReq'.type),
-                 ?assertEqual(<<"a">>, R#'DtFetchReq'.bucket),
-                 ?assertEqual(<<"a">>, R#'DtFetchReq'.key),
-                 ?assertEqual(undefined, R#'DtFetchReq'.r),
-                 ?assertEqual(undefined, R#'DtFetchReq'.pr),
-                 ?assertEqual(undefined, R#'DtFetchReq'.basic_quorum),
-                 ?assertEqual(undefined, R#'DtFetchReq'.notfound_ok),
-                 ?assertEqual(undefined, R#'DtFetchReq'.timeout),
-                 ?assertEqual(undefined, R#'DtFetchReq'.sloppy_quorum),
-                 ?assertEqual(undefined, R#'DtFetchReq'.n_val),
-                 ?assertEqual(undefined, R#'DtFetchReq'.include_context)
+                 R = riak_dt_pb:decode(dtfetchreq, RBin),
+                 ?assertEqual(<<"a">>, R#dtfetchreq.type),
+                 ?assertEqual(<<"a">>, R#dtfetchreq.bucket),
+                 ?assertEqual(<<"a">>, R#dtfetchreq.key),
+                 ?assertEqual(undefined, R#dtfetchreq.r),
+                 ?assertEqual(undefined, R#dtfetchreq.pr),
+                 ?assertEqual(undefined, R#dtfetchreq.basic_quorum),
+                 ?assertEqual(undefined, R#dtfetchreq.notfound_ok),
+                 ?assertEqual(undefined, R#dtfetchreq.timeout),
+                 ?assertEqual(undefined, R#dtfetchreq.sloppy_quorum),
+                 ?assertEqual(undefined, R#dtfetchreq.n_val),
+                 ?assertEqual(true, R#dtfetchreq.include_context)
              end)},
      {"msg code encode decode",
       ?_test(begin

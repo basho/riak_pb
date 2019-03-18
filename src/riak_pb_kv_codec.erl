@@ -69,12 +69,12 @@
 
 %% @doc Convert a list of object {MetaData,Value} pairs to protocol
 %% buffers messages.
--spec encode_contents(contents()) -> [#'RpbContent'{}].
+-spec encode_contents(contents()) -> [#rpbcontent{}].
 encode_contents(List) ->
     [ encode_content(C) || C <- List ].
 
-%% @doc Convert a metadata/value pair into an #'RpbContent'{} record
--spec encode_content({metadata(), value()}) -> #'RpbContent'{}.
+%% @doc Convert a metadata/value pair into an #rpbcontent{} record
+-spec encode_content({metadata(), value()}) -> #rpbcontent{}.
 encode_content({MetadataIn, ValueIn}=C) ->
     {Metadata, Value} =
         case is_binary(ValueIn) of
@@ -90,28 +90,28 @@ encode_content({MetadataIn, ValueIn}=C) ->
                 {dict:store(?MD_CTYPE, ?CTYPE_ERLANG_BINARY, MetadataIn),
                  term_to_binary(ValueIn)}
         end,
-    dict:fold(fun encode_content_meta/3, #'RpbContent'{value = Value}, Metadata).
+    dict:fold(fun encode_content_meta/3, #rpbcontent{value = Value}, Metadata).
 
 %% @doc Convert the metadata dictionary entries to protocol buffers
 -spec encode_content_meta(MetadataKey::string(), any(), tuple()) -> tuple().
 encode_content_meta(?MD_CTYPE, ContentType, PbContent) when is_list(ContentType) ->
-    PbContent#'RpbContent'{content_type = ContentType};
+    PbContent#rpbcontent{content_type = ContentType};
 encode_content_meta(?MD_CHARSET, Charset, PbContent) when is_list(Charset) ->
-    PbContent#'RpbContent'{charset = Charset};
+    PbContent#rpbcontent{charset = Charset};
 encode_content_meta(?MD_ENCODING, Encoding, PbContent) when is_list(Encoding) ->
-    PbContent#'RpbContent'{content_encoding = Encoding};
+    PbContent#rpbcontent{content_encoding = Encoding};
 encode_content_meta(?MD_VTAG, Vtag, PbContent) when is_list(Vtag) ->
-    PbContent#'RpbContent'{vtag = Vtag};
+    PbContent#rpbcontent{vtag = Vtag};
 encode_content_meta(?MD_LINKS, Links, PbContent) when is_list(Links) ->
-    PbContent#'RpbContent'{links = [encode_link(E) || E <- Links]};
+    PbContent#rpbcontent{links = [encode_link(E) || E <- Links]};
 encode_content_meta(?MD_LASTMOD, {MS,S,US}, PbContent) ->
-    PbContent#'RpbContent'{last_mod = 1000000*MS+S, last_mod_usecs = US};
+    PbContent#rpbcontent{last_mod = 1000000*MS+S, last_mod_usecs = US};
 encode_content_meta(?MD_USERMETA, UserMeta, PbContent) when is_list(UserMeta) ->
-    PbContent#'RpbContent'{usermeta = [encode_pair(E) || E <- UserMeta]};
+    PbContent#rpbcontent{usermeta = [encode_pair(E) || E <- UserMeta]};
 encode_content_meta(?MD_INDEX, Indexes, PbContent) when is_list(Indexes) ->
-    PbContent#'RpbContent'{indexes = [encode_index_pair(E) || E <- Indexes]};
+    PbContent#rpbcontent{indexes = [encode_index_pair(E) || E <- Indexes]};
 encode_content_meta(?MD_DELETED, DeletedVal, PbContent) ->
-    PbContent#'RpbContent'{deleted=header_val_to_bool(DeletedVal)};
+    PbContent#rpbcontent{deleted=header_val_to_bool(DeletedVal)};
 encode_content_meta(_Key, _Value, PbContent) ->
     %% Ignore unknown metadata - need to add to RpbContent if it needs to make it
     %% to/from the client
@@ -135,7 +135,7 @@ header_val_to_bool(_) ->
 decode_contents(RpbContents) ->
     [decode_content(RpbContent) || RpbContent <- RpbContents].
 
--spec decode_content_meta(atom(), any(), #'RpbContent'{}) -> [ {binary(), any()} ].
+-spec decode_content_meta(atom(), any(), #rpbcontent{}) -> [ {binary(), any()} ].
 decode_content_meta(_, undefined, _Pb) ->
     [];
 decode_content_meta(_, [], _Pb) ->
@@ -154,7 +154,7 @@ decode_content_meta(encoding, Encoding, _Pb) ->
 decode_content_meta(vtag, VTag, _Pb) ->
     [{?MD_VTAG, binary_to_list(VTag)}];
 decode_content_meta(last_mod, LastMod, Pb) ->
-    case Pb#'RpbContent'.last_mod_usecs of
+    case Pb#rpbcontent.last_mod_usecs of
         undefined ->
             Usec = 0;
         Usec ->
@@ -179,20 +179,20 @@ decode_content_meta(deleted, DeletedVal, _Pb) ->
 %% @doc Convert an rpccontent pb message to an erlang {MetaData,Value} tuple
 -spec decode_content(PBContent::tuple()) -> {metadata(), binary()}.
 decode_content(PbC) ->
-    MD =  decode_content_meta(content_type, PbC#'RpbContent'.content_type, PbC) ++
-          decode_content_meta(charset, PbC#'RpbContent'.charset, PbC) ++
-          decode_content_meta(encoding, PbC#'RpbContent'.content_encoding, PbC) ++
-          decode_content_meta(vtag, PbC#'RpbContent'.vtag, PbC) ++
-          decode_content_meta(links, PbC#'RpbContent'.links, PbC) ++
-          decode_content_meta(last_mod, PbC#'RpbContent'.last_mod, PbC) ++
-          decode_content_meta(usermeta, PbC#'RpbContent'.usermeta, PbC) ++
-          decode_content_meta(indexes, PbC#'RpbContent'.indexes, PbC) ++
-          decode_content_meta(deleted, PbC#'RpbContent'.deleted, PbC),
+    MD =  decode_content_meta(content_type, PbC#rpbcontent.content_type, PbC) ++
+          decode_content_meta(charset, PbC#rpbcontent.charset, PbC) ++
+          decode_content_meta(encoding, PbC#rpbcontent.content_encoding, PbC) ++
+          decode_content_meta(vtag, PbC#rpbcontent.vtag, PbC) ++
+          decode_content_meta(links, PbC#rpbcontent.links, PbC) ++
+          decode_content_meta(last_mod, PbC#rpbcontent.last_mod, PbC) ++
+          decode_content_meta(usermeta, PbC#rpbcontent.usermeta, PbC) ++
+          decode_content_meta(indexes, PbC#rpbcontent.indexes, PbC) ++
+          decode_content_meta(deleted, PbC#rpbcontent.deleted, PbC),
 
-    {dict:from_list(MD), PbC#'RpbContent'.value}.
+    {dict:from_list(MD), PbC#rpbcontent.value}.
 
 %% @doc Convert {K,V} index entries into protocol buffers
--spec encode_index_pair({binary(), integer() | binary()}) -> #'RpbPair'{}.
+-spec encode_index_pair({binary(), integer() | binary()}) -> #rpbpair{}.
 encode_index_pair({K,V}) when is_integer(V) ->
     encode_pair({K, integer_to_list(V)});
 encode_index_pair(E) ->
@@ -200,24 +200,24 @@ encode_index_pair(E) ->
 
 %% @doc Convert {K,V} tuple to protocol buffers
 %% @equiv riak_pb_codec:encode_pair/1
--spec encode_pair({Key::binary(), Value::any()}) -> #'RpbPair'{}.
+-spec encode_pair({Key::binary(), Value::any()}) -> #rpbpair{}.
 encode_pair(Pair) ->
     riak_pb_codec:encode_pair(Pair).
 
 %% @doc Convert RpbPair PB message to erlang {K,V} tuple
 %% @equiv riak_pb_codec:decode_pair/1
--spec decode_pair(#'RpbPair'{}) -> {binary(), binary()}.
+-spec decode_pair(#rpbpair{}) -> {binary(), binary()}.
 decode_pair(PB) ->
     riak_pb_codec:decode_pair(PB).
 
 %% @doc Convert erlang link tuple to RpbLink PB message
--spec encode_link({{binary(), binary()}, binary() | string()}) -> #'RpbLink'{}.
+-spec encode_link({{binary(), binary()}, binary() | string()}) -> #rpblink{}.
 encode_link({{B,K},T}) ->
-    #'RpbLink'{bucket = B, key = K, tag = T}.
+    #rpblink{bucket = B, key = K, tag = T}.
 
 %% @doc Convert RpbLink PB message to erlang link tuple
--spec decode_link(PBLink::#'RpbLink'{}) -> {{binary(), binary()}, binary()}.
-decode_link(#'RpbLink'{bucket = B, key = K, tag = T}) ->
+-spec decode_link(PBLink::#rpblink{}) -> {{binary(), binary()}, binary()}.
+decode_link(#rpblink{bucket = B, key = K, tag = T}) ->
     {{B,K},T}.
 
 %% @doc Encode a symbolic or numeric quorum value into a Protocol
@@ -243,19 +243,19 @@ decode_quorum(I) when is_integer(I), I >= 0 -> I.
 
 %% @doc Convert preflist to RpbBucketKeyPreflist.
 -spec encode_apl_ann(preflist_with_pnum_ann()) ->
-                            PBPreflist::[#'RpbBucketKeyPreflistItem'{}].
+                            PBPreflist::[#rpbbucketkeypreflistitem{}].
 encode_apl_ann(Preflist) ->
     [encode_apl_item({PartitionNumber, Node}, T) ||
         {{PartitionNumber, Node}, T} <- Preflist].
 
 -spec encode_apl_item({non_neg_integer(), node()}, primary|fallback) ->
-                            #'RpbBucketKeyPreflistItem'{}.
+                            #rpbbucketkeypreflistitem{}.
 encode_apl_item({PartitionNumber, Node}, primary) ->
-    #'RpbBucketKeyPreflistItem'{partition=PartitionNumber,
+    #rpbbucketkeypreflistitem{partition=PartitionNumber,
                               node=riak_pb_codec:to_binary(Node),
                               primary=riak_pb_codec:encode_bool(true)};
 encode_apl_item({PartitionNumber, Node}, fallback) ->
-    #'RpbBucketKeyPreflistItem'{partition=PartitionNumber,
+    #rpbbucketkeypreflistitem{partition=PartitionNumber,
                               node=riak_pb_codec:to_binary(Node),
                               primary=riak_pb_codec:encode_bool(false)}.
 
@@ -273,11 +273,11 @@ encode_apl_ann_test() ->
                                 'dev3@127.0.0.1'},
                                fallback}]),
     ?assertEqual(Encoded,
-                 [{'RpbBucketKeyPreflistItem',
+                 [{rpbbucketkeypreflistitem,
                    1,<<"dev5@127.0.0.1">>,true},
-                  {'RpbBucketKeyPreflistItem',
+                  {rpbbucketkeypreflistitem,
                    2,<<"dev6@127.0.0.1">>,true},
-                  {'RpbBucketKeyPreflistItem',
+                  {rpbbucketkeypreflistitem,
                    3,<<"dev3@127.0.0.1">>,false}]).
 
 -endif.

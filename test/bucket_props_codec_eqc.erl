@@ -22,7 +22,20 @@
 -include_lib("eqc/include/eqc.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--export([prop_codec/0]).
+-compile(export_all).
+
+-define(QC_OUT(P), eqc:on_output(fun(F,TL) ->
+                                         io:format(user, F, TL)
+                                 end, P)).
+
+%%====================================================================
+%% Eunit integration
+%%====================================================================
+bucket_codec_test_() ->
+    [{timeout, 10,
+      ?_test(begin
+                 eqc:quickcheck(?QC_OUT(eqc:testing_time(4, prop_codec())))
+             end)}].
 
 %%====================================================================
 %% Properties
@@ -34,12 +47,23 @@ prop_codec() ->
                       end,
                       begin
                           Props2 = riak_pb_codec:decode_bucket_props(
-                                     riak_pb:decode_msg(
-                                       iolist_to_binary(riak_pb:encode_msg(
-                                                          riak_pb_codec:encode_bucket_props(Props))),
-                                      'RpbBucketProps')),
+                                     riak_pb:decode_rpbbucketprops(
+                                       iolist_to_binary(riak_pb:encode_rpbbucketprops(
+                                                          riak_pb_codec:encode_bucket_props(Props))))),
                           Props =:= lists:sort(Props2)
                       end)).
+
+%%====================================================================
+%% Shell helpers
+%%====================================================================
+qc() ->
+    qc(2000).
+
+qc(NumTests) ->
+    quickcheck(numtests(NumTests, prop_codec())).
+
+check() ->
+    eqc:check(prop_codec(), eqc:current_counterexample()).
 
 %%====================================================================
 %% Generators
