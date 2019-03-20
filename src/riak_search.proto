@@ -22,8 +22,10 @@
 */
 
 /*
-** Revision: 1.4
+** Revision: 1.5
 */
+
+syntax = "proto3";
 
 import "riak.proto";
 
@@ -53,3 +55,33 @@ message RpbSearchQueryResp {
   optional float        max_score = 2; // Maximum score
   optional uint32       num_found = 3; // Number of results
 }
+
+message RpbSearch2QueryReq {
+  // query, in any solr syntax
+  oneof query {
+    string str =  1;
+    string json = 3;
+  }
+
+  required string index = 2;
+
+  // optional features, automatically turned on if any kv is present
+  map<string,string> stats = 4; // e. g. { fields: foo }
+  map<string,string> facet = 5;
+  map<string,string> group = 6;
+}
+
+message RpbSearch2QueryResp {
+  // "response"
+  repeated RpbSearchDoc docs = 1;
+  optional float   max_score = 2;                   // Maximum score
+  optional uint32  num_found = 3;                   // Number of results
+
+  // everything below is raw json, because the shape is not fixed
+  optional string stats          = 4;
+  optional string facets         = 5;
+  optional string facet_counts   = 6;
+  optional string grouped        = 7;
+  optional string more_like_this = 8;
+}
+
