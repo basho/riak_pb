@@ -55,8 +55,11 @@ message RpbSearchQueryReq {
   repeated bytes  fl     =  9;  // Return fields limit (for ids only, generally)
   optional bytes  presort = 10; // Presort (key / score)
 
+  // per-field parameters
+  map<string,string> per_field = 15;             // e. g. { ts.range.gap: 2 MINUTES }
+  
   // optional features, automatically turned on if any kv is present
-  map<string,string> stats = 12; // e. g. { fields: foo }
+  map<string,string> stats = 12;                 // e. g. { fields: foo }
   map<string,string> facet = 13;
   map<string,string> group = 14;
 
