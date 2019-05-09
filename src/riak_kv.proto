@@ -329,3 +329,21 @@ message RpbCoverageEntry {
     optional bytes keyspace_desc = 3; // Some human readable description of the keyspace covered
     required bytes cover_context = 4; // Opaque context to pass into 2I query.
 }
+
+// RT Enqueue Request - retrieve bucket/key and pop it on the RTQ
+// NOTE: this is just a GET request minus some meaningless (in this
+// context) options
+message RpbRTEReq {
+    required bytes bucket = 1;
+    required bytes key = 2;
+    optional uint32 r = 3;
+    optional uint32 pr = 4;
+    optional bool basic_quorum = 5;
+    optional bool notfound_ok = 6;
+    optional uint32 timeout = 10;
+    optional bool sloppy_quorum = 11;   // Experimental, may change/disappear
+    optional uint32 n_val = 12;         // Experimental, may change/disappear
+    optional bytes type = 13;           // Bucket type, if not set we assume the 'default' type
+}
+
+// RTE response - not defined, will return a RpbRTEResp on success or RpbErrorResp on failure
