@@ -70,6 +70,8 @@
 104,TsTtbMsg,riak_ts
 200,RpbRTEReq,riak_kv
 201,RpbRTEResp,riak_kv
+202,RpbFetchReq,riak_kv
+203,RpbFetchResp,riak_kv
 253,RpbAuthReq,riak
 254,RpbAuthResp,riak
 255,RpbStartTls,riak
