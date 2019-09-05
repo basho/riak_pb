@@ -360,6 +360,7 @@ message RpbFetchReq{
 message RpbFetchRsp{
     required bool queue_empty = 1;
     optional bool deleted = 2; // Present only if queue_empty is false, true if object a tombstone
-    optional bytes replencoded_object = 3; // Special repl encoding using for object 
-    optional bytes deleted_vclock = 4;
+    optional uint32 crc_check = 3; // CRC check of encoded object
+    optional bytes replencoded_object = 4; // Special repl encoding using for object 
+    optional bytes deleted_vclock = 5;
 }
