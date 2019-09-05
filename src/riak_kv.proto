@@ -357,7 +357,7 @@ message RpbFetchReq{
 // If it is a deleted tombstone, it will return both an encoded_object and
 // a deleted vclock.  If the response is an object, just an encoded_object
 // will be returned
-message RpbFetchRsp{
+message RpbFetchResp{
     required bool queue_empty = 1;
     optional bool deleted = 2; // Present only if queue_empty is false, true if object a tombstone
     optional uint32 crc_check = 3; // CRC check of encoded object
