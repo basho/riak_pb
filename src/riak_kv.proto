@@ -347,3 +347,19 @@ message RpbRTEReq {
 }
 
 // RTE response - not defined, will return a RpbRTEResp on success or RpbErrorResp on failure
+
+// Get preflist info request
+message RpbGetPreflistInfoReq {
+	required bytes bucket = 1;
+	required bytes key = 2;
+	optional bytes type = 3;
+}
+
+message RpbGetPrefListInfoResp {
+	repeated RpbPreflistItem preflist = 1;
+}
+
+message RpbPreflistItem {
+	required uint32 index = 1;
+	required bytes node = 2;
+}

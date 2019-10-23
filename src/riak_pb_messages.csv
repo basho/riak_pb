@@ -70,6 +70,8 @@
 104,TsTtbMsg,riak_ts
 200,RpbRTEReq,riak_kv
 201,RpbRTEResp,riak_kv
+210,RpbGetPreflistInfoReq,riak_kv
+211,RpbGetPreflistInfoResp,riak_kv
 253,RpbAuthReq,riak
 254,RpbAuthResp,riak
 255,RpbStartTls,riak
