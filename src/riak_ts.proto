@@ -97,7 +97,7 @@ enum TsColumnType {
 
 message TsColumnDescription {
   required bytes name = 1;
-  required TsColumnType type = 2;
+  optional TsColumnType type = 2;
 }
 
 message TsRow {
