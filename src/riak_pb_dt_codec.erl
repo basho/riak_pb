@@ -113,14 +113,8 @@ decode_map_field(#mapfield{name=Name,type=Type}, Mods) ->
 
 %% @doc Encodes a tuple of name and type into a MapField message.
 -spec encode_map_field(map_field()) -> #mapfield{}.
-encode_map_field(Field) ->
-    encode_map_field(Field, []).
-
-%% @doc Encodes a tuple of name and type into a MapField message,
-%% using the given type mappings.
--spec encode_map_field(map_field(), type_mappings()) -> #mapfield{}.
-encode_map_field({Name, Type}, Mods) ->
-    #mapfield{name=Name, type=encode_type(Type, Mods)}.
+encode_map_field({Name, Type}) ->
+    #mapfield{name=Name, type=encode_type(Type)}.
 
 %% @doc Decodes an MapEntry message into a tuple of field and value.
 -spec decode_map_entry(#mapentry{}) -> map_entry().
@@ -185,16 +179,6 @@ decode_type('REGISTER') -> register;
 decode_type('FLAG')     -> flag;
 decode_type('MAP')      -> map.
 
-%% @doc Encodes an atom type into the PB message equivalent, using the
-%% passed mappings to convert module names into shortnames.
--spec encode_type(atom(), type_mappings()) -> atom().
-encode_type(TypeOrMod, Mods) ->
-    case lists:keyfind(TypeOrMod, 2, Mods) of
-        {AtomType, TypeOrMod} ->
-            encode_type(AtomType);
-        false ->
-            encode_type(TypeOrMod)
-    end.
 
 %% @doc Encodes an atom type name into the PB message equivalent.
 -spec encode_type(all_type()) -> atom().
@@ -354,12 +338,12 @@ encode_set_update({remove_all, Members}, #setop{removes=R}=S) when is_list(Membe
 
 
 %% @doc Decodes a GSetOp message into a gset operation.
--spec decode_gset_op(#setop{}) -> gset_op().
+-spec decode_gset_op(#gsetop{}) -> gset_op().
 decode_gset_op(#gsetop{adds=A}) ->
     {add_all, A}.
 
 %% @doc Encodes a set operation into a SetOp message.
--spec encode_gset_op(gset_op()) -> #gsetop{}.
+-spec encode_gset_op(gset_op()|{update, [simple_gset_op()]}) -> #gsetop{}.
 encode_gset_op({update, Ops}) when is_list(Ops) ->
     lists:foldr(fun encode_gset_update/2, #gsetop{}, Ops);
 encode_gset_op({C, _}=Op) when add == C; add_all == C ->
