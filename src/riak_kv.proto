@@ -352,7 +352,8 @@ message RpbRTEReq {
 message RpbGetPreflistInfoReq {
 	required bytes bucket = 1;
 	required bytes key = 2;
-	optional bytes type = 3;
+	optional uint32 n_val = 3;
+	optional bool sloppy_quorum = 4;
 }
 
 message RpbGetPrefListInfoResp {
