@@ -349,6 +349,10 @@ message RpbRTEReq {
 // RTE response - not defined, will return a RpbRTEResp on success or RpbErrorResp on failure
 
 // Get ring request
+message RpbGetRingReq {
+
+}
+
 message RpbGetRingResp {
 	required bytes ring_name = 1;
 	required bytes vclock = 2;
