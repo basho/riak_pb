@@ -354,7 +354,7 @@ message RpbGetRingReq {
 }
 
 message RpbGetRingResp {
-	required bytes ring_name = 1;
+	required bytes node_name = 1;
 	required bytes vclock = 2;
 	required bytes chring = 3;
 	required bytes meta = 4;

@@ -47,7 +47,8 @@
          decode_link/1,         %% riakc_pb:erlify_rpblink
          encode_quorum/1,
          decode_quorum/1,       %% riak_kv_pb_socket:normalize_rw_value
-         encode_apl_ann/1
+         encode_apl_ann/1,
+         encode_ring/1
         ]).
 
 -export_type([quorum/0]).
@@ -258,6 +259,22 @@ encode_apl_item({PartitionNumber, Node}, fallback) ->
     #rpbbucketkeypreflistitem{partition=PartitionNumber,
                               node=riak_pb_codec:to_binary(Node),
                               primary=riak_pb_codec:encode_bool(false)}.
+
+encode_ring(Ring) ->
+    {_, NodeName, VClock, ChRing, Meta, ClusterName, Next, Members, Claimant, Seen, Rvsn} = Ring,
+    BinaryNodeName = erlang:term_to_binary(NodeName),
+    BinaryVClock = erlang:term_to_binary(VClock),
+    BinaryChRing = erlang:term_to_binary(ChRing),
+    BinaryMeta = erlang:term_to_binary(Meta),
+    BinaryClusterName = erlang:term_to_binary(ClusterName),
+    BinaryNext = erlang:term_to_binary(Next),
+    BinaryMembers = erlang:term_to_binary(Members),
+    BinaryClaimant = erlang:term_to_binary(Claimant),
+    BinarySeen = erlang:term_to_binary(Seen),
+    BinaryRvsn = erlang:term_to_binary(Rvsn),
+    #rpbgetringresp{node_name = BinaryNodeName, vclock = BinaryVClock, chring = BinaryChRing, meta = BinaryMeta,
+        cluster_name = BinaryClusterName, next = BinaryNext, members = BinaryMembers, claimant = BinaryClaimant,
+        seen = BinarySeen, rvsn = BinaryRvsn}.
 
 
 -ifdef(TEST).
