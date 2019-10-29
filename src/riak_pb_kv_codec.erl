@@ -47,8 +47,7 @@
          decode_link/1,         %% riakc_pb:erlify_rpblink
          encode_quorum/1,
          decode_quorum/1,       %% riak_kv_pb_socket:normalize_rw_value
-         encode_apl_ann/1,
-         encode_preflist/1
+         encode_apl_ann/1
         ]).
 
 -export_type([quorum/0]).
@@ -259,16 +258,6 @@ encode_apl_item({PartitionNumber, Node}, fallback) ->
     #rpbbucketkeypreflistitem{partition=PartitionNumber,
                               node=riak_pb_codec:to_binary(Node),
                               primary=riak_pb_codec:encode_bool(false)}.
-
--spec encode_preflist(Preflist :: {non_neg_integer(), atom()}) ->
-    list(#rpbpreflistitem{}).
-encode_preflist(Preflist) ->
-    [encode_preflist_item({Index, Node}) || {Index, Node} <- Preflist].
-
--spec encode_preflist_item({Index :: non_neg_integer(), Node :: atom()}) ->
-    #rpbpreflistitem{}.
-encode_preflist_item({Index, Node}) ->
-    #rpbpreflistitem{index = Index, node = riak_pb_codec:to_binary(Node)}.
 
 
 -ifdef(TEST).

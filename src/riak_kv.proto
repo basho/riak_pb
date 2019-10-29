@@ -348,19 +348,16 @@ message RpbRTEReq {
 
 // RTE response - not defined, will return a RpbRTEResp on success or RpbErrorResp on failure
 
-// Get preflist info request
-message RpbGetPreflistInfoReq {
-	required bytes bucket = 1;
-	required bytes key = 2;
-	optional uint32 n_val = 3;
-	optional bool sloppy_quorum = 4;
-}
-
-message RpbGetPrefListInfoResp {
-	repeated RpbPreflistItem preflist = 1;
-}
-
-message RpbPreflistItem {
-	required uint32 index = 1;
-	required bytes node = 2;
+// Get ring request
+message RpbGetRingResp {
+	required bytes ring_name = 1;
+	required bytes vclock = 2;
+	required bytes chring = 3;
+	required bytes meta = 4;
+	required bytes cluster_name = 5;
+	required bytes next = 6;
+	required bytes members = 7;
+	required bytes claimant = 8;
+	required bytes seen = 9;
+	required bytes rvsn = 10;
 }
