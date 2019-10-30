@@ -48,7 +48,8 @@
          encode_quorum/1,
          decode_quorum/1,       %% riak_kv_pb_socket:normalize_rw_value
          encode_apl_ann/1,
-         encode_ring/1
+         encode_ring/1,
+         decode_ring/1
         ]).
 
 -export_type([quorum/0]).
@@ -260,6 +261,7 @@ encode_apl_item({PartitionNumber, Node}, fallback) ->
                               node=riak_pb_codec:to_binary(Node),
                               primary=riak_pb_codec:encode_bool(false)}.
 
+%%TODO - Write specs for encode_ring/1 and decode_ring/1
 encode_ring(Ring) ->
     {_, NodeName, VClock, ChRing, Meta, ClusterName, Next, Members, Claimant, Seen, Rvsn} = Ring,
     BinaryNodeName = erlang:term_to_binary(NodeName),
@@ -275,6 +277,22 @@ encode_ring(Ring) ->
     #rpbgetringresp{node_name = BinaryNodeName, vclock = BinaryVClock, chring = BinaryChRing, meta = BinaryMeta,
         cluster_name = BinaryClusterName, next = BinaryNext, members = BinaryMembers, claimant = BinaryClaimant,
         seen = BinarySeen, rvsn = BinaryRvsn}.
+
+decode_ring(Ring) when erlang:is_record(Ring, rpbgetringresp) ->
+    #rpbgetringresp{node_name = BinNodeName, vclock = BinVClock, chring = BinChring, meta = BinMeta,
+        cluster_name = BinClusterName, next = BinNext, members = BinMembers, claimant = BinClaimant, seen = BinSeen,
+        rvsn = BinRvsn} = Ring,
+    NodeName = erlang:binary_to_term(BinNodeName),
+    VClock = erlang:binary_to_term(BinVClock),
+    Chring = erlang:binary_to_term(BinChring),
+    Meta = erlang:binary_to_term(BinMeta),
+    ClusterName = erlang:binary_to_term(BinClusterName),
+    Next = erlang:binary_to_term(BinNext),
+    Members = erlang:binary_to_term(BinMembers),
+    Claimant = erlang:binary_to_term(BinClaimant),
+    Seen = erlang:binary_to_term(BinSeen),
+    Rvsn = erlang:binary_to_term(BinRvsn),
+    {NodeName, VClock, Chring, Meta, ClusterName, Next, Members, Claimant, Seen, Rvsn}.
 
 
 -ifdef(TEST).
