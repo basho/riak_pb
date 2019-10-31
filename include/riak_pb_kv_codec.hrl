@@ -40,3 +40,20 @@
 -define(RIAKPB_RW_QUORUM, ?UINT_MAX-2).
 -define(RIAKPB_RW_ALL, ?UINT_MAX-3).
 -define(RIAKPB_RW_DEFAULT, ?UINT_MAX-4).
+
+-type riak_core_vclock() 		:: [{term(), {integer(), integer()}}].
+-type riak_core_chash() 		:: {pos_integer(), [{integer(), term()}]}.
+-type riak_core_member_status()	:: joining | valid | invalid | leaving | exiting | down.
+
+-record(riak_pb_ring, {
+	nodename 	:: term(),
+	vclock 		:: riak_core_vclock() | undefined,
+	chring 		:: riak_core_chash(),
+	meta 		:: dict:dict() | undefined,
+	clustername	:: {term(), term()} | undefined,
+	next 		:: [{integer(), term(), term(), [module()], awaiting | complete}],
+	members 	:: [{node(), {riak_core_member_status(), riak_core_vclock(), [{atom(), term()}]}}],
+	claimant 	:: term() | undefined,
+	seen 		:: [{term(), riak_core_vclock()}],
+	rvsn 		:: riak_core_vclock()
+}).
