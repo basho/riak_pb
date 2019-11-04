@@ -400,7 +400,7 @@ message membersobject {
 
 message membersinformationobject {
 	required bytes status = 1;
-	required vclocklist vclock = 2;
+	repeated vclockobject vclock = 2;
 	repeated membersoptionsobject members_options = 3;
 }
 
@@ -411,5 +411,5 @@ message membersoptionsobject {
 
 message seenobject {
 	required bytes node = 1;
-	required vclocklist vclock = 2;
+	repeated vclockobject vclock = 2;
 }
