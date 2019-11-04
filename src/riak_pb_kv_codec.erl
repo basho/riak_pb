@@ -282,19 +282,19 @@ encode_ring(Ring) when erlang:is_record(Ring, riak_pb_ring) ->
 
 -spec decode_ring(Ring :: #rpbgetringresp{}) ->
     #riak_pb_ring{}.
-decode_ring(Ring) when erlang:is_record(Ring, rpbgetringresp) ->
+decode_ring(EncodedRing) when erlang:is_record(EncodedRing, rpbgetringresp) ->
     #rpbgetringresp{node_name = EncodedNodeName, vclock = EncodedVClockList, chring = EncodedChRing, meta = EncodedMeta,
         cluster_name = EncodedClusterName, next = EncodedNextList, members = EncodedMembersList,
-        claimant = EncodedClaimant, seen = EncodedSeenList, rvsn = EncodedRvsnList} = Ring,
+        claimant = EncodedClaimant, seen = EncodedSeenList, rvsn = EncodedRvsnList} = EncodedRing,
     NodeName = erlang:binary_to_term(EncodedNodeName),
     VClock = decode_vclock_list(EncodedVClockList),
     ChRing = decode_chring_object(EncodedChRing),
     Meta = erlang:binary_to_term(EncodedMeta),
     ClusterName = decode_cluster_name_object(EncodedClusterName),
     Next = [decode_next_object(EncodedNextObject) || EncodedNextObject <- EncodedNextList],
-    Members = decode_members_list(EncodedMembersList),
+    Members = [decode_members_object(EncodedMembersObject) || EncodedMembersObject <- EncodedMembersList],
     Claimant = decode_claimant_object(EncodedClaimant),
-    Seen = decode_seen_list(EncodedSeenList),
+    Seen = [decode_seen_object(EncodedSeenObject) || EncodedSeenObject <- EncodedSeenList],
     Rvsn = decode_vclock_list(EncodedRvsnList),
     #riak_pb_ring{nodename = NodeName, vclock = VClock, chring = ChRing, meta = Meta, clustername = ClusterName,
         next = Next, members = Members, claimant = Claimant, seen = Seen, rvsn = Rvsn}.
@@ -310,26 +310,9 @@ encode_vclock_object({Node, TimeStamp}) ->
     EncodedTimeStamp = erlang:term_to_binary(TimeStamp),
     #vclockobject{vclock_node = EncodedNode, timestamp = EncodedTimeStamp}.
 
-decode_vclock_list(undefined) ->
-    undefined;
-decode_vclock_list(VClockList) when erlang:is_record(VClockList, vclocklist) ->
-    #vclocklist{vclock = VClockList} = VClockList,
-    [decode_vclock_object(VClockObject) || VClockObject <- VClockList].
-
-decode_vclock_object(VClockObject) when erlang:is_record(VClockObject, vclockobject) ->
-    #vclockobject{vclock_node = EncodedVClockNode, timestamp = EncodedTimeStamp} = VClockObject,
-    VClockNode = erlang:binary_to_term(EncodedVClockNode),
-    Timestamp = erlang:binary_to_term(EncodedTimeStamp),
-    {VClockNode, Timestamp}.
-
 encode_chring_object({NumPartitions, NodeEntries}) ->
     EncodedNodeEntries = erlang:term_to_binary(NodeEntries),
     #chringobject{num_partitions = NumPartitions, node_entries = EncodedNodeEntries}.
-
-decode_chring_object(ChRingObject) when erlang:is_record(ChRingObject, chringobject) ->
-    #chringobject{num_partitions = NumPartitions, node_entries = EncodedNodeEntries} = ChRingObject,
-    NodeEntries = erlang:binary_to_term(EncodedNodeEntries),
-    {NumPartitions, NodeEntries}.
 
 encode_cluster_name_object(undefined) ->
     undefined;
@@ -338,14 +321,6 @@ encode_cluster_name_object({Node, TimeStamp}) ->
     EncodedTimeStamp = erlang:term_to_binary(TimeStamp),
     #clusternameobject{node = EncodedNode, timestamp = EncodedTimeStamp}.
 
-decode_cluster_name_object(undefined) ->
-    undefined;
-decode_cluster_name_object(ClusterNameObject) when erlang:is_record(ClusterNameObject, clusternameobject) ->
-    #clusternameobject{node = EncodedNode, timestamp = EncodedTimeStamp} = ClusterNameObject,
-    Node = erlang:binary_to_term(EncodedNode),
-    TimeStamp = erlang:binary_to_term(EncodedTimeStamp),
-    {Node, TimeStamp}.
-
 encode_next_object({Index, Owner, NextOwner, Transfers, Status}) ->
     EncodedOwner = erlang:term_to_binary(Owner),
     EncodedNextOwner = erlang:term_to_binary(NextOwner),
@@ -353,15 +328,6 @@ encode_next_object({Index, Owner, NextOwner, Transfers, Status}) ->
     EncodedStatus = erlang:term_to_binary(Status),
     #nextobject{index = Index, owner = EncodedOwner, next_owner = EncodedNextOwner, transfers = EncodedTransfers,
         status = EncodedStatus}.
-
-decode_next_object(NextObject) when erlang:is_record(NextObject, nextobject) ->
-    #nextobject{index = Index, owner = EncodedOwner, next_owner = EncodedNextOwner, transfers = EncodedTransfers,
-        status = EncodedStatus} = NextObject,
-    Owner = erlang:binary_to_term(EncodedOwner),
-    NextOwner = erlang:binary_to_term(EncodedNextOwner),
-    Transfers = erlang:binary_to_term(EncodedTransfers),
-    Status = erlang:binary_to_term(EncodedStatus),
-    {Index, Owner, NextOwner, Transfers, Status}.
 
 encode_members_object({Node, MembersInformation}) ->
     EncodedNode = erlang:term_to_binary(Node),
@@ -389,6 +355,70 @@ encode_seen_object({Node, VClock}) ->
     EncodedVClock = encode_vclock_list(VClock),
     #seenobject{node = EncodedNode, vclock = EncodedVClock}.
 
+decode_vclock_list(undefined) ->
+    undefined;
+decode_vclock_list(EncodedVClockList) when erlang:is_record(EncodedVClockList, vclocklist) ->
+    #vclocklist{vclock = EncodedVClock} = EncodedVClockList,
+    [decode_vclock_object(EncodedVClockObject) || EncodedVClockObject <- EncodedVClock].
+
+decode_vclock_object(EncodedVClockObject) when erlang:is_record(EncodedVClockObject, vclockobject) ->
+    #vclockobject{vclock_node = EncodedVClockNode, timestamp = EncodedTimeStamp} = EncodedVClockObject,
+    VClockNode = erlang:binary_to_term(EncodedVClockNode),
+    Timestamp = erlang:binary_to_term(EncodedTimeStamp),
+    {VClockNode, Timestamp}.
+
+decode_chring_object(EncodedChRingObject) when erlang:is_record(EncodedChRingObject, chringobject) ->
+    #chringobject{num_partitions = NumPartitions, node_entries = EncodedNodeEntries} = EncodedChRingObject,
+    NodeEntries = erlang:binary_to_term(EncodedNodeEntries),
+    {NumPartitions, NodeEntries}.
+
+decode_cluster_name_object(undefined) ->
+    undefined;
+decode_cluster_name_object(EncodedClusterNameObject) when erlang:is_record(EncodedClusterNameObject, clusternameobject) ->
+    #clusternameobject{node = EncodedNode, timestamp = EncodedTimeStamp} = EncodedClusterNameObject,
+    Node = erlang:binary_to_term(EncodedNode),
+    TimeStamp = erlang:binary_to_term(EncodedTimeStamp),
+    {Node, TimeStamp}.
+
+decode_next_object(EncodedNextObject) when erlang:is_record(EncodedNextObject, nextobject) ->
+    #nextobject{index = Index, owner = EncodedOwner, next_owner = EncodedNextOwner, transfers = EncodedTransfers,
+        status = EncodedStatus} = EncodedNextObject,
+    Owner = erlang:binary_to_term(EncodedOwner),
+    NextOwner = erlang:binary_to_term(EncodedNextOwner),
+    Transfers = erlang:binary_to_term(EncodedTransfers),
+    Status = erlang:binary_to_term(EncodedStatus),
+    {Index, Owner, NextOwner, Transfers, Status}.
+
+decode_members_object(EncodedMembersObject) when erlang:is_record(EncodedMembersObject, membersobject) ->
+    #membersobject{node = EncodedNode, members_information = EncodedMembersInformation} = EncodedMembersObject,
+    Node = erlang:binary_to_term(EncodedNode),
+    MembersInformation = decode_members_information(EncodedMembersInformation),
+    {Node, MembersInformation}.
+
+decode_members_information(EncodedMembersInformation) when erlang:is_record(EncodedMembersInformation, membersinformationobject) ->
+    #membersinformationobject{status = EncodedStatus, vclock = EncodedVClock, members_options = EncodedMembersOptions}
+        = EncodedMembersInformation,
+    Status = erlang:binary_to_term(EncodedStatus),
+    VClock = decode_vclock_list(EncodedVClock),
+    MembersOptions = [decode_members_options(MembersOptionsObject) || MembersOptionsObject <- EncodedMembersOptions],
+    {Status, VClock, MembersOptions}.
+
+decode_members_options(EncodedMembersOptionsObject) when erlang:is_record(EncodedMembersOptionsObject, membersoptionsobject) ->
+    #membersoptionsobject{option_key = EncodedKey, option_value = EncodedValue} = EncodedMembersOptionsObject,
+    Key = erlang:binary_to_term(EncodedKey),
+    Value = erlang:binary_to_term(EncodedValue),
+    {Key, Value}.
+
+decode_claimant_object(undefined) ->
+    undefined;
+decode_claimant_object(EncodedClaimant) ->
+    erlang:binary_to_term(EncodedClaimant).
+
+decode_seen_object(EncodedSeenObject) when erlang:is_record(EncodedSeenObject, seenobject) ->
+    #seenobject{node = EncodedNode, vclock = EncodedVClock} = EncodedSeenObject,
+    Node = erlang:binary_to_term(EncodedNode),
+    VClock = decode_vclock_list(EncodedVClock),
+    {Node, VClock}.
 
 -ifdef(TEST).
 
