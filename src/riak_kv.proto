@@ -413,3 +413,12 @@ message seenobject {
 	required bytes node = 1;
 	repeated vclockobject vclock = 2;
 }
+
+// Get default bucket props request
+message RpbGetDefaultBucketPropsReq {
+
+}
+
+message RpbGetDefaultBucketPropsResp {
+	repeated bytes bucket_prop = 1;
+}

@@ -49,7 +49,9 @@
          decode_quorum/1,       %% riak_kv_pb_socket:normalize_rw_value
          encode_apl_ann/1,
          encode_ring/1,
-         decode_ring/1
+         decode_ring/1,
+         encode_default_bucket_props/1,
+         decode_default_bucket_props/1
         ]).
 
 -export_type([quorum/0]).
@@ -421,6 +423,11 @@ decode_seen_object(EncodedSeenObject) when erlang:is_record(EncodedSeenObject, s
     Vclock = [decode_vclock_object(EncodedVclockObject) || EncodedVclockObject <- EncodedVclockList],
     {Node, Vclock}.
 
+encode_default_bucket_props(BucketPropsList) ->
+    [erlang:term_to_binary(BucketProp) || BucketProp <- BucketPropsList].
+
+decode_default_bucket_props(EncodedBucketPropsList) ->
+    [erlang:binary_to_term(EncodedBucketProp) || EncodedBucketProp <- EncodedBucketPropsList].
 
 -ifdef(TEST).
 
