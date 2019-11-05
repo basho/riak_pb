@@ -420,5 +420,5 @@ message RpbGetDefaultBucketPropsReq {
 }
 
 message RpbGetDefaultBucketPropsResp {
-	repeated bytes bucket_prop = 1;
+	repeated bytes bucket_props_list = 1;
 }
