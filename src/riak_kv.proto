@@ -347,3 +347,116 @@ message RpbRTEReq {
 }
 
 // RTE response - not defined, will return a RpbRTEResp on success or RpbErrorResp on failure
+
+// AAE Fold requests
+message RpbAaeFoldMergeRootNValReq{
+    required uint32 n_val = 1;
+}
+
+message RpbAaeFoldMergeBranchNValReq{
+    required uint32 n_val = 1;
+    repeated uint32 id_filter = 2;
+}
+
+message RpbAaeFoldFetchClocksNValReq{
+    required uint32 n_val = 1;
+    repeated uint32 id_filter = 2;
+
+}
+
+message RpbAaeFoldMergeTreesRangeReq{
+    optional bytes type = 1;
+    required bytes bucket = 2;
+    required bool key_range = 10;
+    optional bytes start_key = 11;
+    optional bytes end_key = 12;
+    required RpbTreeSize tree_size = 20;
+    required bool segment_filter = 30;
+    repeated uint32 id_filter = 31;
+    optional RpbTreeSize filter_tree_size = 32;
+    required bool modified_range = 40;
+    optional uint32 last_mod_start = 41;
+    optional uint32 last_mod_end = 42;
+    required bool use_prehash = 50;
+    optional uint32 init_vector = 51;
+}
+
+message RpbAaeFoldFetchClocksRangeReq{
+    optional bytes type = 1;
+    required bytes bucket = 2;
+    required bool key_range = 10;
+    optional bytes start_key = 11;
+    optional bytes end_key = 12;
+    required bool segment_filter = 30;
+    repeated uint32 id_filter = 31;
+    optional RpbTreeSize filter_tree_size = 32;
+    required bool modified_range = 40;
+    optional uint32 last_mod_start = 41;
+    optional uint32 last_mod_end = 42;
+}
+
+message RpbAaeFoldFindKeysReq{
+    enum FindType {
+        sibling_count = 0;
+        object_size = 1;
+    }
+
+    optional bytes type = 1;
+    required bytes bucket = 2;
+    required bool key_range = 10;
+    optional bytes start_key = 11;
+    optional bytes end_key = 12;
+    required bool modified_range = 40;
+    optional uint32 last_mod_start = 41;
+    optional uint32 last_mod_end = 42;
+    required FindType finder = 50;
+    required uint32 find_limit = 51;
+}
+
+message RpbAaeFoldObjectStatsReq{
+    optional bytes type = 1;
+    required bytes bucket = 2;
+    required bool key_range = 10;
+    optional bytes start_key = 11;
+    optional bytes end_key = 12;
+    required bool modified_range = 40;
+    optional uint32 last_mod_start = 41;
+    optional uint32 last_mod_end = 42;
+}
+
+message RpbTreeSize{
+    xxsmall = 0;
+    xsmall = 1;
+    small = 2;
+    medium = 3;
+    large = 4;
+    xlarge = 5;
+}
+
+message RpbKeysClocks {
+    optional bytes type = 1;
+    required bytes bucket = 2;
+    required bytes key = 3;
+    required bytes value = 4;
+}
+
+
+message RpbKeyCount{
+    required bytes tag = 1;
+    optional uint32 order = 2;
+    required uint32 count = 3;
+}
+
+message RpbAaeFoldTreeResp{
+    required RpbTreeSize size = 1;
+    optional bytes level_one = 2;
+    repeated RpbPair level_two = 3;
+}
+
+message RpbAaeFoldKeyClockResp{
+    repeated RpbKeysClocks keys_clocks = 1;
+}
+
+message RpbAaeFoldKeyCountResp{
+    repeated RpbKeyCount key_count = 1;
+}

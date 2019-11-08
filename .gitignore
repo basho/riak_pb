@@ -15,6 +15,7 @@ src/riak_pb_messages.erl
 dialyzer_unhandled_warnings
 dialyzer_warnings
 .rebar/*
+.DS_Store
 
 # Java
 target/*
