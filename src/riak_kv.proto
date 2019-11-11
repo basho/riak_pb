@@ -422,3 +422,12 @@ message RpbGetDefaultBucketPropsReq {
 message RpbGetDefaultBucketPropsResp {
 	repeated bytes bucket_props_list = 1;
 }
+
+// Get chash bin request
+message RpbGetChashBinReq {
+
+}
+
+message RpbGetChashBinResp {
+    required bytes chash_bin = 1;
+}
