@@ -433,15 +433,14 @@ message RpbTreeSize{
     xlarge = 5;
 }
 
-message RpbKeysClocks {
+message RpbKeysClock {
     optional bytes type = 1;
     required bytes bucket = 2;
     required bytes key = 3;
     required bytes value = 4;
 }
 
-
-message RpbKeyCount{
+message RpbKeysCount{
     required bytes tag = 1;
     optional uint32 order = 2;
     required uint32 count = 3;
@@ -454,9 +453,9 @@ message RpbAaeFoldTreeResp{
 }
 
 message RpbAaeFoldKeyClockResp{
-    repeated RpbKeysClocks keys_clocks = 1;
+    repeated RpbKeysClock keys_clock = 1;
 }
 
 message RpbAaeFoldKeyCountResp{
-    repeated RpbKeyCount key_count = 1;
+    repeated RpbKeysCount keys_count = 1;
 }
