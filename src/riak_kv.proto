@@ -365,6 +365,15 @@ message RpbAaeFoldFetchClocksNValReq{
 }
 
 message RpbAaeFoldMergeTreesRangeReq{
+    enum RpbTreeSize{
+        xxsmall = 0;
+        xsmall = 1;
+        small = 2;
+        medium = 3;
+        large = 4;
+        xlarge = 5;
+    }
+    
     optional bytes type = 1;
     required bytes bucket = 2;
     required bool key_range = 10;
@@ -382,6 +391,15 @@ message RpbAaeFoldMergeTreesRangeReq{
 }
 
 message RpbAaeFoldFetchClocksRangeReq{
+    enum RpbTreeSize{
+        xxsmall = 0;
+        xsmall = 1;
+        small = 2;
+        medium = 3;
+        large = 4;
+        xlarge = 5;
+    }
+
     optional bytes type = 1;
     required bytes bucket = 2;
     required bool key_range = 10;
@@ -424,15 +442,6 @@ message RpbAaeFoldObjectStatsReq{
     optional uint32 last_mod_end = 42;
 }
 
-message RpbTreeSize{
-    xxsmall = 0;
-    xsmall = 1;
-    small = 2;
-    medium = 3;
-    large = 4;
-    xlarge = 5;
-}
-
 message RpbKeysValue {
     optional bytes type = 1;
     required bytes bucket = 2;
@@ -447,17 +456,26 @@ message RpbKeysCount{
 }
 
 message RpbAaeFoldTreeResp{
+    enum RpbTreeSize{
+        xxsmall = 0;
+        xsmall = 1;
+        small = 2;
+        medium = 3;
+        large = 4;
+        xlarge = 5;
+    }
+
     required RpbTreeSize size = 1;
     optional bytes level_one = 2;
     repeated RpbPair level_two = 3;
 }
 
 message RpbAaeFoldKeyValueResp{
-    required bytes type = 1;
+    required bytes response_type = 1;
     repeated RpbKeysValue keys_value = 2;
 }
 
 message RpbAaeFoldKeyCountResp{
-    required bytes type = 1;
+    required bytes response_type = 1;
     repeated RpbKeysCount keys_count = 2;
 }
