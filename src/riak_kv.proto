@@ -467,7 +467,7 @@ message RpbAaeFoldTreeResp{
 
     required RpbTreeSize size = 1;
     optional bytes level_one = 2;
-    repeated RpbPair level_two = 3;
+    repeated bytes level_two = 3;
 }
 
 message RpbAaeFoldKeyValueResp{
