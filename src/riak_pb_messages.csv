@@ -72,6 +72,16 @@
 201,RpbRTEResp,riak_kv
 202,RpbFetchReq,riak_kv
 203,RpbFetchResp,riak_kv
+210,RpbAaeFoldMergeRootNValReq,riak_kv
+211,RpbAaeFoldMergeBranchNValReq,riak_kv
+212,RpbAaeFoldFetchClocksNValReq,riak_kv
+213,RpbAaeFoldMergeTreesRangeReq,riak_kv
+214,RpbAaeFoldFetchClocksRangeReq,riak_kv
+215,RpbAaeFoldFindKeysReq,riak_kv
+216,RpbAaeFoldObjectStatsReq,riak_kv
+220,RpbAaeFoldTreeResp,riak_kv
+221,RpbAaeFoldKeyValueResp,riak_kv
+222,RpbAaeFoldKeyCountResp,riak_kv
 253,RpbAuthReq,riak
 254,RpbAuthResp,riak
 255,RpbStartTls,riak
