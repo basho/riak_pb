@@ -48,7 +48,6 @@ message RpbPair {
     optional bytes value = 2;
 }
 
-
 // Get bucket properties request
 message RpbGetBucketReq {
     required bytes bucket = 1;
