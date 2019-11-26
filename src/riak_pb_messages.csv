@@ -79,6 +79,7 @@
 214,RpbAaeFoldFetchClocksRangeReq,riak_kv
 215,RpbAaeFoldFindKeysReq,riak_kv
 216,RpbAaeFoldObjectStatsReq,riak_kv
+217,RpbAaeFoldReplKeysReq,riak_kv
 220,RpbAaeFoldTreeResp,riak_kv
 221,RpbAaeFoldKeyValueResp,riak_kv
 222,RpbAaeFoldKeyCountResp,riak_kv

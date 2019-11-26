@@ -429,6 +429,18 @@ message RpbAaeFoldFetchClocksRangeReq{
     optional uint32 last_mod_end = 42;
 }
 
+message RpbAaeFoldReplKeysReq{
+    optional bytes type = 1;
+    required bytes bucket = 2;
+    required bool key_range = 10;
+    optional bytes start_key = 11;
+    optional bytes end_key = 12;
+    required bool modified_range = 40;
+    optional uint32 last_mod_start = 41;
+    optional uint32 last_mod_end = 42;
+    required bytes queuename = 50;
+}
+
 message RpbAaeFoldFindKeysReq{
     enum FindType {
         sibling_count = 0;
