@@ -74,8 +74,6 @@
 211,RpbGetRingResp,riak_kv
 212,RpbGetDefaultBucketPropsReq,riak_kv
 213,RpbGetDefaultBucketPropsResp,riak_kv
-214,RpbGetChashBinReq,riak_kv
-215,RpbGetChashBinResp,riak_kv
 253,RpbAuthReq,riak
 254,RpbAuthResp,riak
 255,RpbStartTls,riak
