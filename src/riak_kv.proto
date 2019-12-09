@@ -459,6 +459,89 @@ message RpbAaeFoldFindKeysReq{
     required uint32 find_limit = 51;
 }
 
+message RpbAaeFoldFindTombsReq{
+    enum RpbTreeSize{
+        xxsmall = 0;
+        xsmall = 1;
+        small = 2;
+        medium = 3;
+        large = 4;
+        xlarge = 5;
+    }
+
+    optional bytes type = 1;
+    required bytes bucket = 2;
+    required bool key_range = 10;
+    optional bytes start_key = 11;
+    optional bytes end_key = 12;
+    required bool segment_filter = 30;
+    repeated uint32 id_filter = 31;
+    optional RpbTreeSize filter_tree_size = 32;
+    required bool modified_range = 40;
+    optional uint32 last_mod_start = 41;
+    optional uint32 last_mod_end = 42;
+}
+
+message RpbAaeFoldReapTombsReq{
+    enum RpbTreeSize{
+        xxsmall = 0;
+        xsmall = 1;
+        small = 2;
+        medium = 3;
+        large = 4;
+        xlarge = 5;
+    }
+    enum ChangeMethod {
+        job = 0;
+        local = 1;
+        count = 2;
+    }
+
+    optional bytes type = 1;
+    required bytes bucket = 2;
+    required bool key_range = 10;
+    optional bytes start_key = 11;
+    optional bytes end_key = 12;
+    required bool segment_filter = 30;
+    repeated uint32 id_filter = 31;
+    optional RpbTreeSize filter_tree_size = 32;
+    required bool modified_range = 40;
+    optional uint32 last_mod_start = 41;
+    optional uint32 last_mod_end = 42;
+    required ChangeMethod change_method = 50;
+    optional uint32 job_id = 51;
+}
+
+message RpbAaeFoldEraseKeysReq{
+    enum RpbTreeSize{
+        xxsmall = 0;
+        xsmall = 1;
+        small = 2;
+        medium = 3;
+        large = 4;
+        xlarge = 5;
+    }
+    enum ChangeMethod {
+        job = 0;
+        local = 1;
+        count = 2;
+    }
+
+    optional bytes type = 1;
+    required bytes bucket = 2;
+    required bool key_range = 10;
+    optional bytes start_key = 11;
+    optional bytes end_key = 12;
+    required bool segment_filter = 30;
+    repeated uint32 id_filter = 31;
+    optional RpbTreeSize filter_tree_size = 32;
+    required bool modified_range = 40;
+    optional uint32 last_mod_start = 41;
+    optional uint32 last_mod_end = 42;
+    required ChangeMethod change_method = 50;
+    optional uint32 job_id = 51;
+}
+
 message RpbAaeFoldObjectStatsReq{
     optional bytes type = 1;
     required bytes bucket = 2;
