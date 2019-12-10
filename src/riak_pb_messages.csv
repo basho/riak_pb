@@ -84,8 +84,8 @@
 220,RpbAaeFoldTreeResp,riak_kv
 221,RpbAaeFoldKeyValueResp,riak_kv
 222,RpbAaeFoldKeyCountResp,riak_kv
-223,RpbAaeFoldListBucketReq,riak_kv
-224,RpbAaeFoldListBucketResp,riak_kv
+223,RpbAaeFoldListBucketsReq,riak_kv
+224,RpbAaeFoldListBucketsResp,riak_kv
 230,RpbAaeFoldReapTombsReq,riak_kv
 231,RpbAaeFoldEraseKeysReq,riak_kv
 253,RpbAuthReq,riak
