@@ -553,6 +553,19 @@ message RpbAaeFoldObjectStatsReq{
     optional uint32 last_mod_end = 42;
 }
 
+message RpbAaeFoldListBucketsReq{
+    optional uint32 n_val = 1;
+}
+
+message RpbAaeFoldListBucketsResp{
+    repeated RpbAaeFoldBucket bucket_list = 1;
+}
+
+message RpbAaeFoldBucket{
+    optional bytes type = 1;
+    required bytes bucket = 2;
+}
+
 message RpbKeysValue {
     optional bytes type = 1;
     required bytes bucket = 2;
