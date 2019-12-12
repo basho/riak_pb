@@ -51,7 +51,9 @@
          encode_ring/1,
          decode_ring/1,
          encode_bucket_props/1,
-         decode_bucket_props/1
+         decode_bucket_props/1,
+         encode_node_watcher_update/1,
+         decode_node_watcher_update/1
         ]).
 
 -export_type([quorum/0]).
@@ -434,6 +436,18 @@ encode_bucket_props(BucketPropsList) when erlang:is_list(BucketPropsList) ->
 decode_bucket_props(EncodedBucketPropsListResp) when erlang:is_record(EncodedBucketPropsListResp, rpbgetdefaultbucketpropsresp) ->
     #rpbgetdefaultbucketpropsresp{bucket_props_list = EncodedBucketPropsList} = EncodedBucketPropsListResp,
     [erlang:binary_to_term(EncodedBucketProp) || EncodedBucketProp <- EncodedBucketPropsList].
+
+-spec encode_node_watcher_update(NodeWatcherUpdate :: list(atom())) ->
+    #rpbnodewatcherupdate{}.
+encode_node_watcher_update(NodeWatcherUpdate) when erlang:is_list(NodeWatcherUpdate) ->
+    EncodedNodes = [erlang:term_to_binary(Node) || Node <- NodeWatcherUpdate],
+    #rpbnodewatcherupdate{nodes = EncodedNodes}.
+
+-spec decode_node_watcher_update(NodeWatcherUpdate :: #rpbnodewatcherupdate{}) ->
+    list(atom()).
+decode_node_watcher_update(NodeWatcherUpdate) when erlang:is_record(NodeWatcherUpdate, rpbnodewatcherupdate) ->
+    #rpbnodewatcherupdate{nodes = EncodedNodes} = NodeWatcherUpdate,
+    [erlang:binary_to_term(EncodedNode) || EncodedNode <- EncodedNodes].
 
 -ifdef(TEST).
 

@@ -422,3 +422,7 @@ message RpbGetDefaultBucketPropsReq {
 message RpbGetDefaultBucketPropsResp {
 	repeated bytes bucket_props_list = 1;
 }
+
+message RpbNodeWatcherUpdate {
+	repeated bytes nodes = 1;
+}
