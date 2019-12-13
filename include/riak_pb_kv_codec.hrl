@@ -41,11 +41,6 @@
 -define(RIAKPB_RW_ALL, ?UINT_MAX-3).
 -define(RIAKPB_RW_DEFAULT, ?UINT_MAX-4).
 
--type riak_core_vclock() 		:: [{term(), {integer(), integer()}}].
--type riak_core_chash() 		:: {pos_integer(), [{integer(), term()}]}.
--type riak_core_member_status()	:: joining | valid | invalid | leaving | exiting | down.
--type riak_pb_ring()			:: #riak_pb_ring{}.
-
 -record(riak_pb_ring, {
 	nodename 	:: term(),
 	vclock 		:: riak_core_vclock() | undefined,
@@ -58,3 +53,8 @@
 	seen 		:: [{term(), riak_core_vclock()}],
 	rvsn 		:: riak_core_vclock()
 }).
+
+-type riak_core_vclock() 		:: [{term(), {integer(), integer()}}].
+-type riak_core_chash() 		:: {pos_integer(), [{integer(), term()}]}.
+-type riak_core_member_status()	:: joining | valid | invalid | leaving | exiting | down.
+-type riak_pb_ring()			:: #riak_pb_ring{}.
