@@ -52,6 +52,8 @@
          decode_ring/1,
          encode_bucket_props/1,
          decode_bucket_props/1,
+         encode_nodes/1,
+         decode_nodes/1,
          encode_node_watcher_update/1,
          decode_node_watcher_update/1
         ]).
@@ -437,17 +439,32 @@ decode_bucket_props(EncodedBucketPropsListResp) when erlang:is_record(EncodedBuc
     #rpbgetdefaultbucketpropsresp{bucket_props_list = EncodedBucketPropsList} = EncodedBucketPropsListResp,
     [erlang:binary_to_term(EncodedBucketProp) || EncodedBucketProp <- EncodedBucketPropsList].
 
--spec encode_node_watcher_update(NodeWatcherUpdate :: list(atom())) ->
+-spec encode_nodes(NodesList :: list(atom())) ->
+    #rpbgetnodesresp{}.
+encode_nodes(NodesList) when erlang:is_list(NodesList) ->
+    EncodedNodes = [erlang:term_to_binary(Node) || Node <- NodesList],
+    #rpbgetnodesresp{nodes = EncodedNodes}.
+
+-spec decode_nodes(GetNodesResp :: #rpbgetnodesresp{}) ->
+    list(atom()).
+decode_nodes(GetNodesResp) ->
+    #rpbgetnodesresp{nodes = EncodedNodes} = GetNodesResp,
+    [erlang:binary_to_term(EncodedNode) || EncodedNode <- EncodedNodes].
+
+-spec encode_node_watcher_update({Timestamp :: integer(), Nodes :: list(atom())}) ->
     #rpbnodewatcherupdate{}.
-encode_node_watcher_update(NodeWatcherUpdate) when erlang:is_list(NodeWatcherUpdate) ->
-    EncodedNodes = [erlang:term_to_binary(Node) || Node <- NodeWatcherUpdate],
-    #rpbnodewatcherupdate{nodes = EncodedNodes}.
+encode_node_watcher_update({Timestamp, Nodes}) when erlang:is_integer(Timestamp) andalso erlang:is_list(Nodes) ->
+    EncodedTimestamp = erlang:term_to_binary(Timestamp),
+    EncodedNodes = [erlang:term_to_binary(Node) || Node <- Nodes],
+    #rpbnodewatcherupdate{timestamp = EncodedTimestamp, nodes = EncodedNodes}.
 
 -spec decode_node_watcher_update(NodeWatcherUpdate :: #rpbnodewatcherupdate{}) ->
-    list(atom()).
+    {integer(), list(atom())}.
 decode_node_watcher_update(NodeWatcherUpdate) when erlang:is_record(NodeWatcherUpdate, rpbnodewatcherupdate) ->
-    #rpbnodewatcherupdate{nodes = EncodedNodes} = NodeWatcherUpdate,
-    [erlang:binary_to_term(EncodedNode) || EncodedNode <- EncodedNodes].
+    #rpbnodewatcherupdate{timestamp = EncodedTimestamp, nodes = EncodedNodes} = NodeWatcherUpdate,
+    Timestamp = erlang:binary_to_term(EncodedTimestamp),
+    Nodes = [erlang:binary_to_term(EncodedNode) || EncodedNode <- EncodedNodes],
+    {Timestamp, Nodes}.
 
 -ifdef(TEST).
 
