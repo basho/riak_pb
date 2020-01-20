@@ -55,7 +55,9 @@
          encode_nodes/1,
          decode_nodes/1,
          encode_node_watcher_update/1,
-         decode_node_watcher_update/1
+         decode_node_watcher_update/1,
+         encode_node_watcher_subscribe/1,
+         decode_node_watcher_subscribe/1
         ]).
 
 -export_type([quorum/0]).
@@ -465,6 +467,18 @@ decode_node_watcher_update(NodeWatcherUpdate) when erlang:is_record(NodeWatcherU
     Timestamp = erlang:binary_to_term(EncodedTimestamp),
     Nodes = [erlang:binary_to_term(EncodedNode) || EncodedNode <- EncodedNodes],
     {Timestamp, Nodes}.
+
+-spec encode_node_watcher_subscribe(Connection :: pid()) ->
+    #rpbnodewatchersubscribe{}.
+encode_node_watcher_subscribe(Connection) when erlang:is_pid(Connection) ->
+    EncodedConnection = erlang:term_to_binary(Connection),
+    #rpbnodewatchersubscribe{connection = EncodedConnection}.
+
+-spec decode_node_watcher_subscribe(NodeWatcherSubscribe :: #rpbnodewatchersubscribe{}) ->
+    pid().
+decode_node_watcher_subscribe(NodeWatcherSubscribe) when erlang:is_record(NodeWatcherSubscribe, rpbnodewatchersubscribe) ->
+    #rpbnodewatchersubscribe{connection = EncodedConnection} = NodeWatcherSubscribe,
+    erlang:binary_to_term(EncodedConnection).
 
 -ifdef(TEST).
 

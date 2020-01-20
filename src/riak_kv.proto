@@ -435,3 +435,7 @@ message RpbNodeWatcherUpdate {
 	required bytes timestamp = 1;
 	repeated bytes nodes = 2;
 }
+
+message RpbNodeWatcherSubscribe {
+	required bytes connection = 1;
+}
