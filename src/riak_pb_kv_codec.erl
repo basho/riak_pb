@@ -469,15 +469,15 @@ decode_node_watcher_update(NodeWatcherUpdate) when erlang:is_record(NodeWatcherU
     {Timestamp, Nodes}.
 
 -spec encode_node_watcher_subscribe(Connection :: pid()) ->
-    #rpbnodewatchersubscribe{}.
+    #rpbnodewatchersubscribereq{}.
 encode_node_watcher_subscribe(Connection) when erlang:is_pid(Connection) ->
     EncodedConnection = erlang:term_to_binary(Connection),
-    #rpbnodewatchersubscribe{connection = EncodedConnection}.
+    #rpbnodewatchersubscribereq{connection = EncodedConnection}.
 
--spec decode_node_watcher_subscribe(NodeWatcherSubscribe :: #rpbnodewatchersubscribe{}) ->
+-spec decode_node_watcher_subscribe(NodeWatcherSubscribe :: #rpbnodewatchersubscribereq{}) ->
     pid().
-decode_node_watcher_subscribe(NodeWatcherSubscribe) when erlang:is_record(NodeWatcherSubscribe, rpbnodewatchersubscribe) ->
-    #rpbnodewatchersubscribe{connection = EncodedConnection} = NodeWatcherSubscribe,
+decode_node_watcher_subscribe(NodeWatcherSubscribe) when erlang:is_record(NodeWatcherSubscribe, rpbnodewatchersubscribereq) ->
+    #rpbnodewatchersubscribereq{connection = EncodedConnection} = NodeWatcherSubscribe,
     erlang:binary_to_term(EncodedConnection).
 
 -ifdef(TEST).

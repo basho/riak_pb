@@ -436,6 +436,10 @@ message RpbNodeWatcherUpdate {
 	repeated bytes nodes = 2;
 }
 
-message RpbNodeWatcherSubscribe {
+message RpbNodeWatcherSubscribeReq {
 	required bytes connection = 1;
+}
+
+message RpbNodeWatcherSubscribeResp {
+
 }
