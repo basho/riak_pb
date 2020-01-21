@@ -432,8 +432,7 @@ message RpbGetNodesResp {
 }
 
 message RpbNodeWatcherUpdate {
-	required bytes timestamp = 1;
-	repeated bytes nodes = 2;
+	repeated bytes nodes = 1;
 }
 
 message RpbNodeWatcherSubscribeReq {
@@ -441,5 +440,13 @@ message RpbNodeWatcherSubscribeReq {
 }
 
 message RpbNodeWatcherSubscribeResp {
+
+}
+
+message RpbNodeWatcherUnsubscribeReq {
+	required bytes connection = 1;
+}
+
+message RpbNodeWatcherUnsubscribeResp {
 
 }

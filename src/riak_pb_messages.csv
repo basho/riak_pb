@@ -79,6 +79,8 @@
 216,RpbNodeWatcherUpdate,riak_kv
 217,RpbNodeWatcherSubscribeReq,riak_kv
 218,RpbNodeWatcherSubscribeResp,riak_kv
+219,RpbNodeWatcherUnsubscribeReq,riak_kv
+220,RpbNodeWatcherUnsubscribeResp,riak_kv
 253,RpbAuthReq,riak
 254,RpbAuthResp,riak
 255,RpbStartTls,riak
