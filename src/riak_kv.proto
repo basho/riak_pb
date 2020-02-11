@@ -348,6 +348,23 @@ message RpbRTEReq {
 
 // RTE response - not defined, will return a RpbRTEResp on success or RpbErrorResp on failure
 
+// Fetch request - retrieve an object by a queue name.
+message RpbFetchReq{
+    required bytes queuename = 1;
+}
+
+// Fetch response - may be an empty queue, an object, a deleted tombstone
+// If it is a deleted tombstone, it will return both an encoded_object and
+// a deleted vclock.  If the response is an object, just an encoded_object
+// will be returned
+message RpbFetchResp{
+    required bool queue_empty = 1;
+    optional bool deleted = 2; // Present only if queue_empty is false, true if object a tombstone
+    optional uint32 crc_check = 3; // CRC check of encoded object
+    optional bytes replencoded_object = 4; // Special repl encoding using for object 
+    optional bytes deleted_vclock = 5;
+}
+
 // AAE Fold requests
 message RpbAaeFoldMergeRootNValReq{
     required uint32 n_val = 1;
@@ -361,7 +378,6 @@ message RpbAaeFoldMergeBranchNValReq{
 message RpbAaeFoldFetchClocksNValReq{
     required uint32 n_val = 1;
     repeated uint32 id_filter = 2;
-
 }
 
 message RpbAaeFoldMergeTreesRangeReq{
@@ -413,6 +429,18 @@ message RpbAaeFoldFetchClocksRangeReq{
     optional uint32 last_mod_end = 42;
 }
 
+message RpbAaeFoldReplKeysReq{
+    optional bytes type = 1;
+    required bytes bucket = 2;
+    required bool key_range = 10;
+    optional bytes start_key = 11;
+    optional bytes end_key = 12;
+    required bool modified_range = 40;
+    optional uint32 last_mod_start = 41;
+    optional uint32 last_mod_end = 42;
+    required bytes queuename = 50;
+}
+
 message RpbAaeFoldFindKeysReq{
     enum FindType {
         sibling_count = 0;
@@ -431,6 +459,89 @@ message RpbAaeFoldFindKeysReq{
     required uint32 find_limit = 51;
 }
 
+message RpbAaeFoldFindTombsReq{
+    enum RpbTreeSize{
+        xxsmall = 0;
+        xsmall = 1;
+        small = 2;
+        medium = 3;
+        large = 4;
+        xlarge = 5;
+    }
+
+    optional bytes type = 1;
+    required bytes bucket = 2;
+    required bool key_range = 10;
+    optional bytes start_key = 11;
+    optional bytes end_key = 12;
+    required bool segment_filter = 30;
+    repeated uint32 id_filter = 31;
+    optional RpbTreeSize filter_tree_size = 32;
+    required bool modified_range = 40;
+    optional uint32 last_mod_start = 41;
+    optional uint32 last_mod_end = 42;
+}
+
+message RpbAaeFoldReapTombsReq{
+    enum RpbTreeSize{
+        xxsmall = 0;
+        xsmall = 1;
+        small = 2;
+        medium = 3;
+        large = 4;
+        xlarge = 5;
+    }
+    enum ChangeMethod {
+        job = 0;
+        local = 1;
+        count = 2;
+    }
+
+    optional bytes type = 1;
+    required bytes bucket = 2;
+    required bool key_range = 10;
+    optional bytes start_key = 11;
+    optional bytes end_key = 12;
+    required bool segment_filter = 30;
+    repeated uint32 id_filter = 31;
+    optional RpbTreeSize filter_tree_size = 32;
+    required bool modified_range = 40;
+    optional uint32 last_mod_start = 41;
+    optional uint32 last_mod_end = 42;
+    required ChangeMethod change_method = 50;
+    optional uint32 job_id = 51;
+}
+
+message RpbAaeFoldEraseKeysReq{
+    enum RpbTreeSize{
+        xxsmall = 0;
+        xsmall = 1;
+        small = 2;
+        medium = 3;
+        large = 4;
+        xlarge = 5;
+    }
+    enum ChangeMethod {
+        job = 0;
+        local = 1;
+        count = 2;
+    }
+
+    optional bytes type = 1;
+    required bytes bucket = 2;
+    required bool key_range = 10;
+    optional bytes start_key = 11;
+    optional bytes end_key = 12;
+    required bool segment_filter = 30;
+    repeated uint32 id_filter = 31;
+    optional RpbTreeSize filter_tree_size = 32;
+    required bool modified_range = 40;
+    optional uint32 last_mod_start = 41;
+    optional uint32 last_mod_end = 42;
+    required ChangeMethod change_method = 50;
+    optional uint32 job_id = 51;
+}
+
 message RpbAaeFoldObjectStatsReq{
     optional bytes type = 1;
     required bytes bucket = 2;
@@ -440,6 +551,19 @@ message RpbAaeFoldObjectStatsReq{
     required bool modified_range = 40;
     optional uint32 last_mod_start = 41;
     optional uint32 last_mod_end = 42;
+}
+
+message RpbAaeFoldListBucketsReq{
+    optional uint32 n_val = 1;
+}
+
+message RpbAaeFoldListBucketsResp{
+    repeated RpbAaeFoldBucket bucket_list = 1;
+}
+
+message RpbAaeFoldBucket{
+    optional bytes type = 1;
+    required bytes bucket = 2;
 }
 
 message RpbKeysValue {
