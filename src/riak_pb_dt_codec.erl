@@ -238,6 +238,8 @@ encode_fetch_options(Fetch, [basic_quorum|Tail]) ->
     encode_fetch_options(Fetch, [{basic_quorum, true}|Tail]);
 encode_fetch_options(Fetch, [{basic_quorum, BQ}|Tail]) ->
     encode_fetch_options(Fetch#dtfetchreq{basic_quorum=BQ},Tail);
+encode_fetch_options(Fetch, [{node_confirms, NodeConfirms}|Tail]) ->
+    encode_fetch_options(Fetch#dtfetchreq{node_confirms=encode_quorum(NodeConfirms)}, Tail);
 encode_fetch_options(Fetch, [notfound_ok|Tail]) ->
     encode_fetch_options(Fetch, [{notfound_ok, true}|Tail]);
 encode_fetch_options(Fetch, [{notfound_ok, NOK}|Tail]) ->

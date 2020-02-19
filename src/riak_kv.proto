@@ -57,6 +57,7 @@ message RpbGetReq {
     optional bool sloppy_quorum = 11;   // Experimental, may change/disappear
     optional uint32 n_val = 12;         // Experimental, may change/disappear
     optional bytes type = 13;           // Bucket type, if not set we assume the 'default' type
+    optional uint32 node_confirms = 14; // Distinct phycical node quorum
 }
 
 // Get Response - if the record was not found there will be no content/vclock
@@ -281,6 +282,7 @@ message RpbCounterGetReq {
     optional uint32 pr = 4;
     optional bool basic_quorum = 5;
     optional bool notfound_ok = 6;
+    optional uint32 node_confirms = 7; // Distinct phycical node quorum
 }
 
 // Counter value response
