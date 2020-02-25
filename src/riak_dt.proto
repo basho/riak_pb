@@ -96,6 +96,8 @@ message DtFetchReq {
     // For read-only requests or context-free operations, you can set
     // this to false to reduce the size of the response payload.
     optional bool include_context = 11 [default=true];
+
+    optional uint32 node_confirms = 12; // Distinct phycical node quorum
 }
 
 
