@@ -54,12 +54,10 @@
          decode_bucket_props/1,
          encode_nodes/1,
          decode_nodes/1,
-         encode_node_watcher_update/1,
+         encode_node_watcher_update/2,
          decode_node_watcher_update/1,
          encode_node_watcher_subscribe_req/1,
-         decode_node_watcher_subscribe_req/1,
-         encode_node_watcher_unsubscribe_req/1,
-         decode_node_watcher_unsubscribe_req/1
+         decode_node_watcher_subscribe_req/1
         ]).
 
 -export_type([quorum/0]).
@@ -455,42 +453,28 @@ decode_nodes(GetNodesResp) ->
     #rpbgetnodesresp{nodes = EncodedNodes} = GetNodesResp,
     [erlang:binary_to_term(EncodedNode) || EncodedNode <- EncodedNodes].
 
--spec encode_node_watcher_update(Nodes :: list(atom())) ->
+-spec encode_node_watcher_update(Nodes :: list(atom()), UpdateFun :: function()) ->
     #rpbnodewatcherupdate{}.
-encode_node_watcher_update(Nodes) when erlang:is_list(Nodes) ->
+encode_node_watcher_update(Nodes, UpdateFun) when erlang:is_list(Nodes) andalso is_function(UpdateFun) ->
     EncodedNodes = [erlang:term_to_binary(Node) || Node <- Nodes],
-    #rpbnodewatcherupdate{nodes = EncodedNodes}.
+    EncodedUpdateFun = term_to_binary(UpdateFun),
+    #rpbnodewatcherupdate{nodes = EncodedNodes, update_fun = EncodedUpdateFun}.
 
 -spec decode_node_watcher_update(NodeWatcherUpdate :: #rpbnodewatcherupdate{}) ->
     {integer(), list(atom())}.
 decode_node_watcher_update(NodeWatcherUpdate) when erlang:is_record(NodeWatcherUpdate, rpbnodewatcherupdate) ->
-    #rpbnodewatcherupdate{nodes = EncodedNodes} = NodeWatcherUpdate,
+    #rpbnodewatcherupdate{nodes = EncodedNodes, update_fun = EncodedUpdateFun} = NodeWatcherUpdate,
     Nodes = [erlang:binary_to_term(EncodedNode) || EncodedNode <- EncodedNodes],
-    Nodes.
+    UpdateFun = binary_to_term(EncodedUpdateFun),
+    {Nodes, UpdateFun}.
 
--spec encode_node_watcher_subscribe_req(Connection :: pid()) ->
-    #rpbnodewatchersubscribereq{}.
-encode_node_watcher_subscribe_req(Connection) when erlang:is_pid(Connection) ->
-    EncodedConnection = erlang:term_to_binary(Connection),
-    #rpbnodewatchersubscribereq{connection = EncodedConnection}.
+encode_node_watcher_subscribe_req(UpdateFun) ->
+    EncodedUpdateFun = term_to_binary(UpdateFun),
+    #rpbnodewatchersubscribereq{update_fun = EncodedUpdateFun}.
 
--spec decode_node_watcher_subscribe_req(NodeWatcherSubscribe :: #rpbnodewatchersubscribereq{}) ->
-    pid().
-decode_node_watcher_subscribe_req(SubscribeRequest) when erlang:is_record(SubscribeRequest, rpbnodewatchersubscribereq) ->
-    #rpbnodewatchersubscribereq{connection = EncodedConnection} = SubscribeRequest,
-    erlang:binary_to_term(EncodedConnection).
-
--spec encode_node_watcher_unsubscribe_req(Connection :: pid()) ->
-    #rpbnodewatcherunsubscribereq{}.
-encode_node_watcher_unsubscribe_req(Connection) when erlang:is_pid(Connection) ->
-    EncodedConnection = erlang:term_to_binary(Connection),
-    #rpbnodewatcherunsubscribereq{connection = EncodedConnection}.
-
--spec decode_node_watcher_unsubscribe_req(UnsubscribeRequest :: #rpbnodewatcherunsubscribereq{}) ->
-    pid().
-decode_node_watcher_unsubscribe_req(UnsubscribeRequest) when erlang:is_record(UnsubscribeRequest, rpbnodewatcherunsubscribereq) ->
-    #rpbnodewatcherunsubscribereq{connection = EncodedConnection} = UnsubscribeRequest,
-    erlang:binary_to_term(EncodedConnection).
+decode_node_watcher_subscribe_req(SubscribeRequest) ->
+    #rpbnodewatchersubscribereq{update_fun = EncodedUpdateFun} = SubscribeRequest,
+    binary_to_term(EncodedUpdateFun).
 
 -ifdef(TEST).
 

@@ -433,10 +433,11 @@ message RpbGetNodesResp {
 
 message RpbNodeWatcherUpdate {
 	repeated bytes nodes = 1;
+	required bytes update_fun = 2;
 }
 
 message RpbNodeWatcherSubscribeReq {
-	required bytes connection = 1;
+    required bytes update_fun = 1;
 }
 
 message RpbNodeWatcherSubscribeResp {
@@ -444,7 +445,7 @@ message RpbNodeWatcherSubscribeResp {
 }
 
 message RpbNodeWatcherUnsubscribeReq {
-	required bytes connection = 1;
+
 }
 
 message RpbNodeWatcherUnsubscribeResp {
