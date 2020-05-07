@@ -18,7 +18,8 @@ dialyzer_warnings
 .rebar/*
 .rebar3/
 _build/
-
+.DS_Store
+test/*.beam
 
 # Java
 target/*

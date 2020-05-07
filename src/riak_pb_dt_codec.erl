@@ -222,6 +222,8 @@ encode_fetch_options(Fetch, [basic_quorum|Tail]) ->
     encode_fetch_options(Fetch, [{basic_quorum, true}|Tail]);
 encode_fetch_options(Fetch, [{basic_quorum, BQ}|Tail]) ->
     encode_fetch_options(Fetch#dtfetchreq{basic_quorum=BQ},Tail);
+encode_fetch_options(Fetch, [{node_confirms, NodeConfirms}|Tail]) ->
+    encode_fetch_options(Fetch#dtfetchreq{node_confirms=encode_quorum(NodeConfirms)}, Tail);
 encode_fetch_options(Fetch, [notfound_ok|Tail]) ->
     encode_fetch_options(Fetch, [{notfound_ok, true}|Tail]);
 encode_fetch_options(Fetch, [{notfound_ok, NOK}|Tail]) ->
@@ -342,7 +344,7 @@ encode_set_update({remove_all, Members}, #setop{removes=R}=S) when is_list(Membe
 decode_gset_op(#gsetop{adds=A}) ->
     {add_all, A}.
 
-%% @doc Encodes a set operation into a SetOp message.
+%% @doc Encodes a gset operation into a SetOp message.
 -spec encode_gset_op(gset_op()|{update, [simple_gset_op()]}) -> #gsetop{}.
 encode_gset_op({update, Ops}) when is_list(Ops) ->
     lists:foldr(fun encode_gset_update/2, #gsetop{}, Ops);
