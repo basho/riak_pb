@@ -103,7 +103,7 @@ pb_test_() ->
                  ?assertEqual(undefined, R#dtfetchreq.timeout),
                  ?assertEqual(undefined, R#dtfetchreq.sloppy_quorum),
                  ?assertEqual(undefined, R#dtfetchreq.n_val),
-                 ?assertEqual(undefined, R#dtfetchreq.include_context)
+                 ?assertEqual(true, R#dtfetchreq.include_context)
              end)},
      {"msg code encode decode",
       ?_test(begin
