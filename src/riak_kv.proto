@@ -380,6 +380,9 @@ message RpbAaeFoldMergeBranchNValReq{
 message RpbAaeFoldFetchClocksNValReq{
     required uint32 n_val = 1;
     repeated uint32 id_filter = 2;
+    optional bool modified_range = 40;
+    optional uint32 last_mod_start = 41;
+    optional uint32 last_mod_end = 42;
 }
 
 message RpbAaeFoldMergeTreesRangeReq{
