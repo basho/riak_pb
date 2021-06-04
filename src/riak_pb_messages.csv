@@ -68,6 +68,9 @@
 102,TsCoverageEntry,riak_ts
 103,TsRange,riak_ts
 104,TsTtbMsg,riak_ts
+128,RpbReplGetReq,riak_repl
+129,RpbReplGetClusterIdReq,riak_repl
+130,RpbReplGetClusterIdResp,riak_repl
 200,RpbRTEReq,riak_kv
 201,RpbRTEResp,riak_kv
 202,RpbFetchReq,riak_kv
