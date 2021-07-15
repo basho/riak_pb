@@ -377,8 +377,8 @@ message RpbPushReq{
 }
 
 message RpbPushResp{
-    required bool queue_exists = 1;
-    optional bytes queuename = 2;
+    optional bytes queuename = 1;
+    required bool queue_exists = 2;
     optional uint32 foldq_length = 10;
     optional uint32 fsync_length = 11;
     optional uint32 realt_length = 12;
