@@ -353,6 +353,7 @@ message RpbRTEReq {
 // Fetch request - retrieve an object by a queue name.
 message RpbFetchReq{
     required bytes queuename = 1;
+    optional bytes encoding = 2;
 }
 
 // Fetch response - may be an empty queue, an object, a deleted tombstone
@@ -365,6 +366,22 @@ message RpbFetchResp{
     optional uint32 crc_check = 3; // CRC check of encoded object
     optional bytes replencoded_object = 4; // Special repl encoding using for object 
     optional bytes deleted_vclock = 5;
+    optional uint32 segment_id = 6;
+    optional uint32 segment_hash = 7; 
+}
+
+// Push request - queue a list of keys for replication if at a given clock.
+message RpbPushReq{
+    required bytes queuename = 1;
+    repeated RpbKeysValue keys_value = 2;
+}
+
+message RpbPushResp{
+    optional bytes queuename = 1;
+    required bool queue_exists = 2;
+    optional uint32 foldq_length = 10;
+    optional uint32 fsync_length = 11;
+    optional uint32 realt_length = 12;
 }
 
 // AAE Fold requests
