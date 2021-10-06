@@ -86,6 +86,7 @@
 216,RpbAaeFoldObjectStatsReq,riak_kv
 217,RpbAaeFoldReplKeysReq,riak_kv
 218,RpbAaeFoldFindTombsReq,riak_kv
+219,RpbAaeFoldRepairKeysReq,riak_kv
 220,RpbAaeFoldTreeResp,riak_kv
 221,RpbAaeFoldKeyValueResp,riak_kv
 222,RpbAaeFoldKeyCountResp,riak_kv
