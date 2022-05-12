@@ -384,6 +384,21 @@ message RpbPushResp{
     optional uint32 realt_length = 12;
 }
 
+// Request a member of a cluster return the API addresses of other members
+message RpbMembershipReq{
+    optional bytes queuename = 1;
+}
+
+// An IP Port representing the API address of a cluster member 
+message RpbClusterMemberEntry {
+    required bytes ip = 1;
+    required uint32 port = 2;
+}
+
+message RpbMembershipResp{
+    repeated RpbClusterMemberEntry up_nodes = 1;
+}
+
 // AAE Fold requests
 message RpbAaeFoldMergeRootNValReq{
     required uint32 n_val = 1;

@@ -77,6 +77,8 @@
 203,RpbFetchResp,riak_kv
 204,RpbPushReq,riak_kv
 205,RpbPushResp,riak_kv
+206,RpbMembershipReq,riak_kv
+207,RpbMembershipResp,riak_kv
 210,RpbAaeFoldMergeRootNValReq,riak_kv
 211,RpbAaeFoldMergeBranchNValReq,riak_kv
 212,RpbAaeFoldFetchClocksNValReq,riak_kv
