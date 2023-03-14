@@ -22,8 +22,10 @@
 */
 
 /*
-** Revision: 1.4
+** Revision: 1.5
 */
+
+syntax = "proto3";
 
 import "riak.proto";
 
@@ -36,8 +38,14 @@ message RpbSearchDoc {
 }
 
 message RpbSearchQueryReq {
-  required bytes  q      =  1;  // Query string
-  required bytes  index  =  2;  // Index
+  // query, in any solr syntax
+  oneof query {
+    string str =  1;
+    string json = 11;
+  }
+
+  required string index  =  2;  // Index
+
   optional uint32 rows   =  3;  // Limit rows
   optional uint32 start  =  4;  // Starting offset
   optional bytes  sort   =  5;  // Sort order
@@ -46,10 +54,27 @@ message RpbSearchQueryReq {
   optional bytes  op     =  8;  // Default op
   repeated bytes  fl     =  9;  // Return fields limit (for ids only, generally)
   optional bytes  presort = 10; // Presort (key / score)
+
+  // per-field parameters
+  map<string,string> per_field = 15;             // e. g. { ts.range.gap: 2 MINUTES }
+  
+  // optional features, automatically turned on if any kv is present
+  map<string,string> stats = 12;                 // e. g. { fields: foo }
+  map<string,string> facet = 13;
+  map<string,string> group = 14;
+
 }
 
 message RpbSearchQueryResp {
   repeated RpbSearchDoc docs      = 1; // Result documents
   optional float        max_score = 2; // Maximum score
   optional uint32       num_found = 3; // Number of results
+
+  // everything below is raw json, because the shape is not fixed
+  optional string stats          = 4;
+  optional string facets         = 5;
+  optional string facet_counts   = 6;
+  optional string grouped        = 7;
+  optional string more_like_this = 8;
 }
+
