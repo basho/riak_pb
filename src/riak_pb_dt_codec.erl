@@ -23,8 +23,6 @@
 
 -include("riak_dt_pb.hrl").
 
--include_lib("eunit/include/eunit.hrl").
-
 -export([
          encode_fetch_request/2,
          encode_fetch_request/3,
